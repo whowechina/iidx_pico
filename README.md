@@ -13,7 +13,7 @@ Features:
 
 <img src="doc/stacked.jpg" width="80%">
 
-<video src="xxx.mp4" controls="controls" width="50%"></video>
+<video src="https://user-images.githubusercontent.com/11623830/229287886-d01893c5-04b6-41fc-a178-72c815e28c96.mp4" controls="controls" width="50%"></video>
 
 Thanks to many respectful guys/companies who made their tools or materials free or open source (KiCad, OpenSCAD, InkScape, Raspberry things).
 
@@ -27,4 +27,3 @@ I'm still working on this documentation. If you see incomplete things, that's no
 ### Step 2 - Solder
 ### Step 3 - Assemble
 ### Step 4 - Firmware
-
