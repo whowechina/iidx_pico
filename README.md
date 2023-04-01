@@ -30,9 +30,9 @@ Move forward only if you're REALLY interested.
 
 ## HOW TO BUILD
 ### Turntable Materials
-* 1x AS5600 hall angular sensor board (23mm\*23mm)   
- <img src="doc/as5600.png" width="150px">
-* 1x 6mm\*2mm magnet (should be magnetized in radial direction), sometimes comes with the AS5600 board.
+* 1x AS5600 hall angular sensor board set (23mm\*23mm)   
+  <img src="doc/as5600.png" width="150px">
+* 1x 6mm\*2mm magnet (must be radially magnetized), normally comes with the AS5600 board set.
 * 1x 61804-2RS deep groove ball bearing (20x32x7mm), normally < 5US$;
 * 3x M4*10mm screws (large flat head is better) and hex nuts.
 
@@ -52,9 +52,10 @@ Move forward only if you're REALLY interested.
 * 2x 0603 10ohm resistor.
 * 5x 0805 1uF capacitors.
 
-### The Cable
+### Detachable Cable
 * 1x HDMI cable (ultra slim, diameter < 4mm), at least 50cm in length, we'll cut the HDMI connectors off, so pick a cheap one.
-* 2X Magnetic pogopin connector sets, male and female. PCB side should use 90-degree pins, cable side use straight pins.
+* 2X Magnetic pogopin connector sets, male and female. PCB side should use ones with 90-degree pins, cable side use ones with straight pins.  
+  <img src="doc/pogopin.jpg" width="300px">
 
 ### Step 1 - Buy
 ### Step 2 - Solder
