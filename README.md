@@ -7,9 +7,7 @@
 
 Features:
 * It's thin, really thin.
-* Turntable and keyboard are separate.
-* Magnetic connector.
-* 1000Hz polling rate.
+* Turntable and keyboard are detachable with magnetic connector.
 * HID lights, of course!
 * Multiple turntable effects.
 * Many live settings.
@@ -34,7 +32,10 @@ Move forward only if you're REALLY interested.
   <img src="doc/as5600.png" width="150px">
 * 1x 6mm\*2mm magnet (must be radially magnetized), normally comes with the AS5600 board set.
 * 1x 61804-2RS deep groove ball bearing (20x32x7mm), normally < 5US$;
-* 3x M4*10mm screws (large flat head is better) and hex nuts.
+* 3x M4*10mm screws (large flat head is better) and hex nuts, for bearing.
+* 4x M3*12mm screws, for spinning disc. 
+* 2x 1N4148 diode (choose ones easy to solder)
+* 1x Custom cut acrylic spining disc, 4mm thickness.
 
 ### Keybard Materials
 * 1x Raspberry Pi Pico.  
@@ -51,6 +52,7 @@ Move forward only if you're REALLY interested.
 * 1x 0603 5.1kohm resistors for USB.
 * 2x 0603 10ohm resistor.
 * 5x 0805 1uF capacitors.
+* 4x Kailh low-profile keycaps.
 
 ### Detachable Cable
 * 1x HDMI cable (ultra slim, diameter < 4mm), at least 50cm in length, we'll cut the HDMI connectors off, so pick a cheap one.
@@ -58,6 +60,32 @@ Move forward only if you're REALLY interested.
   <img src="doc/pogopin.jpg" width="300px">
 
 ### Step 1 - Buy
-### Step 2 - Solder
-### Step 3 - Assemble
+### Step 2 - 3D Print
+* Keyboard PCB bottom  
+  FDM, PLA/PETG transparent, 0.2mm layer.
+* Keyboard PCB top (dual color if you have Bambu Lab's machine and equipped with AMS)
+  FDM, PLA transparent, 0.2mm layer.
+  If you have Bambu Lab's AMS system, use PLA black/gray for 3.0mm+ layers.
+* Turntable base, choose one of the 150, 170 or 180, based on your choice of disc size.
+  FDM, PLA, 0.16-0.2mm layer.
+* Turntable bearing seat  
+  FDM, PLA, 0.16-0.2mm layer.
+* Flange for the spinning disc  
+  FDM, PLA, 0.16-0.2mm layer.
+* Main button keycaps  
+  SLA (resin), regular white, 0.05mm layer.
+
+### Step 3 - Solder
+Still in progress, check out later...
+
+### Step 4 - Assemble
+* Assemble the turntable  
+  <img src="doc/tt_assemble.png" width="300px">
+* Install the low-profile stablizers.  
+  https://docs.keeb.io/choc-stabs   
+  A little trick here is leave the keyswitch unsoldered, after the stabilizer, the keyswitch and the keycap are in place, push the keycap down and then solder the keyswith. This way keyswitch can align to the stabilizers better.
+* Assemble the keyboard  
+  <img src="doc/kb_assemble.png" width="300px">
+
 ### Step 4 - Firmware
+Still in progress, check out later...
