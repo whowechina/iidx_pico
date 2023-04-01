@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="169.99998mm"
+   height="169.99998mm"
+   viewBox="0 0 169.99998 169.99998"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.2.1 (9c6d41e410, 2022-07-14)"
+   sodipodi:docname="TT_disc_170.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="1.0444209"
+     inkscape:cx="330.80533"
+     inkscape:cy="337.50761"
+     inkscape:window-width="1920"
+     inkscape:window-height="1010"
+     inkscape:window-x="-6"
+     inkscape:window-y="-6"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="图层 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(5,5)">
+    <path
+       id="path358"
+       style="vector-effect:non-scaling-stroke;fill:#0000ff;fill-opacity:0;stroke:#ff0000;stroke-width:0.264583;-inkscape-stroke:hairline"
+       d="M 164.99999,79.999997 A 84.999998,84.999998 0 0 1 79.999997,164.99999 84.999998,84.999998 0 0 1 -5,79.999997 84.999998,84.999998 0 0 1 79.999997,-5 84.999998,84.999998 0 0 1 164.99999,79.999997 Z" />
+    <path
+       id="path1022"
+       style="vector-effect:non-scaling-stroke;fill:#0000ff;fill-opacity:0;stroke:#ff0000;stroke-width:0.264583;-inkscape-stroke:hairline"
+       d="M 87.6,80 A 1.6,1.6 0 0 1 86,81.6 1.6,1.6 0 0 1 84.4,80 1.6,1.6 0 0 1 86,78.4 1.6,1.6 0 0 1 87.6,80 Z" />
+    <path
+       id="path1022-2"
+       style="vector-effect:non-scaling-stroke;fill:#0000ff;fill-opacity:0;stroke:#ff0000;stroke-width:0.264583;-inkscape-stroke:hairline"
+       d="M 75.6,80 A 1.6,1.6 0 0 1 74,81.6 1.6,1.6 0 0 1 72.4,80 1.6,1.6 0 0 1 74,78.4 1.6,1.6 0 0 1 75.6,80 Z" />
+    <path
+       id="path1022-3"
+       style="vector-effect:non-scaling-stroke;fill:#0000ff;fill-opacity:0;stroke:#ff0000;stroke-width:0.264583;-inkscape-stroke:hairline"
+       d="M 81.6,86 A 1.6,1.6 0 0 1 80,87.6 1.6,1.6 0 0 1 78.4,86 1.6,1.6 0 0 1 80,84.4 1.6,1.6 0 0 1 81.6,86 Z" />
+    <path
+       id="path1022-2-9"
+       style="vector-effect:non-scaling-stroke;fill:#0000ff;fill-opacity:0;stroke:#ff0000;stroke-width:0.264583;-inkscape-stroke:hairline"
+       d="M 81.6,74 A 1.6,1.6 0 0 1 80,75.6 1.6,1.6 0 0 1 78.4,74 1.6,1.6 0 0 1 80,72.4 1.6,1.6 0 0 1 81.6,74 Z" />
+  </g>
+</svg>
