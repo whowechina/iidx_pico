@@ -11,6 +11,7 @@ Features:
 * HID lights, of course!
 * Multiple turntable effects.
 * Many live settings.
+* All source files open.
 
 Thanks to many respectful guys/companies who made their tools or materials free or open source (KiCad, OpenSCAD, InkScape, Raspberry things).
 
@@ -60,6 +61,8 @@ Move forward only if you're REALLY interested.
   <img src="doc/pogopin.jpg" width="300px">
 
 ### Step 1 - Buy
+Documentation still in progress, come later...
+
 ### Step 2 - 3D Print
 * Keyboard PCB bottom  
   FDM, PLA/PETG transparent, 0.2mm layer.
@@ -76,7 +79,12 @@ Move forward only if you're REALLY interested.
   SLA (resin), regular white, 0.05mm layer.
 
 ### Step 3 - Solder
-Still in progress, check out later...
+* Turntable   
+  There're a set of I2C and a WS2812B signal line together in the cable that connects turntable and the keyboard. Unfortunately these signals crosstalks. So we have to use shield cables for them. Two I2C lines should have a shield cable, and WS2812B signal should have another shield cable. Good thing is, an HDMI cable has 4 shield cable and bunch of other small cables. We can make use of it.
+
+  To ease the pain of soldering cables and 2 1N4148 diodes. I made a turntable PCB. But I haven't tried it myself.
+  
+Documentation still in progress, come later...
 
 ### Step 4 - Assemble
 * Assemble the turntable  
@@ -88,4 +96,17 @@ Still in progress, check out later...
   <img src="doc/kb_assemble.png" width="300px">
 
 ### Step 4 - Firmware
-Still in progress, check out later...
+* For the new build, hold the BOOTSEL button while connect the USB to a PC, there will be a disk named "RPI-RP2" showed up. Drag the uf2 firmware binary file into it. That's it. There's a small hole at the back side of the keyboard, it is facing right to the BOOTSEL button.
+* If it is already running my IIDX firmware, hold two small AUX buttons together will do the same as the BOOTSEL button.
+
+Documentation still in progress, come later...
+
+### What If?
+* I can't find pogopin connector.
+* I don't have Bambu Lab's machine, or I don't have an AMS system.
+* STL files are not accurate, difficult to assemble.
+* I don't have resin printer.
+* I can't find Kailh low-profile stabilizer.
+* I don't have electronic DIY gears.
+  
+Documentation still in progress, come later...
