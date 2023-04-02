@@ -4,6 +4,8 @@ ss=2.9;
 shaft6804();
 //shaft6805();
 
+%magnet();
+
 module shaft6804() {
   difference() {
     union($fn=256) {
@@ -12,8 +14,8 @@ module shaft6804() {
     }
     
     union($fn=128) {
-      translate([0,0,9]) cylinder(d=17,h=3);
-      translate([0,0,6.8]) cylinder(d=6.3,h=4);
+      translate([0,0,9.8]) cylinder(d=18,h=3);
+      color("cyan") translate([0,0,7.8]) cylinder(d=6.3,h=4); // magnet
     }
 
     color("gray") for (i=[0:90:270]) {
@@ -32,8 +34,8 @@ module shaft6805() {
     }
     
     union($fn=128) {
-      translate([0,0,9]) cylinder(d=20,h=3);
-      translate([0,0,6.8]) cylinder(d=6.3,h=4);
+      translate([0,0,9.8]) cylinder(d=22,h=3);
+      color("cyan") translate([0,0,7.8]) cylinder(d=6.3,h=4); // magnet
     }
 
     color("gray") for (i=[0:90:270]) {
@@ -61,4 +63,8 @@ module nsk6804() {
 
 module skf6805() {
   translate([0.72,1.93,9.5]) rotate([0,90,0]) import("skf6805.stl");
+}
+
+module magnet() {
+  translate([0,0,8]) cylinder(d=6,h=2,$fn=64);
 }
