@@ -1,3 +1,4 @@
+magnet=[6,2]; // define your magnet: [diameter, thickness]
 sd=6; 
 ss=2.9;
 
@@ -6,21 +7,15 @@ shaft6804();
 
 %magnet();
 
+
 module shaft6804() {
   difference() {
     union($fn=256) {
       cylinder(d=20.1,h=10.3);
       cylinder(d=24,h=3.3);
     }
-    
-    union($fn=128) {
-      translate([0,0,9.8]) cylinder(d=18,h=3);
-      color("cyan") translate([0,0,7.8]) cylinder(d=6.3,h=4); // magnet
-    }
-
-    color("gray") for (i=[0:90:270]) {
-      hole(i);
-    }  
+    translate([0,0,10]) cylinder(d=18,h=3,$fn=64);
+    core();
   }
 
   %nsk6804();
@@ -32,18 +27,19 @@ module shaft6805() {
       cylinder(d=25.1,h=10.3);
       cylinder(d=29,h=3.3);
     }
-    
-    union($fn=128) {
-      translate([0,0,9.8]) cylinder(d=22,h=3);
-      color("cyan") translate([0,0,7.8]) cylinder(d=6.3,h=4); // magnet
-    }
-
-    color("gray") for (i=[0:90:270]) {
-      hole(i);
-    }  
+    translate([0,0,10]) cylinder(d=22,h=3,$fn=64);
+    core();
   }
 
   %skf6805();
+}
+
+module core() {
+  color("cyan") translate([0,0,10-magnet[1]]) cylinder(d=magnet[0]+0.3,h=10,$fn=64); // magnet
+
+  color("gray") for (i=[0:90:270]) {
+    hole(i);
+  }  
 }
 
 module hole(angle) {
@@ -66,5 +62,5 @@ module skf6805() {
 }
 
 module magnet() {
-  translate([0,0,8]) cylinder(d=6,h=2,$fn=64);
+  translate([0,0,10.2-magnet[1]]) cylinder(d=magnet[0],h=magnet[1],$fn=64);
 }
