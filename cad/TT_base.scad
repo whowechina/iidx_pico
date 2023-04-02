@@ -7,18 +7,18 @@ h5=3; // pcb top
 led_h=4;
 
 // 150 disc
-//disc_d=150;
-//d1=175; // lower outer
-//d2=155; // upper outer
-//d3=152; // disc area
-//led=142; // led ring
+disc_d=150;
+d1=175; // lower outer
+d2=155; // upper outer
+d3=152; // disc area
+led=142; // led ring
 
 // 170 disc
-disc_d=170;
-d1=195; // lower outer
-d2=175; // upper outer
-d3=172; // disc area
-led=160; // led ring
+//disc_d=170;
+//d1=195; // lower outer
+//d2=175; // upper outer
+//d3=172; // disc area
+//led=160; // led ring
 
 
 // 180 disc
@@ -41,6 +41,7 @@ $fn=64;
 body();
 //%disc();
 %nsk6804();
+%pcb();
 
 module body() {
   difference() {
@@ -67,7 +68,7 @@ module body() {
       translate([-11*sqrt(3),-11,-0.1]) cylinder(d=10,h=2.2);
     }
    
-    color("darkgreen") translate([0,0,pcb_h]) rcube(23.4,23.4,5,2.5);
+    color("darkgreen") translate([0,0,pcb_h]) rcube(23.2,23.2,5,2.5);
 
     color("green") hull() {
       translate([-5, -15, pcb_h]) cube([10, 5, 25]);
@@ -100,6 +101,10 @@ module disc() {
     translate([0,0,disc_h]) cylinder(d=disc_d-2,h=disc_th);
     translate([0,0,disc_h]) cylinder(d=disc_d,h=disc_th-1);
   }
+}
+
+module pcb() {
+  translate([97.5,191.5,3]) rotate([0,0,-90]) import("iidx_tt v1.stl");
 }
 
 module nsk6804() {
