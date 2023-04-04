@@ -1,9 +1,9 @@
 magnet=[6,2]; // define your magnet: [diameter, thickness]
 sd=6; 
-ss=2.9;
+ss=2.95;
 
-shaft6804();
-//shaft6805();
+//shaft6804();
+shaft6805();
 
 %magnet();
 
@@ -11,7 +11,7 @@ shaft6804();
 module shaft6804() {
   difference() {
     union($fn=256) {
-      cylinder(d=20.1,h=10.3);
+      cylinder(d=20.2,h=10.3);
       cylinder(d=24,h=3.3);
     }
     translate([0,0,10]) cylinder(d=18,h=3,$fn=64);
@@ -24,7 +24,7 @@ module shaft6804() {
 module shaft6805() {
   difference() {
     union($fn=256) {
-      cylinder(d=25.1,h=10.3);
+      cylinder(d=25.2,h=10.3);
       cylinder(d=29,h=3.3);
     }
     translate([0,0,10]) cylinder(d=22,h=3,$fn=64);

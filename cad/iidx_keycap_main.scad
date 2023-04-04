@@ -34,8 +34,8 @@ module mark(offset=[0,0,0],h=5.5,c="red") {
 
 module stems() {
   translate([0,0,1.2]) {
-    stab_stem([0,12,0],stem_l,5.6,1.03,4.12,4.34,3.5);
-    stab_stem([0,-12,0],stem_l,5.6,1.03,4.12,4.34,3.5);
+    stab_stem([0,12,0],stem_l,5.6,1.04,4.14,4.36,3.5);
+    stab_stem([0,-12,0],stem_l,5.6,1.04,4.14,4.36,3.5);
   }
   
   // choc v2

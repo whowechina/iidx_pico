@@ -18,7 +18,7 @@ Thanks to many respectful guys/companies who made their tools or materials free 
 ## Caution
 This is a difficult build, much more difficult than my previous Pico Popn project:  
 https://github.com/whowechina/popn_pico.  
-I suggest you to build the my Pico Popn first.  
+I suggest you to build my Pico Popn first.  
 This Pico IIDX project:  
 * Heavily depends on 3D printing, both FDM and SLA (resin).
 * Requires skills to solder tiny components and thin cables.
@@ -36,12 +36,12 @@ Move forward only if you're REALLY interested.
 * 3x M4*10mm screws (large flat head is better) and hex nuts, for bearing.
 * 4x M3*12mm screws, for spinning disc. 
 * 2x 1N4148 diode (choose ones easy to solder)
-* 1x Custom cut acrylic spining disc, 4mm thickness.
+* 1x Custom cut acrylic disc, 4mm thickness.
 
-### Keybard Materials
+### Keyboard Materials
 * 1x Raspberry Pi Pico.  
   https://www.raspberrypi.com/products/raspberry-pi-pico
-* 11x Kailh Choc v1 or v2 keyswitches, to get better play feel, 7 of them should be 50g linear.  
+* 11x Kailh Choc v1 or v2 key switches, to get better play feel, 7 of them should be 50g linear.  
   https://www.kailhswitch.com/mechanical-keyboard-switches/low-profile-key-switches/burnt-orange-switch.html  
   https://www.kailhswitch.com/mechanical-keyboard-switches/key-switches/kailh-low-profile-switch-choc-v2.html
 * 7x Kailh low-profile stabilizers.  
@@ -64,23 +64,28 @@ Move forward only if you're REALLY interested.
 Documentation still in progress, come later...
 
 ### Step 2 - 3D Print
-* Keyboard PCB bottom  
-  FDM, PLA/PETG transparent, 0.2mm layer.
-* Keyboard PCB top (dual color if you have Bambu Lab's machine and equipped with AMS)
-  FDM, PLA transparent, 0.2mm layer.
+#### Keyboard
+* PCB bottom  
+  FDM, PLA/PETG transparent, 0.2mm layer, 4 walls.
+* PCB top (dual color if you have Bambu Lab's machine and equipped with AMS)
+  FDM, PLA transparent, 0.2mm layer, 4 walls.
   If you have Bambu Lab's AMS system, use PLA black/gray for 3.0mm+ layers.
-* Turntable base, choose one of the 150, 170 or 180, based on your choice of disc size.
+
+#### Turntable 
+For following prints, make sure the "Seam Position" is set to "Random" in your slicer.
+* Base, choose one of the 150, 170 or 180, based on your choice of disc size.
   FDM, PLA, 0.16-0.2mm layer.
-* Turntable bearing seat  
+* Bearing seat  
   FDM, PLA, 0.16-0.2mm layer.
-* Flange for the spinning disc  
+* Flange for disc  
   FDM, PLA, 0.16-0.2mm layer.
-* Main button keycaps  
+
+#### Button keycaps  
   SLA (resin), regular white, 0.05mm layer.
 
 ### Step 3 - Solder
 * Turntable   
-  There're a set of I2C and a WS2812B signal line together in the cable that connects turntable and the keyboard. Unfortunately these signals crosstalks. So we have to use shield cables for them. Two I2C lines should have a shield cable, and WS2812B signal should have another shield cable. Good thing is, an HDMI cable has 4 shield cable and bunch of other small cables. We can make use of it.
+  There're a set of I2C and a WS2812B signal line together in the cable that connects turntable and the keyboard. Unfortunately, these signals crosstalk. So, we have to use shield cables for them. Two I2C lines should have a shield cable, and the WS2812B signal should have another shield cable. Good thing is, an HDMI cable has 4 shield cables and bunch of other small cables. We can make use of it.
 
   To ease the pain of soldering cables and 2 1N4148 diodes. I made a turntable PCB. But I haven't tried it myself.
   
@@ -89,22 +94,24 @@ Documentation still in progress, come later...
 ### Step 4 - Assemble
 * Assemble the turntable  
   <img src="doc/tt_assemble.png" width="300px">
-* Install the low-profile stablizers.  
+* Install the low-profile stabilizers.  
   https://docs.keeb.io/choc-stabs   
-  A little trick here is leave the keyswitch unsoldered, after the stabilizer, the keyswitch and the keycap are in place, push the keycap down and then solder the keyswith. This way keyswitch can align to the stabilizers better.
+  A little trick here is to leave the key switch unsoldered, after the stabilizer, the key switch and the keycap are in place, push the keycap down and then solder the key switch. This way the key switch can align to the stabilizers better.
 * Assemble the keyboard  
   <img src="doc/kb_assemble.png" width="300px">
 
 ### Step 4 - Firmware
 * For the new build, hold the BOOTSEL button while connect the USB to a PC, there will be a disk named "RPI-RP2" showed up. Drag the uf2 firmware binary file into it. That's it. There's a small hole at the back side of the keyboard, it is facing right to the BOOTSEL button.
 * If it is already running my IIDX firmware, hold two small AUX buttons together will do the same as the BOOTSEL button.
+* For now, some configurations are hardcoded, if you want to change something, you need to build by yourself.
 
 Documentation still in progress, come later...
 
 ### What If?
 * I can't find pogopin connector.
 * I don't have Bambu Lab's machine, or I don't have an AMS system.
-* STL files are not accurate, difficult to assemble.
+* STL files are not accurate, difficult to assemble.   
+**Solution:** 3D printers are different, they make small differences in printing. If the components are not happy with each other, you can fiddle with the OpenSCAD source file and the numbers in it to get perfect components for your case.
 * I don't have resin printer.
 * I can't find Kailh low-profile stabilizer.
 * I don't have electronic DIY gears.
