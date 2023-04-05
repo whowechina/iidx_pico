@@ -65,5 +65,5 @@ void turntable_update()
 
 uint16_t turntable_read()
 {
-    return angle; // 12bit to 8bit
+    return angle; // 12bit
 }

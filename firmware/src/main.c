@@ -65,7 +65,7 @@ static void core2_loop()
     while (true) {
         uint32_t angle = turntable_read();
         rgb_set_angle(angle);
-        report.joy0 = angle >> 4;
+        report.joy0 = angle >> 4; // 12bit to 8bit
         RUN_EVERY_N_MS(rgb_update(), 2);
         turntable_update();
         frame++;
