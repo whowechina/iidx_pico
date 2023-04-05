@@ -56,9 +56,17 @@ void boot_check()
     }
 }
 
-static bool core2_pause = false;
+static bool request_core1_pause = false;
 
-static void core2_loop()
+static void pause_core1(bool pause)
+{
+    request_core1_pause = pause;
+    if (pause) {
+        sleep_ms(5); /* wait for any IO ops to finish */
+    }
+}
+
+static void core1_loop()
 {
 #define RUN_EVERY_N_MS(a, ms) { if (frame % ms == 0) a; }
     uint32_t frame = 0;
@@ -71,20 +79,20 @@ static void core2_loop()
         frame++;
         do {
             sleep_ms(1);
-        } while (core2_pause);
+        } while (request_core1_pause);
     }
 }
 
-static void core2_init()
+static void core0_loop()
 {
-    multicore_launch_core1(core2_loop);
-}
-
-static void core2_pause_loop(bool pause)
-{
-    core2_pause = pause;
-    if (pause) {
-        sleep_ms(5); /* wait for any IO ops to finish */
+    while (true)
+    {
+        tud_task();
+        report.buttons = button_read();
+        hid_report();
+        rgb_set_button_light(report.buttons);
+        button_update();
+        config_loop();
     }
 }
 
@@ -101,23 +109,15 @@ void init()
     turntable_init();
     boot_check();
     stdio_init_all();
-    config_init(core2_pause_loop);
-    core2_init();
+    config_init(pause_core1);
 }
 
 int main(void)
 {
     init();
+    multicore_launch_core1(core1_loop);
 
-    while (1)
-    {
-        tud_task();
-        report.buttons = button_read();
-        hid_report();
-        rgb_set_button_light(report.buttons);
-        button_update();
-        config_loop();
-    }
+    core0_loop();
 
     return 0;
 }

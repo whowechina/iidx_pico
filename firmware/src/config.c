@@ -1,5 +1,5 @@
 /*
- * Controller Config
+ * Controller Config Save and Load
  * WHowe <github.com/whowechina>
  * 
  * Config is stored in last sector of flash
@@ -42,7 +42,7 @@ static int cfg_page = -1;
 static bool requesting_save = false;
 static uint64_t requesting_time = 0;
 
-static core2_locker core2_lock;
+static io_locker_func io_lock;
 
 static void config_save()
 {
@@ -50,7 +50,7 @@ static void config_save()
 
     cfg_page = (cfg_page + 1) % (FLASH_SECTOR_SIZE / FLASH_PAGE_SIZE);
     printf("Program Flash %d %8lx\n", cfg_page, old_cfg.magic);
-    core2_lock(true);
+    io_lock(true);
     uint32_t ints = save_and_disable_interrupts();
     if (cfg_page == 0) {
         flash_range_erase(CONFIG_SECTOR_OFFSET, FLASH_SECTOR_SIZE);
@@ -58,7 +58,7 @@ static void config_save()
     flash_range_program(CONFIG_SECTOR_OFFSET + cfg_page * FLASH_PAGE_SIZE,
                         (uint8_t *)&old_cfg, FLASH_PAGE_SIZE);
     restore_interrupts(ints);
-    core2_lock(false);
+    io_lock(false);
 }
 
 static void load_default()
@@ -101,9 +101,9 @@ static void config_loaded()
     }
 }
 
-void config_init(core2_locker locker)
+void config_init(io_locker_func locker)
 {
-    core2_lock = locker;
+    io_lock = locker;
     config_load();
     config_loop();
     config_loaded();

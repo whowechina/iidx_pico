@@ -1,6 +1,6 @@
 function(make_firmware board board_def)
     add_executable(${board}
-                   main.c buttons.c rgb.c config.c turntable.c
+                   main.c buttons.c rgb.c config.c setup.c turntable.c
                    tt_rainbow.c tt_blade.c
                    usb_descriptors.c)
     target_compile_definitions(${board} PUBLIC ${board_def})
