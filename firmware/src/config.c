@@ -29,7 +29,7 @@ static int module_num = 0;
 #define CONFIG_PAGE_MAGIC 0x13424321
 #define CONFIG_SECTOR_OFFSET (PICO_FLASH_SIZE_BYTES - FLASH_SECTOR_SIZE)
 
-typedef struct __attribute__ ((__packed__)) {
+typedef struct __attribute ((packed)) {
     uint32_t magic;
     uint8_t data[FLASH_PAGE_SIZE - 4];
 } page_t;
