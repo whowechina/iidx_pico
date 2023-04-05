@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "D:/Code/pico-sdk/**",
+                "D:/Code/lib/**",
+                "${workspaceFolder}/firmware/build/generated/pico_base"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "BOARD_IIDX_PICO"
+            ],
+            "intelliSenseMode": "linux-gcc-arm64"
+        }
+    ],
+    "version": 4
+}

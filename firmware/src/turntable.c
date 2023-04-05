@@ -54,11 +54,11 @@ static uint16_t angle = 0;
 
 void turntable_update()
 {
-    uint8_t reg = 0x0c;
-    i2c_write_blocking(TT_AS5600_I2C, as5600_addr, &reg, 1, true);
-
-    uint8_t buf[2] = {0x0c};
-    i2c_read_blocking(TT_AS5600_I2C, as5600_addr, buf, 2, false);
+    uint8_t buf[2] = {0x0c, 0x00};
+    i2c_write_blocking_until(TT_AS5600_I2C, as5600_addr, buf, 1, true,
+                             time_us_64() + 1000);
+    i2c_read_blocking_until(TT_AS5600_I2C, as5600_addr, buf, 2, false,
+                            time_us_64() + 1000);
 
     angle = ((uint16_t)buf[0]) << 8 | buf[1];
 }

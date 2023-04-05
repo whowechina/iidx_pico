@@ -7,7 +7,7 @@
 
 Features:
 * It's thin, really thin.
-* Turntable and keyboard are detachable with magnetic connector.
+* Turntable and keyboard are detachable with magnetic connector, hotswap!
 * HID lights, of course!
 * Multiple turntable effects.
 * Many live settings.
