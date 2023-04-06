@@ -33,10 +33,13 @@ Move forward only if you're REALLY interested.
   <img src="doc/as5600.png" width="150px">
 * 1x 6mm\*2mm magnet (must be radially magnetized), normally comes with the AS5600 board set.
 * 1x 61804-2RS deep groove ball bearing (20x32x7mm), normally < 5US$;
+* 1x WS2812B LED ring board, use ones with dense LED arrangement (>=32 LEDs);
 * 3x M4*10mm screws (large flat head is better) and hex nuts, for bearing.
 * 4x M3*12mm screws, for spinning disc. 
 * 2x 1N4148 diode (choose ones easy to solder)
 * 1x Custom cut acrylic disc, 4mm thickness.
+* 11x 12mm non slip self-adhesive silicon pads (also for Keyboard).   
+  https://www.amazon.com/Cabinet-Dampening-Adhesive-Circular-Stoppers/dp/B07XXWG818
 
 ### Keyboard Materials
 * 1x Raspberry Pi Pico.  
@@ -50,10 +53,12 @@ Move forward only if you're REALLY interested.
   https://www3.panasonic.biz/ac/e/dl/catalog/index.jsp?series_cd=3473&part_no=EVQP1K05M
 * 1x USB Type-C socket (918-418K2023S40001 or KH-TYPE-C-16P)
 * 11x WS2812B-3528 RGB LEDs or if you want more challenge: 28x WS2812B-1516.
+* 2x SN74LV1T34DBVR (SOT-23-5) level shifter, optional, for better voltage tolerance.
 * 1x 0603 5.1kohm resistors for USB.
 * 2x 0603 10ohm resistor.
 * 5x 0805 1uF capacitors.
 * 4x Kailh low-profile keycaps.
+* 4x M3*6mm screws and hex nuts to fix parts together.
 
 ### Detachable Cable
 * 1x HDMI cable (ultra slim, diameter < 4mm), at least 50cm in length, we'll cut the HDMI connectors off, so pick a cheap one.
@@ -61,24 +66,29 @@ Move forward only if you're REALLY interested.
   <img src="doc/pogopin.jpg" width="300px">
 
 ### Step 1 - Buy
+* Keyboard PCB   
+  Just go [JLC](https://jlcpcb.com/) and make the order. Leave everything default, except the board thickness is **1.2mm**, it's very important!
+* Turntable PCB   
+  It's an optional one. It makes the wiring and soldering inside the turntable a litter easier.
+* Acrylic disc   
+  Choose the dxf file according to your disc size and find a vendor to cut the 4mm black acrylic.
+
 Documentation still in progress, come later...
 
 ### Step 2 - 3D Print
 #### Keyboard
-* PCB bottom  
+* PCB bottom (pcb_bottom.stl)   
   FDM, PLA/PETG transparent, 0.2mm layer, 4 walls.
-* PCB top (dual color if you have Bambu Lab's machine and equipped with AMS)
-  FDM, PLA transparent, 0.2mm layer, 4 walls.
+* PCB top (pcb_top.stl)   
+  FDM, PLA transparent, 0.2mm layer, 4 walls.   
   If you have Bambu Lab's AMS system, use PLA black/gray for 3.0mm+ layers.
 
 #### Turntable 
-For following prints, make sure the "Seam Position" is set to "Random" in your slicer.
-* Base, choose one of the 150, 170 or 180, based on your choice of disc size.
-  FDM, PLA, 0.16-0.2mm layer.
-* Bearing seat  
-  FDM, PLA, 0.16-0.2mm layer.
-* Flange for disc  
-  FDM, PLA, 0.16-0.2mm layer.
+For following prints, FDM, PLA, 0.4 nozzle, 0.16-0.2mm layer, 4 walls.  And very important: "Seam Position" should be set to "**Random**" in your slicer.   
+These are all printed with
+* Base (TT_base_xxx.stl), choose one of the 150, 170 or 180, based on your choice of disc size, 20-60% fill.
+* Bearing seat (bearing_seat_6804.stl), 20-60% fill.
+* Flange for disc (TTshaft_6804.stl), 60% fill.
 
 #### Button keycaps  
   SLA (resin), regular white, 0.05mm layer.
