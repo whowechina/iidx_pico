@@ -25,7 +25,7 @@ This Pico IIDX project:
 
 Move forward only if you're REALLY interested.  
 
-**This README documentation is still in progress.**
+**Due to my limited personal time, this document is unfinished and still in progress. So stay tuned!**
 
 ## HOW TO BUILD
 ### Turntable Materials
@@ -84,19 +84,20 @@ Documentation still in progress, come later...
   If you have Bambu Lab's AMS system, use PLA black/gray for 3.0mm+ layers.
 
 #### Turntable 
-For following prints, FDM, PLA, 0.4 nozzle, 0.16-0.2mm layer, 4 walls.  And very important: "Seam Position" should be set to "**Random**" in your slicer.   
+For following prints, FDM, PLA, 0.4 nozzle, 0.16-0.2mm layer, 4 walls.  And very important: "Seam Position" should be set to "**Random**" in your slicer, not only it looks better, it makes the bearing-flange coupling smoother and tension distributed more evenly.   
 These are all printed with
 * Base (TT_base_xxx.stl), choose one of the 150, 170 or 180, based on your choice of disc size, 20-60% fill.
 * Bearing seat (bearing_seat_6804.stl), 20-60% fill.
 * Flange for disc (TTshaft_6804.stl), 60% fill.
 
-### Pogopin Connector
+#### Pogopin Connector
 It's very small and requires higher accuracy.
 * Housing for pogopin connector (pogo_bottom.stl, pogo_top.stl).   
   FDM, PLA, **0.2 nozzle** is recommended, 0.1mm layer, 4 walls, 60% fill.
 
 #### Button keycaps  
-  SLA (resin), regular white, 0.05mm layer.
+  SLA (resin), regular white, 0.05mm layer, check out my orientation:   
+  <img src="doc/keycap_support.png" width="300px">
 
 ### Step 3 - Solder
 * Turntable   
@@ -108,12 +109,26 @@ Documentation still in progress, come later...
 
 ### Step 4 - Assemble
 * Assemble the turntable  
-  <img src="doc/tt_assemble.png" width="300px">
+  I don't know how to draw an explosion diagram, this is done by coding in OpenSCAD:   
+  <img src="doc/tt_assemble.png" width="300px">   
+  These shows how a bearing is installed.   
+  <img src="doc/bearing_1.jpg" width="300px">
+  <img src="doc/bearing_2.jpg" width="300px">
+  <img src="doc/bearing_3.jpg" width="300px">
+  <img src="doc/bearing_4.jpg" width="300px">
+  <img src="doc/bearing_5.jpg" width="300px">
+
 * Install the low-profile stabilizers.  
   https://docs.keeb.io/choc-stabs   
-  A little trick here is to leave the key switch unsoldered, after the stabilizer, the key switch and the keycap are in place, push the keycap down and then solder the key switch. This way the key switch can align to the stabilizers better.
+  A little trick here. As the PCB footprint is made to support both choc v1 and v2, that leaves some wobble space for choc v1 and makes it difficult to align. So leave the key switch unsoldered, when the stabilizer, the key switch and the keycap are all in place, push the keycap down and then solder the key switch. This way the key switch will be aligned to the stabilizers better.
 * Assemble the keyboard  
-  <img src="doc/kb_assemble.png" width="300px">
+  It's very easy.   
+  <img src="doc/kb_assemble.png" width="300px">   
+  <img src="doc/kb_1.jpg" width="300px">
+  <img src="doc/kb_2.jpg" width="300px">
+  <img src="doc/kb_3.jpg" width="300px">
+  <img src="doc/kb_4.jpg" width="300px">
+  <img src="doc/kb_5.jpg" width="300px">
 
 ### Step 4 - Firmware
 * For the new build, hold the BOOTSEL button while connect the USB to a PC, there will be a disk named "RPI-RP2" showed up. Drag the uf2 firmware binary file into it. That's it. There's a small hole at the back side of the keyboard, it is facing right to the BOOTSEL button.
@@ -124,14 +139,12 @@ Documentation still in progress, come later...
 
 ### What If?
 * I can't find pogopin connector.   
-  I figured out another connector choice, which is a 3.5mm 4P headphone jack. It uses analog to communicate turntable movements, but I'm still testing it, so stay tuned. I will update this document.
+**Solution:** I figured out another connector choice, which is a 3.5mm 4P headphone jack. It uses analog to communicate turntable movements, but I'm still testing it, so stay tuned. I will update this document.
 * I don't have Bambu Lab's machine, or I don't have an AMS system.   
-  There're many online vendors and people providing paid Bambu printing service. Or you can just use other 3D printers. It's just the numbers in the OpenSCAD source file or STL files are finetuned on my Bambu Lab X1. You may need to adjust a little on your 3D printer system to get perfect result. And regarding the multi-color thing, maybe you can just paint the top layer by hand. I know people do miniature painting, I think it would be similar.
+**Solution:** There're many online vendors and people providing paid Bambu printing service. Or you can just use other 3D printers. It's just the numbers in the OpenSCAD source file or STL files are finetuned on my Bambu Lab X1. You may need to adjust a little on your 3D printer system to get perfect result. And regarding the multi-color thing, maybe you can just paint the top layer by hand. I know people do miniature painting, I think it would be similar.
 * STL files are not accurate, difficult to assemble.   
 **Solution:** 3D printer systems are different one from another, it results in small differences even with same model file and some configuration. If the printed parts are not happy with each other, you can fiddle with the OpenSCAD source file and the numbers in it for your case.
 * I don't have resin printer.
 * I can't find Kailh low-profile stabilizer.
 * I don't have electronic DIY gears.   
-  OK, this project is a electronic hobby project, maybe it's not for you if you don't plan to do electronic DIYs. You can buy good mini-cons online.
-
-Documentation still in progress, come later...
+**Solution:** OK, this is an electronic hobby project, maybe it's not for you if you don't plan to do electronic DIYs. There're many good IIDX controllers you can purchase somewhere online.
