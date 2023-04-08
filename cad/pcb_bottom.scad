@@ -1,10 +1,13 @@
+pogo=true; // if you use pogopin connector
+jack35=true; // if you use 3.5mm headphone jack
+
 body();
 stab();
 
-%color("gray", 0.3) pcb();
+%color("cyan", 0.3) pcb();
 
 module pcb() {
-  translate([-137.32,144.4,5]) import("iidx_pico_to_stl v1.stl");
+  translate([-137.32,144.4,5]) import("iidx_pico v1.stl");
 }
 
 module body() {
@@ -50,17 +53,26 @@ module body() {
     
     // upper button area holes
     color("navy") translate([0,0,1.2]) {
-      translate([-26,111,0]) rcube(93,20,10,2);
-      translate([34,111,0]) rcube(20,20,10,2);
+      translate([-32,111,0]) rcube(84,20,10,2);
+      translate([35,111,0]) rcube(19,20,10,2);
       translate([60,111,0]) rcube(25,20,10,2);
     }
     
-    // pogo
-    color("cyan") translate([0,0,5.7]) {
-      translate([-48.92,139,0]) rotate([90,0,0]) rcube(20.5,10,20,0.1);
-      translate([84,74.42,0]) rotate([90,0,90]) rcube(20.5,10,20,0.1);
+    if (pogo) {
+      color("cyan") translate([0,0,5.7]) {
+        translate([-48.92,139,0]) rotate([90,0,0]) rcube(20.5,10,20,0.1);
+        translate([84,74.42,0]) rotate([90,0,90]) rcube(20.5,10,20,0.1);
+      }
     }
     
+    if (jack35) {
+      color("cyan") translate([0,0,5.7]) {
+        translate([17.8,139,0]) rotate([90,0,0]) rcube(6.8,12,28.6,0.2);
+        translate([17.8,125.1,0]) rotate([90,0,0]) rcube(10,3,13,0.1);
+        translate([17.8,128,-7]) cylinder(d=12,h=10,$fn=4);
+      }
+    }
+  
     // usb
     color("cyan") translate([0,0,6.7]) {
       translate([-16.72,139,0]) rotate([90,0,0]) rcube(9.5,10,20,1);
