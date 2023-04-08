@@ -4,23 +4,8 @@
  */
 
 #if defined BOARD_IIDX_PICO
-/* A button consists of a switch and an LED
-   7 main buttons + E1, E2, E3, E4 */
-#define BUTTON_DEF { \
-    {8, -1}, \
-    {7, -1}, \
-    {6, -1}, \
-    {5, -1}, \
-    {4, -1}, \
-    {3, -1}, \
-    {2, -1}, \
-    {12, -1}, \
-    {11, -1}, \
-    {10, -1}, \
-    {9, -1}, \
-    {1, -1}, \
-    {0, -1}, \
-}
+/* List of button pins */
+#define BUTTON_DEF { 8, 7, 6, 5, 4, 3, 2, 12, 11, 10, 9, 1, 0 }
 
 #define BUTTON_RGB_PIN 13
 #define BUTTON_RGB_NUM 11
@@ -31,12 +16,7 @@
 #define BUTTON_RGB_ORDER GRB
 
 #define TT_RGB_PIN 28
-#define TT_RGB_NUM 52
 #define TT_RGB_ORDER GRB
-
-#define TT_RGB_START 0
-#define TT_RGB_SIZE 52
-#define TT_RGB_REVERSED true
 
 #define TT_AS5600_SCL 27
 #define TT_AS5600_SDA 26

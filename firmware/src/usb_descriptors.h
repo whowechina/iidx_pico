@@ -29,12 +29,14 @@ enum {
       HID_USAGE_MAX(11),                                             \
       HID_LOGICAL_MIN(0), HID_LOGICAL_MAX(1), HID_REPORT_COUNT(11),  \
       HID_REPORT_SIZE(1), HID_INPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE),   \
-      HID_REPORT_COUNT(1), HID_REPORT_SIZE(16 - 11), /*Padding*/\
+      HID_REPORT_COUNT(1), HID_REPORT_SIZE(16 - 11), /*Padding*/               \
       HID_INPUT(HID_CONSTANT | HID_VARIABLE | HID_ABSOLUTE),                   \
       HID_USAGE_PAGE(HID_USAGE_PAGE_DESKTOP), HID_LOGICAL_MIN(0x00),           \
-      HID_LOGICAL_MAX_N(0x00ff, 2),                                            \
-      HID_USAGE(HID_USAGE_DESKTOP_X), /*Joystick*/                             \
-      HID_USAGE(HID_USAGE_DESKTOP_Y), HID_REPORT_COUNT(2), HID_REPORT_SIZE(8), \
+      HID_LOGICAL_MAX_N(0x00ff, 2),   /* Below is Joystick/analog */           \
+      HID_USAGE(HID_USAGE_DESKTOP_X), HID_USAGE(HID_USAGE_DESKTOP_Y),          \
+      HID_USAGE(HID_USAGE_DESKTOP_Z), HID_USAGE(HID_USAGE_DESKTOP_RX),         \
+      HID_USAGE(HID_USAGE_DESKTOP_RY), HID_USAGE(HID_USAGE_DESKTOP_RZ),        \
+      HID_REPORT_COUNT(6), HID_REPORT_SIZE(8), \
       HID_INPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE), HID_COLLECTION_END
 
 // Light Map

@@ -142,10 +142,7 @@ char const* string_desc_arr[] = {
     "E1",
     "E2",
     "E3",
-    "E4",
-    "Logo Red",
-    "Logo Green",
-    "Logo Blue"
+    "E4"
 };
 
 static uint16_t _desc_str[64];

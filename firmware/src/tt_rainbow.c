@@ -64,11 +64,11 @@ static void set_angle(uint32_t angle)
 
 static void update(uint32_t context)
 {
-    for (int i = 0; i < rgb_tt_size; i++) {
+    for (int i = 0; i < tt_ring_size; i++) {
         uint32_t pitch = COLOR_WHEEL_SIZE * RGB_RING_CYCLE * i;
-        uint32_t index = (phase + pitch / rgb_tt_size) % COLOR_WHEEL_SIZE;
-        int led = rgb_tt_reversed ? rgb_tt_size - 1 - i: i;
-        rgb_tt_buf[led] = color_wheel[index];
+        uint32_t index = (phase + pitch / tt_ring_size) % COLOR_WHEEL_SIZE;
+        int led = tt_ring_reversed ? tt_ring_size - 1 - i: i;
+        tt_ring_buf[led] = color_wheel[index];
     }
 }
 

@@ -10,13 +10,18 @@
 #include <stdbool.h>
 
 void rgb_init();
+void rgb_set_hardware(uint16_t tt_start, uint16_t tt_num, bool tt_reversed);
+
 uint8_t rgb_button_num();
 void rgb_update();
+
 void rgb_set_angle(uint32_t angle);
 void rgb_set_level(uint8_t level);
 
 void rgb_set_button_light(uint16_t buttons);
 void rgb_set_hid_light(uint8_t const *lights, uint8_t num);
+
+void rgb_force_display(uint32_t *keyboard, uint32_t *tt);
 
 typedef struct {
     void (*init)(uint32_t context);
@@ -28,10 +33,11 @@ typedef struct {
 
 void rgb_reg_tt_effect(tt_effect_t effect);
 
-extern uint32_t *rgb_tt_buf;
-extern uint32_t rgb_tt_size;
-extern uint32_t rgb_tt_angle;
-extern bool rgb_tt_reversed;
+/* These global variables meant to be accessed by effect codes */
+extern uint32_t *tt_ring_buf;
+extern uint32_t tt_ring_size;
+extern uint32_t tt_ring_angle;
+extern bool tt_ring_reversed;
 
 uint32_t button_rgb32(uint32_t r, uint32_t g, uint32_t b, bool gamma_fix);
 uint32_t tt_rgb32(uint32_t r, uint32_t g, uint32_t b, bool gamma_fix);

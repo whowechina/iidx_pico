@@ -87,11 +87,12 @@ void rgb_set_level(uint8_t level)
 
 uint8_t button_lights[BUTTON_RGB_NUM];
 
-static uint32_t tt_led_buf[TT_RGB_NUM] = {0};
-uint32_t *rgb_tt_buf = &tt_led_buf[TT_RGB_START];
-uint32_t rgb_tt_size = TT_RGB_SIZE;
-bool rgb_tt_reversed = TT_RGB_REVERSED;
-uint32_t rgb_tt_angle = 0;
+static uint32_t tt_led_buf[128] = {0};
+uint32_t *tt_ring_buf = &tt_led_buf[0];
+uint32_t tt_ring_start = 0;
+uint32_t tt_ring_size = 24;
+bool tt_ring_reversed = false;
+uint32_t tt_ring_angle = 0;
 
 static uint32_t button_led_buf[BUTTON_RGB_NUM] = {0};
 
@@ -131,7 +132,7 @@ static void button_lights_update()
 
 void rgb_set_angle(uint32_t angle)
 {
-    rgb_tt_angle = angle;
+    tt_ring_angle = angle;
     effects[current_effect].set_angle(angle);
 }
 
@@ -157,11 +158,29 @@ static void effect_update()
     effects[current_effect].update(effects[current_effect].context);
 }
 
+#define FORCE_EXPIRE_DURATION 100000ULL
+static uint64_t force_expire_time = 0;
+
 void rgb_update()
 {
-    effect_update();
-    button_lights_update();
+    if (time_us_64() > force_expire_time) {
+        effect_update();
+        button_lights_update();
+    }
     drive_led();
+}
+
+void rgb_force_display(uint32_t *keyboard, uint32_t *tt)
+{
+    for (int i = 0; i < BUTTON_RGB_NUM; i++) {
+        int led = button_rgb_map[i];
+        button_led_buf[led] = keyboard[i];
+    }
+
+    memset(tt_led_buf, 0, tt_ring_start * sizeof(uint32_t));
+    memcpy(tt_led_buf + tt_ring_start, tt, tt_ring_size * sizeof(uint32_t));
+
+    force_expire_time = time_us_64() + FORCE_EXPIRE_DURATION;
 }
 
 void rgb_init()
@@ -179,4 +198,12 @@ void rgb_reg_tt_effect(tt_effect_t effect)
 {
     effects[effect_num] = effect;
     effect_num++;
+}
+
+void rgb_set_hardware(uint16_t tt_start, uint16_t tt_num, bool tt_reversed)
+{
+    tt_ring_start = tt_start;
+    tt_ring_size = tt_num;
+    tt_ring_reversed = tt_reversed;
+    tt_ring_buf = &tt_led_buf[tt_start];
 }
