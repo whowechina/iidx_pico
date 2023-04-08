@@ -67,7 +67,7 @@ Move forward only if you're REALLY interested.
 
 ### Step 1 - Buy
 * Keyboard PCB   
-  Just go [JLC](https://jlcpcb.com/) and make the order. Leave everything default, except the board thickness is **1.2mm**, it's very important!
+  Just go [JLC](https://jlcpcb.com/) and make the order. Make sure the board thickness is **1.2mm**, it's very important!
 * Turntable PCB   
   It's an optional one. It makes the wiring and soldering inside the turntable a litter easier.
 * Acrylic disc   
@@ -77,7 +77,7 @@ Documentation still in progress, come later...
 
 ### Step 2 - 3D Print
 #### Keyboard
-* PCB bottom (pcb_bottom.stl)   
+* PCB bottom (pcb_bottom_*.stl, choose one according to your connector choice)   
   FDM, PLA/PETG transparent, 0.2mm layer, 4 walls.
 * PCB top (pcb_top.stl)   
   FDM, PLA transparent, 0.2mm layer, 4 walls.   
@@ -89,6 +89,11 @@ These are all printed with
 * Base (TT_base_xxx.stl), choose one of the 150, 170 or 180, based on your choice of disc size, 20-60% fill.
 * Bearing seat (bearing_seat_6804.stl), 20-60% fill.
 * Flange for disc (TTshaft_6804.stl), 60% fill.
+
+### Pogopin Connector
+It's very small and requires higher accuracy.
+* Housing for pogopin connector (pogo_bottom.stl, pogo_top.stl).   
+  FDM, PLA, **0.2 nozzle** is recommended, 0.1mm layer, 4 walls, 60% fill.
 
 #### Button keycaps  
   SLA (resin), regular white, 0.05mm layer.
@@ -118,12 +123,15 @@ Documentation still in progress, come later...
 Documentation still in progress, come later...
 
 ### What If?
-* I can't find pogopin connector.
-* I don't have Bambu Lab's machine, or I don't have an AMS system.
+* I can't find pogopin connector.   
+  I figured out another connector choice, which is a 3.5mm 4P headphone jack. It uses analog to communicate turntable movements, but I'm still testing it, so stay tuned. I will update this document.
+* I don't have Bambu Lab's machine, or I don't have an AMS system.   
+  There're many online vendors and people providing paid Bambu printing service. Or you can just use other 3D printers. It's just the numbers in the OpenSCAD source file or STL files are finetuned on my Bambu Lab X1. You may need to adjust a little on your 3D printer system to get perfect result. And regarding the multi-color thing, maybe you can just paint the top layer by hand. I know people do miniature painting, I think it would be similar.
 * STL files are not accurate, difficult to assemble.   
-**Solution:** 3D printers are different, they make small differences in printing. If the components are not happy with each other, you can fiddle with the OpenSCAD source file and the numbers in it to get perfect components for your case.
+**Solution:** 3D printer systems are different one from another, it results in small differences even with same model file and some configuration. If the printed parts are not happy with each other, you can fiddle with the OpenSCAD source file and the numbers in it for your case.
 * I don't have resin printer.
 * I can't find Kailh low-profile stabilizer.
-* I don't have electronic DIY gears.
-  
+* I don't have electronic DIY gears.   
+  OK, this project is a electronic hobby project, maybe it's not for you if you don't plan to do electronic DIYs. You can buy good mini-cons online.
+
 Documentation still in progress, come later...
