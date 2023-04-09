@@ -119,14 +119,14 @@ void drive_led()
 
 uint32_t rgb32_from_hsv(hsv_t hsv)
 {
-    uint8_t region, remainder, p, q, t;
+    uint32_t region, remainder, p, q, t;
 
     if (hsv.s == 0) {
         return hsv.v << 16 | hsv.v << 8 | hsv.v;
     }
 
     region = hsv.h / 43;
-    remainder = (hsv.h - (region * 43)) * 6;
+    remainder = (hsv.h % 43) * 6;
 
     p = (hsv.v * (255 - hsv.s)) >> 8;
     q = (hsv.v * (255 - ((hsv.s * remainder) >> 8))) >> 8;
@@ -156,9 +156,9 @@ static void button_lights_update()
     for (int i = 0; i < BUTTON_RGB_NUM; i++) {
         int led = button_rgb_map[i];
         if (button_lights[i] > 0) {
-            button_led_buf[led] = rgb32_from_hsv(iidx_cfg->key_on[i]);
+            button_led_buf[led] = rgb32_from_hsv((hsv_t){255,0,200});
         } else {
-            button_led_buf[led] = rgb32_from_hsv(iidx_cfg->key_off[i]);
+            button_led_buf[led] = rgb32_from_hsv((hsv_t){23*i,255,20});
         }
     }
 }
