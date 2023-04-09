@@ -253,7 +253,7 @@ static void quit_mode(bool apply)
     current_mode = MODE_NONE;
     printf("Quit setup %s\n", apply ? "saved." : "discarded.");
 }
-
+ 
 bool setup_run(uint16_t keys, uint16_t angle)
 {
     setup_tick_ms = time_us_64() / 1000;
@@ -262,9 +262,14 @@ bool setup_run(uint16_t keys, uint16_t angle)
     input.just_pressed = keys & ~input.last_keys;
     input.just_released = ~keys & input.last_keys;
     input.rotate = input.angle - input.last_angle;
+    if (input.rotate > 128) {
+        input.rotate -= 256;
+    } else if (input.rotate < -128) {
+        input.rotate += 256;
+    }
 
-    if (input.rotate != 0) {
-        printf("@ %d\n", input.rotate);
+   if (input.rotate != 0) {
+        printf("@ %3d %2x\n", input.rotate, input.angle);
         mode_defs[current_mode].rotate();
     }
 

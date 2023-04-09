@@ -12,7 +12,7 @@ function(make_firmware board board_def)
     target_include_directories(${board} PRIVATE ${CMAKE_CURRENT_LIST_DIR})
     target_link_libraries(${board} PRIVATE
         pico_multicore pico_stdlib hardware_pio hardware_pwm hardware_flash
-        hardware_i2c tinyusb_device tinyusb_board)
+        hardware_adc hardware_i2c tinyusb_device tinyusb_board)
 
     # Make a UF2 binary
     pico_add_extra_outputs(${board})
