@@ -42,18 +42,13 @@ static inline void blade_color_mix(int index, uint32_t color, uint32_t distance,
 /* pos: 0..4095 */
 static void blade_put_pixel(uint32_t pos, uint32_t color, uint32_t level)
 {
-    pos = (pos % 4096) * tt_ring_size / 16; // *256/4096, zoom in by 256x
+    pos = (pos % 4096) * TT_LED_NUM / 16; // *256/4096, zoom in by 256x
 
     // calc brightness share between left and right LEDs
     uint32_t index_left = pos >> 8;
-    uint32_t index_right = (index_left + 1) % tt_ring_size;
+    uint32_t index_right = (index_left + 1) % TT_LED_NUM;
     uint32_t dis_left = pos & 0xff;
     uint32_t dis_right = 255 - dis_left;
-
-    if (tt_ring_reversed) {
-        index_left = tt_ring_size - 1 - index_left;
-        index_right = tt_ring_size - 1 - index_right;
-    }
 
     blade_color_mix(index_left, color, dis_left, level);
     blade_color_mix(index_right, color, dis_right, level);
@@ -112,9 +107,9 @@ static uint32_t apply_level(uint32_t color)
 
 static void update(uint32_t context)
 {
-    uint32_t delta = tt_ring_angle > snake[0] ? tt_ring_angle - snake[0] : snake[0] - tt_ring_angle;
+    uint32_t delta = tt_led_angle > snake[0] ? tt_led_angle - snake[0] : snake[0] - tt_led_angle;
 
-    snake[0] = tt_ring_angle;
+    snake[0] = tt_led_angle;
     life[0] = 255;
     life[1] = delta > 7 ? 255: delta * 8;
 
@@ -136,8 +131,8 @@ static void update(uint32_t context)
             life[i]--;
         }
     }
-    for (int i = 0; i < tt_ring_size; i++) {
-        tt_ring_buf[i] = apply_level(blade_buf[i]);
+    for (int i = 0; i < TT_LED_NUM; i++) {
+        tt_led_buf[i] = apply_level(blade_buf[i]);
     }
 }
 

@@ -24,6 +24,7 @@
 #include "tt_rainbow.h"
 
 #include "config.h"
+#include "save.h"
 
 /* Measure the time of a function call */
 #define RUN_TIME(func) \
@@ -38,10 +39,10 @@ struct {
 void report_usb_hid()
 {
     if (tud_hid_ready()) {
-        hid_report.joy[2] = iidx_cfg.effects.play_vol;
-        hid_report.joy[3] = iidx_cfg.effects.filter;
-        hid_report.joy[4] = iidx_cfg.effects.eq_low;
-        hid_report.joy[5] = iidx_cfg.effects.eq_hi;
+        hid_report.joy[2] = iidx_cfg->effects.play_vol;
+        hid_report.joy[3] = iidx_cfg->effects.filter;
+        hid_report.joy[4] = iidx_cfg->effects.eq_low;
+        hid_report.joy[5] = iidx_cfg->effects.eq_hi;
         tud_hid_n_report(0x00, REPORT_ID_JOYSTICK, &hid_report, sizeof(hid_report));
     }
 }
@@ -73,8 +74,10 @@ static void core1_loop()
     while (true) {
         uint32_t angle = turntable_read();
         rgb_set_angle(angle);
+
         hid_report.joy[0] = angle >> 4; // 12bit to 8bit
         hid_report.joy[1] = 255 - hid_report.joy[0];
+
         RUN_EVERY_N_MS(rgb_update(), 2);
         turntable_update();
         frame++;
@@ -92,18 +95,15 @@ static void core0_loop()
         uint16_t buttons = button_read();
         uint16_t angle = turntable_read() >> 4;
         if (setup_run(buttons, angle)) {
-            turntable_set_hardware(iidx_cfg.tt_sensor_reversed);
-            rgb_set_hardware(iidx_cfg.tt_led.start, iidx_cfg.tt_led.num, iidx_cfg.tt_led.reversed);
             rgb_force_display(setup_led_button, setup_led_tt);
             report_usb_hid();
-            sleep_ms(5);
             continue;
         }
 
         hid_report.buttons = buttons;
         report_usb_hid();
         rgb_set_button_light(buttons);
-        config_loop();
+        save_loop();
     }
 }
 
@@ -122,7 +122,8 @@ void init()
     stdio_init_all();
 
     setup_init();
-    config_init(pause_core1);
+    config_init();
+    save_init(pause_core1);
 }
 
 int main(void)

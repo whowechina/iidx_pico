@@ -9,6 +9,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "config.h"
+
 void rgb_init();
 void rgb_set_hardware(uint16_t tt_start, uint16_t tt_num, bool tt_reversed);
 
@@ -33,11 +35,12 @@ typedef struct {
 
 void rgb_reg_tt_effect(tt_effect_t effect);
 
+extern uint32_t tt_led_buf[];
+#define TT_LED_NUM (iidx_cfg->tt_led.num)
+
 /* These global variables meant to be accessed by effect codes */
-extern uint32_t *tt_ring_buf;
-extern uint32_t tt_ring_size;
-extern uint32_t tt_ring_angle;
-extern bool tt_ring_reversed;
+extern uint32_t tt_led_angle;
+
 
 uint32_t button_rgb32(uint32_t r, uint32_t g, uint32_t b, bool gamma_fix);
 uint32_t tt_rgb32(uint32_t r, uint32_t g, uint32_t b, bool gamma_fix);

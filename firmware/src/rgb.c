@@ -18,6 +18,7 @@
 #include "ws2812.pio.h"
 
 #include "board_defs.h"
+#include "config.h"
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
@@ -86,13 +87,8 @@ void rgb_set_level(uint8_t level)
 }
 
 uint8_t button_lights[BUTTON_RGB_NUM];
-
-static uint32_t tt_led_buf[128] = {0};
-uint32_t *tt_ring_buf = &tt_led_buf[0];
-uint32_t tt_ring_start = 0;
-uint32_t tt_ring_size = 24;
-bool tt_ring_reversed = false;
-uint32_t tt_ring_angle = 0;
+uint32_t tt_led_buf[128] = {0};
+uint32_t tt_led_angle = 0;
 
 static uint32_t button_led_buf[BUTTON_RGB_NUM] = {0};
 
@@ -109,9 +105,46 @@ void drive_led()
     for (int i = 0; i < ARRAY_SIZE(button_led_buf); i++) {
         pio_sm_put_blocking(pio0, 0, button_led_buf[i] << 8u);
     }
+    for (int i = 0; i < iidx_cfg->tt_led.start; i++) {
+        pio_sm_put_blocking(pio1, 0, 0);
+    }
+    for (int i = 0; i < TT_LED_NUM; i++) {
+        uint8_t id = iidx_cfg->tt_led.reversed ? TT_LED_NUM - i - 1 : i;
+        pio_sm_put_blocking(pio1, 0, tt_led_buf[id] << 8u);
+    }
+    for (int i = 0; i < 8; i++) { // a few more to wipe out the last led
+        pio_sm_put_blocking(pio1, 0, 0);
+    }
+}
 
-    for (int i = 0; i < ARRAY_SIZE(tt_led_buf); i++) {
-        pio_sm_put_blocking(pio1, 0, tt_led_buf[i] << 8u);
+uint32_t rgb32_from_hsv(hsv_t hsv)
+{
+    uint8_t region, remainder, p, q, t;
+
+    if (hsv.s == 0) {
+        return hsv.v << 16 | hsv.v << 8 | hsv.v;
+    }
+
+    region = hsv.h / 43;
+    remainder = (hsv.h - (region * 43)) * 6;
+
+    p = (hsv.v * (255 - hsv.s)) >> 8;
+    q = (hsv.v * (255 - ((hsv.s * remainder) >> 8))) >> 8;
+    t = (hsv.v * (255 - ((hsv.s * (255 - remainder)) >> 8))) >> 8;
+
+    switch (region) {
+        case 0:
+            return hsv.v << 16 | t << 8 | p;
+        case 1:
+            return q << 16 | hsv.v << 8 | p;
+        case 2:
+            return p << 16 | hsv.v << 8 | t;
+        case 3:
+            return p << 16 | q << 8 | hsv.v;
+        case 4:
+            return t << 16 | p << 8 | hsv.v;
+        default:
+            return hsv.v << 16 | p << 8 | q;
     }
 }
 
@@ -123,16 +156,16 @@ static void button_lights_update()
     for (int i = 0; i < BUTTON_RGB_NUM; i++) {
         int led = button_rgb_map[i];
         if (button_lights[i] > 0) {
-            button_led_buf[led] = button_rgb32(0x80, 0x80, 0x80, true);
+            button_led_buf[led] = rgb32_from_hsv(iidx_cfg->key_on[i]);
         } else {
-            button_led_buf[led] = 0;
+            button_led_buf[led] = rgb32_from_hsv(iidx_cfg->key_off[i]);
         }
     }
 }
 
 void rgb_set_angle(uint32_t angle)
 {
-    tt_ring_angle = angle;
+    tt_led_angle = angle;
     effects[current_effect].set_angle(angle);
 }
 
@@ -160,26 +193,34 @@ static void effect_update()
 
 #define FORCE_EXPIRE_DURATION 100000ULL
 static uint64_t force_expire_time = 0;
+uint32_t *force_buttons = NULL;
+uint32_t *force_tt = NULL;
+
+void force_update()
+{
+    for (int i = 0; i < BUTTON_RGB_NUM; i++) {
+        int led = button_rgb_map[i];
+        button_led_buf[led] = force_buttons[i];
+    }
+
+    memcpy(tt_led_buf, force_tt, TT_LED_NUM * sizeof(uint32_t));
+}
 
 void rgb_update()
 {
     if (time_us_64() > force_expire_time) {
         effect_update();
         button_lights_update();
+    } else {
+        force_update();
     }
     drive_led();
 }
 
-void rgb_force_display(uint32_t *keyboard, uint32_t *tt)
+void rgb_force_display(uint32_t *buttons, uint32_t *tt)
 {
-    for (int i = 0; i < BUTTON_RGB_NUM; i++) {
-        int led = button_rgb_map[i];
-        button_led_buf[led] = keyboard[i];
-    }
-
-    memset(tt_led_buf, 0, tt_ring_start * sizeof(uint32_t));
-    memcpy(tt_led_buf + tt_ring_start, tt, tt_ring_size * sizeof(uint32_t));
-
+    force_buttons = buttons;
+    force_tt = tt;
     force_expire_time = time_us_64() + FORCE_EXPIRE_DURATION;
 }
 
@@ -198,12 +239,4 @@ void rgb_reg_tt_effect(tt_effect_t effect)
 {
     effects[effect_num] = effect;
     effect_num++;
-}
-
-void rgb_set_hardware(uint16_t tt_start, uint16_t tt_num, bool tt_reversed)
-{
-    tt_ring_start = tt_start;
-    tt_ring_size = tt_num;
-    tt_ring_reversed = tt_reversed;
-    tt_ring_buf = &tt_led_buf[tt_start];
 }
