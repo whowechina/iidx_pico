@@ -25,7 +25,10 @@ This Pico IIDX project:
 
 Move forward only if you're REALLY interested.  
 
-**Due to my limited personal time, this document is unfinished and still in progress. So stay tuned!**
+## **Disclaimer** ##
+Due to my limited personal time, this document is still in progress. So stay tuned!   
+This project already has a working "release" but I haven't make it a real release yet. There will be updates to all components and firmware as I'm trying to make it better. Luckily, there hasn't been any big mistakes so far. But still there's a chance I will make some, which may lead to your time or money loss. This open source project is provided as is, I can't promise anything.   
+Please don't hate me.
 
 ## HOW TO BUILD
 ### Turntable Materials
