@@ -100,6 +100,9 @@ It's very small and requires higher accuracy.
   <img src="doc/keycap_support.png" width="300px">
 
 ### Step 3 - Solder
+* Keyboard   
+  * WS2812 choices for main 7 main keys, for each key: solder 1x WS2812B-3528 under the key switch, or 4x WS2812-1516 around the key switch.
+  * Connector choices: solder 2x pogopin connectors, or solder 1x 3.5mm headphone input jack.
 * Turntable   
   There're a set of I2C and a WS2812B signal line together in the cable that connects turntable and the keyboard. Unfortunately, these signals crosstalk. So, we have to use shield cables for them. Two I2C lines should have a shield cable, and the WS2812B signal should have another shield cable. Good thing is, an HDMI cable has 4 shield cables and bunch of other small cables. We can make use of it.
 
