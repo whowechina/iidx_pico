@@ -27,13 +27,15 @@ void turntable_init()
     adc_gpio_init(TT_AS5600_ANALOG);
     adc_select_input(TT_AS5600_ANALOG - 26);
 #else
-    i2c_init(TT_AS5600_I2C, 800 * 1000);
+    i2c_init(TT_AS5600_I2C, 333 * 1000);
     gpio_set_function(TT_AS5600_SCL, GPIO_FUNC_I2C);
     gpio_set_function(TT_AS5600_SDA, GPIO_FUNC_I2C);
     gpio_pull_up(TT_AS5600_SCL);
     gpio_pull_up(TT_AS5600_SDA);
 #endif
 }
+
+#ifdef TT_AS5600_ANALOG
 
 uint32_t max_adc = 3500;
 static inline void adjust_max(uint32_t value)
@@ -76,6 +78,7 @@ static uint16_t read_average(uint16_t size)
 
     return (all / size) % max_adc;
 }
+#endif
 
 void turntable_update()
 {
