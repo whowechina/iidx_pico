@@ -39,8 +39,8 @@ Please don't hate me.
 * 1x WS2812B LED ring board, use ones with dense LED arrangement (>=32 LEDs);
 * 3x M4*10mm screws (large flat head is better) and hex nuts, for bearing.
 * 4x M3*12mm screws, for spinning disc. 
-* 2x 1N4148 diode (choose ones easy to solder)
-* 1x Custom cut acrylic disc, 4mm thickness.
+* 1x REF3030 (3.0V Voltage Reference, SOT-23-3).
+* 1x Custom cut black acrylic disc, 4mm thickness.
 * 11x 12mm non slip self-adhesive silicon pads (also for Keyboard).   
   https://www.amazon.com/Cabinet-Dampening-Adhesive-Circular-Stoppers/dp/B07XXWG818
 
@@ -107,11 +107,20 @@ It's very small and requires higher accuracy.
   * WS2812 choices for main 7 main keys, for each key: solder 1x WS2812B-3528 under the key switch, or 4x WS2812-1516 around the key switch.
   * Connector choices: solder 2x pogopin connectors, or solder 1x 3.5mm headphone input jack.
 * Turntable   
-  There're a set of I2C and a WS2812B signal line together in the cable that connects turntable and the keyboard. Unfortunately, these signals crosstalk. So, we have to use shield cables for them. Two I2C lines should have a shield cable, and the WS2812B signal should have another shield cable. Good thing is, an HDMI cable has 4 shield cables and bunch of other small cables. We can make use of it.
+  * General   
+  Typical AS5600 development board comes with 3.3V configuration, we can't feed 5V to it directly, it would burn the AS5600 or the main Pi Pico. The GPIO we use to communicate with AS5600 can never go beyond 3.6V. So we need a lower voltage, I chose REF3030, a precise 3.0V voltage reference.   
+  You need to scrape off some solder mask to expose the ground copper. I found a good place to mount the REF3030, this is how I handled it:   
+  <img src="doc/ref3030.jpg" width="300px">
 
-  To ease the pain of soldering cables and 2 1N4148 diodes. I made a turntable PCB. But I haven't tried it myself.
-  
-Documentation still in progress, come later...
+  * If you go with digital (magnetic pogo pin connector)
+  Ditigal There're a set of I2C and a WS2812B signal line together in the cable that connects turntable and the keyboard. Unfortunately, these signals crosstalk. So, we have to use shield cables for them. Two I2C lines should have a shield cable, and the WS2812B signal should have another shield cable. Good thing is, an HDMI cable has 4 shield cables and bunch of other small cables. We can make use of it.   
+  <img src="doc/pogopin_wiring.jpg" width="300px">   
+
+  * If you go with analog (3.5mm headphone jack)   
+  Crosstalk maybe no longer an issue, but ground level becomes a concern. When driving the turntable LED ring, there's a considerable amount of current travelling through the ground cable which lifts AS5600 ground level. We need to reduce this effect by minimize the ground cable resistance. For example, we can use metal braid shielding cable, and use the metal shield as the ground line.   
+  <img src="doc/headphone_jack_wiring.png" width="300px">   
+  The "ANGLE" is the AS5600 analog OUT. You need to remove a resistor to get OUT pin working.   
+  <img src="doc/as5600_mod.png" width="300px">
 
 ### Step 4 - Assemble
 * Assemble the turntable  
@@ -140,8 +149,6 @@ Documentation still in progress, come later...
 * For the new build, hold the BOOTSEL button while connect the USB to a PC, there will be a disk named "RPI-RP2" showed up. Drag the uf2 firmware binary file into it. That's it. There's a small hole at the back side of the keyboard, it is facing right to the BOOTSEL button.
 * If it is already running my IIDX firmware, hold two small AUX buttons together will do the same as the BOOTSEL button.
 * For now, some configurations are hardcoded, if you want to change something, you need to build by yourself.
-
-Documentation still in progress, come later...
 
 ### What If?
 * I can't find pogopin connector.   
