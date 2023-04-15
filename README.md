@@ -105,7 +105,12 @@ It's very small and requires higher accuracy.
 ### Step 3 - Solder
 * Keyboard   
   * WS2812 choices for main 7 main keys, for each key: solder 1x WS2812B-3528 under the key switch, or 4x WS2812-1516 around the key switch.
+  * IMPORTANT: be careful about the orientation of LEDs, they're different at different rows or columns.   
+    <img src="doc/led_3528_orientation.jpg" width="300px">
+    <img src="doc/led_1615_orientation.jpg" width="300px">
   * Connector choices: solder 2x pogopin connectors, or solder 1x 3.5mm headphone input jack.
+  * It's very easy to miss the USB pins of the Raspberry Pico Pi, it's at the other side. And it's difficult to solder as you may leave an airbubble in the soldering hole. My trick is to use sharpest iron tip, super-slowly apply solder wire only at one side. This is my result:   
+  <img src="doc/solder_usb_txrx.jpg" width="300px">
 * Turntable   
   * General   
   Typical AS5600 development board comes with 3.3V configuration, we can't feed 5V to it directly, it would burn the AS5600 or the main Pi Pico. The GPIO we use to communicate with AS5600 can never go beyond 3.6V. So we need a lower voltage, I chose REF3030, a precise 3.0V voltage reference.   
