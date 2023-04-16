@@ -20,24 +20,42 @@
 
 static uint16_t angle = 0;
 
-void turntable_init()
+static bool running_analog = false;
+
+static void init_i2c()
 {
-#ifdef TT_AS5600_ANALOG
-    adc_init();
-    adc_gpio_init(TT_AS5600_ANALOG);
-    adc_select_input(TT_AS5600_ANALOG - 26);
-#else
     i2c_init(TT_AS5600_I2C, 333 * 1000);
     gpio_set_function(TT_AS5600_SCL, GPIO_FUNC_I2C);
     gpio_set_function(TT_AS5600_SDA, GPIO_FUNC_I2C);
     gpio_pull_up(TT_AS5600_SCL);
     gpio_pull_up(TT_AS5600_SDA);
-#endif
 }
 
-#ifdef TT_AS5600_ANALOG
+static void init_analog()
+{
+    adc_init();
+    adc_gpio_init(TT_AS5600_ANALOG);
+    adc_select_input(TT_AS5600_ANALOG - 26);
+}
 
-uint32_t max_adc = 3500;
+static void follow_mode_change()
+{
+    if (running_analog != iidx_cfg->tt_sensor_analog) {
+        turntable_init();
+    }
+}
+
+void turntable_init()
+{
+    running_analog = iidx_cfg->tt_sensor_analog;
+    if (running_analog) {
+        init_analog();
+    } else {
+        init_i2c();
+    }
+}
+
+uint32_t max_adc = 3650;
 static inline void adjust_max(uint32_t value)
 {
     if (value > max_adc) {
@@ -78,11 +96,9 @@ static uint16_t read_average(uint16_t size)
 
     return (all / size) % max_adc;
 }
-#endif
 
-void turntable_update()
+static void update_analog()
 {
-#ifdef TT_AS5600_ANALOG
     const uint16_t deadzone = 24;
     static uint16_t sample = 0;
     int new_value = read_average(200);
@@ -92,7 +108,10 @@ void turntable_update()
     }
     sample = new_value;
     angle = (sample * 4095) / max_adc;
-#else
+}
+
+static void update_i2c()
+{
     const uint8_t as5600_addr = 0x36;
     uint8_t buf[2] = {0x0c, 0x00};
     i2c_write_blocking_until(TT_AS5600_I2C, as5600_addr, buf, 1, true,
@@ -101,7 +120,16 @@ void turntable_update()
                             make_timeout_time_ms(1));
 
     angle = ((uint16_t)buf[0] & 0x0f) << 8 | buf[1];
-#endif
+}
+
+void turntable_update()
+{
+    follow_mode_change();
+    if (running_analog) {
+        update_analog();
+    } else {
+        update_i2c();
+    }
 }
 
 uint16_t turntable_read()

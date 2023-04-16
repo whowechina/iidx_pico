@@ -23,6 +23,7 @@ static iidx_cfg_t default_cfg = {
         .brightness = 5,
         .reversed = false,
     },
+    .tt_sensor_analog = false,
     .tt_sensor_reversed = false,
     .effects = {
         .play_vol = 255,
@@ -34,7 +35,12 @@ static iidx_cfg_t default_cfg = {
 
 static void config_loaded()
 {
-    /* configuration validation */
+    if ((iidx_cfg->tt_led.start > 8) ||
+        (iidx_cfg->tt_led.start + iidx_cfg->tt_led.num > 128)) {
+        iidx_cfg->tt_led.start = 0;
+        iidx_cfg->tt_led.num = 24;
+        config_changed();
+    }
 }
 
 void config_changed()

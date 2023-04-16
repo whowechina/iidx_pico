@@ -18,11 +18,10 @@
 #define TT_RGB_PIN 28
 #define TT_RGB_ORDER GRB
 
-/* If you define both Analog and I2C, it will use analog */
-#define TT_AS5600_ANALOG 27
-//#define TT_AS5600_SCL 27
-//#define TT_AS5600_SDA 26
-//#define TT_AS5600_I2C i2c1
+#define TT_AS5600_ANALOG 26
+#define TT_AS5600_SCL 27
+#define TT_AS5600_SDA 26
+#define TT_AS5600_I2C i2c1
 
 #else
 
