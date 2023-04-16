@@ -136,8 +136,6 @@ static struct {
     bool adjust_led_start;
     int16_t start_angle;
     uint8_t counter;
-    bool e4_press_valid;
-    uint64_t e4_timeout;
 } tt_ctx;
 
 void mode_tt_enter()
@@ -153,15 +151,19 @@ static void mode_tt_key_change()
     } else if (JUST_PRESSED(E_EFFECT)) {
         tt_ctx.adjust_led_start = false;
         tt_ctx.start_angle = input.angle;
-    } else if (JUST_PRESSED(E_4)) {
-        tt_ctx.e4_press_valid = true;
-        tt_ctx.e4_timeout = setup_tick_ms + 3000;
-    }
-
-    if (JUST_RELEASED(E_VEFX)) {
+    } else if (JUST_PRESSED(E_VEFX)) {
         iidx_cfg->tt_led.reversed = !iidx_cfg->tt_led.reversed;
-    } else if (JUST_RELEASED(E_4) && tt_ctx.e4_press_valid) {
-        iidx_cfg->tt_sensor_reversed = !iidx_cfg->tt_sensor_reversed;
+    } else if (JUST_PRESSED(E_4)) {
+        if (iidx_cfg->tt_sensor.reversed) {
+            iidx_cfg->tt_sensor.analog = !iidx_cfg->tt_sensor.analog;
+        }
+        iidx_cfg->tt_sensor.reversed = !iidx_cfg->tt_sensor.reversed;
+    } else if (JUST_PRESSED(KEY_2)) {
+        iidx_cfg->tt_sensor.analog_deadzone = 0;
+    } else if (JUST_PRESSED(KEY_4)) {
+        iidx_cfg->tt_sensor.analog_deadzone = 1;
+    } else if (JUST_PRESSED(KEY_6)) {
+        iidx_cfg->tt_sensor.analog_deadzone = 2;
     }
 
     check_exit();
@@ -225,16 +227,16 @@ void mode_tt_loop()
     uint32_t green = button_rgb32(0, 99, 0, false);
     uint32_t cyan = button_rgb32(0, 99, 99, false);
     uint32_t yellow = button_rgb32(99, 99, 0, false);
+    uint32_t silver = button_rgb32(60, 60, 60, false);
 
     setup_led_button[LED_E_VEFX] = iidx_cfg->tt_led.reversed ? cyan : yellow;
-    setup_led_button[LED_E_4] = iidx_cfg->tt_sensor_analog ?
-        (iidx_cfg->tt_sensor_reversed ? red : green) :
-        (iidx_cfg->tt_sensor_reversed ? yellow : cyan);
-    
-    if (PRESSED_ANY(E_4) && tt_ctx.e4_press_valid && (setup_tick_ms > tt_ctx.e4_timeout)) {
-        iidx_cfg->tt_sensor_analog = !iidx_cfg->tt_sensor_analog;
-        tt_ctx.e4_press_valid = false;
-    }
+    setup_led_button[LED_E_4] = iidx_cfg->tt_sensor.analog ?
+        (iidx_cfg->tt_sensor.reversed ? red : green) :
+        (iidx_cfg->tt_sensor.reversed ? yellow : cyan);
+
+    setup_led_button[LED_KEY_2] = iidx_cfg->tt_sensor.analog_deadzone == 0 ? silver : 0;
+    setup_led_button[LED_KEY_4] = iidx_cfg->tt_sensor.analog_deadzone == 1 ? silver : 0;
+    setup_led_button[LED_KEY_6] = iidx_cfg->tt_sensor.analog_deadzone == 2 ? silver : 0;
 }
 
 static struct {
@@ -285,14 +287,12 @@ bool setup_run(uint16_t keys, uint16_t angle)
         input.rotate += 256;
     }
 
-   if (input.rotate != 0) {
+    if (input.rotate != 0) {
         printf("@ %3d %2x\n", input.rotate, input.angle);
         mode_defs[current_mode].rotate();
     }
-
     if (input.just_pressed) {
         printf("+ %04x\n", input.just_pressed);
-        printf("S:%u L:%u\n", iidx_cfg->tt_led.start, iidx_cfg->tt_led.num);
     }
     if (input.just_released) {
         printf("- %04x\n", input.just_released);

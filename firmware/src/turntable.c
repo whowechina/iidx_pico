@@ -42,14 +42,14 @@ static void init_analog()
 
 static void follow_mode_change()
 {
-    if (running_analog != iidx_cfg->tt_sensor_analog) {
+    if (running_analog != iidx_cfg->tt_sensor.analog) {
         turntable_init();
     }
 }
 
 void turntable_init()
 {
-    running_analog = iidx_cfg->tt_sensor_analog;
+    running_analog = iidx_cfg->tt_sensor.analog;
     if (running_analog) {
         init_analog();
     } else {
@@ -57,12 +57,44 @@ void turntable_init()
     }
 }
 
-uint32_t max_adc = 3650;
+static uint32_t min_adc = 0;  /* idealy [0..3740] */
+static uint32_t max_adc = 3740;
+static bool min_touched = false;
+static bool max_touched = false;
+
 static inline void adjust_max(uint32_t value)
 {
     if (value > max_adc) {
         max_adc += (value - max_adc + 1) / 2;
+        printf("Auto adc max: %4lu %4lu\n", min_adc, max_adc);
     }
+    max_touched = true;
+}
+
+static inline void adjust_min(uint32_t value)
+{
+    if (value < min_adc) {
+        min_adc -= (min_adc - value + 1) / 2;
+        printf("Auto adc min: %4lu %4lu\n", min_adc, max_adc);
+    }
+    min_touched = true;
+}
+
+static void auto_adjust_adc()
+{
+    if (!min_touched || !max_touched) {
+        return;
+    }
+    min_touched = false;
+    max_touched = false;
+
+    if (max_adc > 3540) {
+        max_adc--;
+    }
+    if (min_adc < 200) {
+        min_adc++;
+    }
+    printf("Auto adc adj: %4lu %4lu\n", min_adc, max_adc);
 }
 
 static uint16_t read_average(uint16_t size)
@@ -75,10 +107,10 @@ static uint16_t read_average(uint16_t size)
 
     for (int i = 0; i < size; i++) {
         uint32_t sample = adc_read();
-        if (sample > 3500) {
+        if (sample > 3540) {
             large_cnt++;
             large += sample;
-        } else if (sample < 500) {
+        } else if (sample < 200) {
             small_cnt++;
             small += sample;
         } else {
@@ -86,8 +118,12 @@ static uint16_t read_average(uint16_t size)
         }
     }
 
-    if (large_cnt > 100) {
+    if (large_cnt > 50) {
         adjust_max(large / large_cnt);
+    }
+
+    if (small_cnt > 50) {
+        adjust_min(small / small_cnt);
     }
 
     uint32_t all = large + small + medium;
@@ -101,15 +137,23 @@ static uint16_t read_average(uint16_t size)
 
 static void update_analog()
 {
-    const uint16_t deadzone = 24;
     static uint16_t sample = 0;
+
+    auto_adjust_adc();
+
+    uint16_t deadzone = (iidx_cfg->tt_sensor.analog_deadzone + 1) * 16;
+
     int new_value = read_average(200);
     int delta = abs(new_value - sample);
     if ((abs(delta) < deadzone) || (abs(delta) > 4096 - deadzone)) {
         return;
     }
     sample = new_value;
-    angle = (sample * 4095) / max_adc;
+    if (sample < min_adc) {
+        angle = 0;
+        return;
+    }
+    angle = (sample - min_adc) * 4095 / (max_adc - min_adc);
 }
 
 static void update_i2c()
@@ -136,5 +180,5 @@ void turntable_update()
 
 uint16_t turntable_read()
 {
-    return iidx_cfg->tt_sensor_reversed ? 4095 - angle : angle; // 12bit
+    return iidx_cfg->tt_sensor.reversed ? 4095 - angle : angle; // 12bit
 }

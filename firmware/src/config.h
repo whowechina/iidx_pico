@@ -26,8 +26,11 @@ typedef struct __attribute ((packed)) {
         uint8_t brightness;
         bool reversed;
     } tt_led;
-    bool tt_sensor_analog;
-    bool tt_sensor_reversed;
+    struct {
+        bool analog;
+        bool reversed;
+        uint8_t analog_deadzone;
+    } tt_sensor;
     struct {
         uint8_t play_vol;
         uint8_t filter;
