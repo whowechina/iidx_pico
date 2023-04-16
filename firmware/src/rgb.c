@@ -226,9 +226,11 @@ void rgb_force_display(uint32_t *buttons, uint32_t *tt)
 
 void rgb_init()
 {
+    gpio_set_drive_strength(BUTTON_RGB_PIN, GPIO_DRIVE_STRENGTH_2MA);
     uint offset = pio_add_program(pio0, &ws2812_program);
     ws2812_program_init(pio0, 0, offset, BUTTON_RGB_PIN, 800000, false);
 
+    gpio_set_drive_strength(BUTTON_RGB_PIN, GPIO_DRIVE_STRENGTH_8MA);
     offset = pio_add_program(pio1, &ws2812_program);
     ws2812_program_init(pio1, 0, offset, TT_RGB_PIN, 800000, false);
     rgb_set_level(8);

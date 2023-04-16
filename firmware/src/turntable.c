@@ -24,9 +24,11 @@ static bool running_analog = false;
 
 static void init_i2c()
 {
-    i2c_init(TT_AS5600_I2C, 333 * 1000);
+    i2c_init(TT_AS5600_I2C, 573 * 1000);
     gpio_set_function(TT_AS5600_SCL, GPIO_FUNC_I2C);
     gpio_set_function(TT_AS5600_SDA, GPIO_FUNC_I2C);
+    gpio_set_drive_strength(TT_AS5600_SCL, GPIO_DRIVE_STRENGTH_8MA);
+    gpio_set_drive_strength(TT_AS5600_SDA, GPIO_DRIVE_STRENGTH_8MA);
     gpio_pull_up(TT_AS5600_SCL);
     gpio_pull_up(TT_AS5600_SDA);
 }
