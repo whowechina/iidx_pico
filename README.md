@@ -122,15 +122,17 @@ It's very small and requires higher accuracy.
   <img src="doc/pogopin_wiring.jpg" width="300px">   
 
   * If you go with analog (3.5mm headphone jack)   
-  Crosstalk maybe no longer an issue, but ground level becomes a concern. When driving the turntable LED ring, there's a considerable amount of current travelling through the ground cable which lifts AS5600 ground level. We need to reduce this effect by minimize the ground cable resistance. For example, we can use metal braid shielding cable, and use the metal shield as the ground line.   
-  <img src="doc/headphone_jack_wiring.png" width="300px">   
+  Crosstalk maybe no longer an issue, but ground level becomes a concern. When driving the turntable LED ring, there's a considerable amount of current travelling through the ground cable which lifts AS5600 ground level. We need to reduce this effect by minimize the ground cable resistance. A metal braid shielding cable can be used with the metal shield serving as the ground line. Alternatively, a high current (5A-rated) USB charge cable can be used, as it has low resistance red and black wires. You can use red and black together as ground (to get ultra low resistance) and others for 5V and signals.   
+  <img src="doc/5A_usb.jpg" width="300px">
+  <img src="doc/USB_ground.jpg" width="600px">   
+  <img src="doc/headphone_jack_wiring.png" width="200px">   
   The "ANGLE" is the AS5600 analog OUT. You need to remove a resistor to get OUT pin working.   
   <img src="doc/as5600_mod.png" width="300px">
 
 ### Step 4 - Assemble
 * Assemble the turntable  
   I don't know how to draw an explosion diagram, this is done by coding in OpenSCAD:   
-  <img src="doc/tt_assemble.png" width="300px">   
+  <img src="doc/tt_assemble.png" width="500px">   
   These shows how a bearing is installed.   
   <img src="doc/bearing_1.jpg" width="300px">
   <img src="doc/bearing_2.jpg" width="300px">
@@ -143,7 +145,7 @@ It's very small and requires higher accuracy.
   A little trick here. As the PCB footprint is made to support both choc v1 and v2, that leaves some wobble space for choc v1 and makes it difficult to align. So leave the key switch unsoldered, when the stabilizer, the key switch and the keycap are all in place, push the keycap down and then solder the key switch. This way the key switch will be aligned to the stabilizers better.
 * Assemble the keyboard  
   It's very easy.   
-  <img src="doc/kb_assemble.png" width="300px">   
+  <img src="doc/kb_assemble.png" width="500px">   
   <img src="doc/kb_1.jpg" width="300px">
   <img src="doc/kb_2.jpg" width="300px">
   <img src="doc/kb_3.jpg" width="300px">
