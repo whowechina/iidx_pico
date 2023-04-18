@@ -24,12 +24,11 @@ typedef struct __attribute ((packed)) {
         uint8_t effect;
         uint8_t param;
         uint8_t brightness;
-        bool reversed;
+        uint8_t mode; /* 0: on, 1: reversed, 2: off */
     } tt_led;
     struct {
-        bool analog;
-        bool reversed;
-        uint8_t analog_deadzone;
+        uint8_t mode; /* 0: analog, 1: analog reversed, 2: i2c, 3: i2c reversed */
+        uint8_t deadzone; /* only for analog */
     } tt_sensor;
     struct {
         uint8_t play_vol;

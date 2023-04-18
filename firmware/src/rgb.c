@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "bsp/board.h"
 #include "hardware/pio.h"
 #include "hardware/timer.h"
 
@@ -30,6 +31,8 @@ static void trap() {}
 static tt_effect_t effects[10] = { {trap, trap, trap, trap, 0} };
 static size_t effect_num = 0;
 static size_t current_effect = 0;
+
+static uint8_t current_mode = 0;
 
 #define _MAP_LED(x) _MAKE_MAPPER(x)
 #define _MAKE_MAPPER(x) MAP_LED_##x
@@ -105,11 +108,17 @@ void drive_led()
     for (int i = 0; i < ARRAY_SIZE(button_led_buf); i++) {
         pio_sm_put_blocking(pio0, 0, button_led_buf[i] << 8u);
     }
+
+    if (iidx_cfg->tt_led.mode == 2) {
+        return;
+    }
+
     for (int i = 0; i < iidx_cfg->tt_led.start; i++) {
         pio_sm_put_blocking(pio1, 0, 0);
     }
     for (int i = 0; i < TT_LED_NUM; i++) {
-        uint8_t id = iidx_cfg->tt_led.reversed ? TT_LED_NUM - i - 1 : i;
+        bool reversed = iidx_cfg->tt_led.mode & 0x01;
+        uint8_t id = reversed ? TT_LED_NUM - i - 1 : i;
         pio_sm_put_blocking(pio1, 0, tt_led_buf[id] << 8u);
     }
     for (int i = 0; i < 8; i++) { // a few more to wipe out the last led
@@ -206,17 +215,6 @@ void force_update()
     memcpy(tt_led_buf, force_tt, TT_LED_NUM * sizeof(uint32_t));
 }
 
-void rgb_update()
-{
-    if (time_us_64() > force_expire_time) {
-        effect_update();
-        button_lights_update();
-    } else {
-        force_update();
-    }
-    drive_led();
-}
-
 void rgb_force_display(uint32_t *buttons, uint32_t *tt)
 {
     force_buttons = buttons;
@@ -224,17 +222,90 @@ void rgb_force_display(uint32_t *buttons, uint32_t *tt)
     force_expire_time = time_us_64() + FORCE_EXPIRE_DURATION;
 }
 
-void rgb_init()
+static bool pio1_loaded = false;
+
+static void wipe_out_tt_led()
+{
+    sleep_ms(5);
+    for (int i = 0; i < 128; i++) {
+        pio_sm_put_blocking(pio1, 0, 0);
+    }
+    sleep_ms(5);
+}
+
+static void start_pio1()
+{
+    if (pio1_loaded) {
+        return;
+    }
+
+    gpio_set_drive_strength(TT_RGB_PIN, GPIO_DRIVE_STRENGTH_8MA);
+    uint offset = pio_add_program(pio1, &ws2812_program);
+    ws2812_program_init(pio1, 0, offset, TT_RGB_PIN, 800000, false);
+    rgb_set_level(8);
+    set_effect(1);
+
+    pio1_loaded = true;
+}
+
+static void stop_pio1()
+{
+    if (!pio1_loaded) {
+        return;
+    }
+
+    wipe_out_tt_led();
+
+    pio_sm_set_enabled(pio1, 0, false);
+    pio_clear_instruction_memory(pio1);
+
+    gpio_set_function(TT_RGB_PIN, GPIO_FUNC_SIO);
+    gpio_set_dir(TT_RGB_PIN, GPIO_IN);
+    gpio_disable_pulls(TT_RGB_PIN);
+
+    pio1_loaded = false;
+}
+
+void rgb_tt_init()
+{
+    current_mode = iidx_cfg->tt_led.mode;
+    if (current_mode == 2) {
+        stop_pio1();
+    } else {
+        start_pio1();
+    }
+}
+
+static void rgb_button_init()
 {
     gpio_set_drive_strength(BUTTON_RGB_PIN, GPIO_DRIVE_STRENGTH_2MA);
     uint offset = pio_add_program(pio0, &ws2812_program);
     ws2812_program_init(pio0, 0, offset, BUTTON_RGB_PIN, 800000, false);
+}
 
-    gpio_set_drive_strength(BUTTON_RGB_PIN, GPIO_DRIVE_STRENGTH_8MA);
-    offset = pio_add_program(pio1, &ws2812_program);
-    ws2812_program_init(pio1, 0, offset, TT_RGB_PIN, 800000, false);
-    rgb_set_level(8);
-    set_effect(1);
+void rgb_init()
+{
+    rgb_tt_init();
+    rgb_button_init();
+}
+
+static void follow_mode_change()
+{
+    if (current_mode != iidx_cfg->tt_led.mode) {
+        rgb_tt_init();
+    }
+}
+
+void rgb_update()
+{
+    follow_mode_change();
+    if (time_us_64() > force_expire_time) {
+        effect_update();
+        button_lights_update();
+    } else {
+        force_update();
+    }
+    drive_led();
 }
 
 void rgb_reg_tt_effect(tt_effect_t effect)

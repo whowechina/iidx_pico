@@ -20,7 +20,7 @@
 
 static uint16_t angle = 0;
 
-static bool running_analog = false;
+static uint8_t current_mode = 0;
 
 static void init_i2c()
 {
@@ -42,18 +42,18 @@ static void init_analog()
 
 static void follow_mode_change()
 {
-    if (running_analog != iidx_cfg->tt_sensor.analog) {
+    if (current_mode != iidx_cfg->tt_sensor.mode) {
         turntable_init();
     }
 }
 
 void turntable_init()
 {
-    running_analog = iidx_cfg->tt_sensor.analog;
-    if (running_analog) {
-        init_analog();
-    } else {
+    current_mode = iidx_cfg->tt_sensor.mode;
+    if (current_mode & 0x02) {
         init_i2c();
+    } else {
+        init_analog();
     }
 }
 
@@ -141,7 +141,7 @@ static void update_analog()
 
     auto_adjust_adc();
 
-    uint16_t deadzone = (iidx_cfg->tt_sensor.analog_deadzone + 1) * 16;
+    uint16_t deadzone = (iidx_cfg->tt_sensor.deadzone + 1) * 16;
 
     int new_value = read_average(200);
     int delta = abs(new_value - sample);
@@ -171,7 +171,7 @@ static void update_i2c()
 void turntable_update()
 {
     follow_mode_change();
-    if (running_analog) {
+    if (current_mode) {
         update_analog();
     } else {
         update_i2c();
@@ -180,5 +180,6 @@ void turntable_update()
 
 uint16_t turntable_read()
 {
-    return iidx_cfg->tt_sensor.reversed ? 4095 - angle : angle; // 12bit
+    bool reversed = iidx_cfg->tt_sensor.mode & 0x01;
+    return reversed ? 4095 - angle : angle; // 12bit
 }
