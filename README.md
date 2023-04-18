@@ -114,11 +114,11 @@ It's very small and requires higher accuracy.
 * Turntable   
   * General   
   Typical AS5600 development board comes with 3.3V configuration, we can't feed 5V to it directly, it would burn the AS5600 or the main Pi Pico. The GPIO we use to communicate with AS5600 can never go beyond 3.6V. So we need a lower voltage, I chose REF3030, a precise 3.0V voltage reference.   
-  You need to scrape off some solder mask to expose the ground copper. I found a good place to mount the REF3030, this is how I handled it:   
+  You need to scrape off some solder mask to expose the ground copper (don't scrape the solder mask under 5V pin). I found a good place to mount the REF3030, this is how I handled it:   
   <img src="doc/ref3030.jpg" width="300px">
 
-  * If you go with digital (magnetic pogo pin connector)
-  Ditigal There're a set of I2C and a WS2812B signal line together in the cable that connects turntable and the keyboard. Unfortunately, these signals crosstalk. So, we have to use shield cables for them. Two I2C lines should have a shield cable, and the WS2812B signal should have another shield cable. Good thing is, an HDMI cable has 4 shield cables and bunch of other small cables. We can make use of it.   
+  * If you go with digital (magnetic pogo pin connector)   
+  There're a set of I2C and a WS2812B signal line together in the cable that connects turntable and the keyboard. Unfortunately, these signals crosstalk. So, we have to use shield cables for them. Two I2C lines should have a shield cable, and the WS2812B signal should have another shield cable. Good thing is, an HDMI cable has 4 shield cables and bunch of other small cables. We can make use of it.   
   <img src="doc/pogopin_wiring.jpg" width="300px">   
 
   * If you go with analog (3.5mm headphone jack)   
