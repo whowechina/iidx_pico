@@ -122,9 +122,11 @@ It's very small and requires higher accuracy.
   <img src="doc/pogopin_wiring.jpg" width="300px">   
 
   * If you go with analog (3.5mm headphone jack)   
-  Crosstalk maybe no longer an issue, but ground level becomes a concern. When driving the turntable LED ring, there's a considerable amount of current travelling through the ground cable which lifts AS5600 ground level. We need to reduce this effect by minimize the ground cable resistance. A metal braid shielding cable can be used with the metal shield serving as the ground line. Alternatively, a high current (5A-rated) USB charge cable can be used, as it has low resistance red and black wires. You can use red and black together as ground (to get ultra low resistance) and others for 5V and signals.   
-  <img src="doc/5A_usb.jpg" width="300px">
-  <img src="doc/USB_ground.jpg" width="600px">   
+  Crosstalk maybe no longer an issue, but ground level becomes a concern. When driving the turntable LED ring, there's a considerable amount of current travelling through the ground cable which lifts AS5600 ground level. There're two ways to handle this. 
+    * One is to use a 5 wire cable, separate LED ground from the sensor ground. You can use a Type-C to Type-C cable, it normally has 5 wires inside. You can use red and black to power the LED and others to serve sensor ground and signals.   
+    <img src="doc/5A_usb.jpg" width="300px">
+    <img src="doc/USB_ground.jpg" width="600px">
+    * The other one is to minimize the ground wire resistance. A metal braid shielding cable can be used with the metal shield serving as the ground line. Or you can find a 4 wire cable with thick core copper.   
   <img src="doc/headphone_jack_wiring.png" width="200px">   
   The "ANGLE" is the AS5600 analog OUT. You need to remove a resistor to get OUT pin working.   
   <img src="doc/as5600_mod.png" width="300px">
