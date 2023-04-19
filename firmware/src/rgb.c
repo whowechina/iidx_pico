@@ -32,8 +32,6 @@ static tt_effect_t effects[10] = { {trap, trap, trap, trap, 0} };
 static size_t effect_num = 0;
 static size_t current_effect = 0;
 
-static uint8_t current_mode = 0;
-
 #define _MAP_LED(x) _MAKE_MAPPER(x)
 #define _MAKE_MAPPER(x) MAP_LED_##x
 #define MAP_LED_RGB { c1 = r; c2 = g; c3 = b; }
@@ -222,8 +220,6 @@ void rgb_force_display(uint32_t *buttons, uint32_t *tt)
     force_expire_time = time_us_64() + FORCE_EXPIRE_DURATION;
 }
 
-static bool pio1_loaded = false;
-
 static void wipe_out_tt_led()
 {
     sleep_ms(5);
@@ -233,66 +229,50 @@ static void wipe_out_tt_led()
     sleep_ms(5);
 }
 
-static void start_pio1()
+static uint pio1_offset;
+static bool pio1_running = false;
+
+static void pio1_run()
 {
-    if (pio1_loaded) {
-        return;
-    }
-
     gpio_set_drive_strength(TT_RGB_PIN, GPIO_DRIVE_STRENGTH_8MA);
-    uint offset = pio_add_program(pio1, &ws2812_program);
-    ws2812_program_init(pio1, 0, offset, TT_RGB_PIN, 800000, false);
-    rgb_set_level(8);
-    set_effect(1);
-
-    pio1_loaded = true;
+    ws2812_program_init(pio1, 0, pio1_offset, TT_RGB_PIN, 800000, false);
 }
 
-static void stop_pio1()
+static void pio1_stop()
 {
-    if (!pio1_loaded) {
-        return;
-    }
-
     wipe_out_tt_led();
-
     pio_sm_set_enabled(pio1, 0, false);
-    pio_clear_instruction_memory(pio1);
 
     gpio_set_function(TT_RGB_PIN, GPIO_FUNC_SIO);
     gpio_set_dir(TT_RGB_PIN, GPIO_IN);
     gpio_disable_pulls(TT_RGB_PIN);
-
-    pio1_loaded = false;
-}
-
-void rgb_tt_init()
-{
-    current_mode = iidx_cfg->tt_led.mode;
-    if (current_mode == 2) {
-        stop_pio1();
-    } else {
-        start_pio1();
-    }
-}
-
-static void rgb_button_init()
-{
-    gpio_set_drive_strength(BUTTON_RGB_PIN, GPIO_DRIVE_STRENGTH_2MA);
-    uint offset = pio_add_program(pio0, &ws2812_program);
-    ws2812_program_init(pio0, 0, offset, BUTTON_RGB_PIN, 800000, false);
 }
 
 void rgb_init()
 {
-    rgb_tt_init();
-    rgb_button_init();
+    uint pio0_offset = pio_add_program(pio0, &ws2812_program);
+    pio1_offset = pio_add_program(pio1, &ws2812_program);
+
+    gpio_set_drive_strength(BUTTON_RGB_PIN, GPIO_DRIVE_STRENGTH_2MA);
+    ws2812_program_init(pio0, 0, pio0_offset, BUTTON_RGB_PIN, 800000, false);
+
+    /* We don't start the tt LED program yet */
+
+    rgb_set_level(8);
+    set_effect(1);
 }
 
 static void follow_mode_change()
 {
-    if (current_mode != iidx_cfg->tt_led.mode) {
-        rgb_tt_init();
+    bool pio1_should_run = (iidx_cfg->tt_led.mode != 2);
+    if (pio1_should_run == pio1_running) {
+        return;
+    }
+    pio1_running = pio1_should_run;
+    if (pio1_should_run) {
+        pio1_run();
+    } else {
+        pio1_stop();
     }
 }
 

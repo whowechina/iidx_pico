@@ -50,7 +50,7 @@ static void follow_mode_change()
 void turntable_init()
 {
     current_mode = iidx_cfg->tt_sensor.mode;
-    if (current_mode & 0x02) {
+    if (current_mode > 1) {
         init_i2c();
     } else {
         init_analog();
@@ -171,10 +171,10 @@ static void update_i2c()
 void turntable_update()
 {
     follow_mode_change();
-    if (current_mode) {
-        update_analog();
-    } else {
+    if (current_mode > 1) {
         update_i2c();
+    } else {
+        update_analog();
     }
 }
 

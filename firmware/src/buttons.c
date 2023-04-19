@@ -47,7 +47,7 @@ uint8_t button_gpio(uint8_t id)
 }
 
 /* If a switch flips, it freezes for a while */
-#define DEBOUNCE_FREEZE_TIME_US 1000
+#define DEBOUNCE_FREEZE_TIME_US 5000
 uint16_t button_read()
 {
     uint64_t now = time_us_64();

@@ -133,9 +133,8 @@ static void mode_none_loop()
 }
 
 static struct {
-    bool adjust_led_start;
+    uint8_t adjust_led; /* 0: nothing, 1: adjust start, 2: adjust stop */
     int16_t start_angle;
-    uint8_t counter;
 } tt_ctx;
 
 void mode_tt_enter()
@@ -146,10 +145,10 @@ void mode_tt_enter()
 static void mode_tt_key_change()
 {
     if (JUST_PRESSED(E_START)) {
-        tt_ctx.adjust_led_start = true;
+        tt_ctx.adjust_led = (tt_ctx.adjust_led == 1) ? 0 : 1;
         tt_ctx.start_angle = input.angle;
     } else if (JUST_PRESSED(E_EFFECT)) {
-        tt_ctx.adjust_led_start = false;
+        tt_ctx.adjust_led = (tt_ctx.adjust_led == 2) ? 0 : 2;
         tt_ctx.start_angle = input.angle;
     } else if (JUST_PRESSED(E_VEFX)) {
         iidx_cfg->tt_led.mode = (iidx_cfg->tt_led.mode + 1) % 3;
@@ -175,7 +174,7 @@ static void mode_tt_rotate()
         #define LED_START iidx_cfg->tt_led.start
         #define LED_NUM iidx_cfg->tt_led.num
 
-        if (tt_ctx.adjust_led_start) {
+        if (tt_ctx.adjust_led == 1) {
             if ((delta > 0) & (LED_START < 8)) {
                 LED_START++;
                 if (LED_NUM > 1) {
@@ -185,7 +184,7 @@ static void mode_tt_rotate()
                 LED_START--;
                 LED_NUM++;
             }
-        } else {
+        } else if (tt_ctx.adjust_led == 2) {
             if ((delta > 0) & (LED_NUM + LED_START < 128)) {
                 LED_NUM++;
             } else if ((delta < 0) & (LED_NUM > 1)) { // at least 1 led
@@ -211,14 +210,14 @@ void mode_tt_loop()
 
     setup_led_tt[head] = tt_rgb32(0xa0, 0, 0, false);
     setup_led_tt[tail] = tt_rgb32(0, 0xa0, 0, false);
+    setup_led_button[LED_E_EFFECT] = tt_rgb32(0, 10, 0, false);
+    setup_led_button[LED_E_START] = tt_rgb32(10, 0, 0, false);
 
-    if (tt_ctx.adjust_led_start) {
+    if (tt_ctx.adjust_led == 1) {
         setup_led_tt[head] &= mask;
         setup_led_button[LED_E_START] = tt_rgb32(128, 0, 0, false) & mask;
-        setup_led_button[LED_E_EFFECT] = tt_rgb32(0, 10, 0, false);
-    } else {
+    } else if (tt_ctx.adjust_led == 2) {
         setup_led_tt[tail] &= mask;
-        setup_led_button[LED_E_START] = tt_rgb32(10, 0, 0, false);
         setup_led_button[LED_E_EFFECT] = tt_rgb32(0, 128, 0, false) & mask;
     }
 
@@ -230,10 +229,10 @@ void mode_tt_loop()
 
     switch (iidx_cfg->tt_led.mode) {
         case 0:
-            setup_led_button[LED_E_VEFX] = cyan;
+            setup_led_button[LED_E_VEFX] = green;
             break;
         case 1:
-            setup_led_button[LED_E_VEFX] = yellow;
+            setup_led_button[LED_E_VEFX] = red;
             break;
         default:
             setup_led_button[LED_E_VEFX] = 0;
