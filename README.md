@@ -36,7 +36,7 @@ Please don't hate me.
   <img src="doc/as5600.png" width="150px">
 * 1x 6mm\*2mm magnet (must be radially magnetized), normally comes with the AS5600 board set.
 * 1x 61804-2RS deep groove ball bearing (20x32x7mm), normally < 5US$;
-* 1x WS2812B LED ring board, use ones with dense LED arrangement (>=32 LEDs);
+* 1x WS2812B LED ring board, or RGB LED strip (recommended). Choose ones with dense LED arrangement (>=32 LEDs per board, or >90 LEDS per meter);
 * 3x M4*10mm screws (large flat head is better) and hex nuts, for bearing.
 * 4x M3*12mm screws, for spinning disc. 
 * 1x REF3030 (3.0V Voltage Reference, SOT-23-3).
@@ -57,8 +57,9 @@ Please don't hate me.
 * 1x USB Type-C socket (918-418K2023S40001 or KH-TYPE-C-16P)
 * 11x WS2812B-3528 RGB LEDs or if you want more challenge: 28x WS2812B-1516.
 * 2x SN74LV1T34DBVR (SOT-23-5) level shifter, optional, for better voltage tolerance.
+* 2x 0603 10ohm resistors to bypass said level shifters, optional.
 * 1x 0603 5.1kohm resistors for USB.
-* 2x 0603 10ohm resistor.
+* 1x 0805 1nF capacitor for filtering analog signal, optional.
 * 5x 0805 1uF capacitors.
 * 4x Kailh low-profile keycaps.
 * 4x M3*6mm screws and hex nuts to fix parts together.
@@ -111,7 +112,10 @@ It's very small and requires higher accuracy.
   * Connector choices: solder 2x pogopin connectors, or solder 1x 3.5mm headphone input jack.
   * It's very easy to miss the USB pins of the Raspberry Pico Pi, it's at the other side. And it's difficult to solder as you may leave an airbubble in the soldering hole. My trick is to use sharpest iron tip, super-slowly apply solder wire only at one side. This is my result:  
   <img src="doc/solder_usb_txrx.jpg" width="300px">
-* Turntable  
+  * You can use level shifter, or you can just bypass it by soldering a nearby resistor (10ohm).
+  * IMPORTANT: leave R1 unsoldered.
+  * Optional: TVS1 and TVS2 are rated 3.3V, protecting GPIOs. TVS3 should be rated 5V when using level shifter, and 3.3V when not using level shifter.
+* Turntable
   * General  
   Typical AS5600 development board comes with 3.3V configuration, we can't feed 5V to it directly, it would burn the AS5600 or the main Pi Pico. The GPIO we use to communicate with AS5600 can never go beyond 3.6V. So we need a lower voltage, I chose REF3030, a precise 3.0V voltage reference.  
   You need to scrape off some solder mask to expose the ground copper (don't scrape the solder mask under 5V pin). I found a good place to mount the REF3030, this is how I handled it:  
@@ -132,7 +136,9 @@ It's very small and requires higher accuracy.
     <img src="doc/5A_usb.jpg" width="300px">
 
     * The other one is to minimize the ground wire resistance. A metal braid shielding cable can be used with the metal shield serving as the ground line. Or you can find a 4 wire cable with thick core copper.
-
+* Turntable LED Ring  
+  I recommend to use LED strip over LED board, becuase the LED board's light is facing up, but using strip, the light can spread out pefectly.  
+  Use transparent double-sided tape to stick the LED around the turntable inner wall.
 ### Step 4 - Assemble
 * Assemble the turntable  
   I don't know how to draw an explosion diagram, this is done by coding in OpenSCAD:  
