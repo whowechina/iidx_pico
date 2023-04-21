@@ -28,10 +28,10 @@ static iidx_cfg_t default_cfg = {
         .deadzone = 0,
     },
     .effects = {
-        .play_vol = 255,
-        .filter = 128,
-        .eq_low = 128,
-        .eq_hi = 128,
+        .e1 = 255,
+        .e2 = 128,
+        .e3 = 128,
+        .e4 = 128,
     }
 };
 

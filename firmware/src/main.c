@@ -39,10 +39,10 @@ struct {
 void report_usb_hid()
 {
     if (tud_hid_ready()) {
-        hid_report.joy[2] = iidx_cfg->effects.play_vol;
-        hid_report.joy[3] = iidx_cfg->effects.filter;
-        hid_report.joy[4] = iidx_cfg->effects.eq_low;
-        hid_report.joy[5] = iidx_cfg->effects.eq_hi;
+        hid_report.joy[2] = iidx_cfg->effects.e1;
+        hid_report.joy[3] = iidx_cfg->effects.e2;
+        hid_report.joy[4] = iidx_cfg->effects.e3;
+        hid_report.joy[5] = iidx_cfg->effects.e4;
         tud_hid_n_report(0x00, REPORT_ID_JOYSTICK, &hid_report, sizeof(hid_report));
     }
 }

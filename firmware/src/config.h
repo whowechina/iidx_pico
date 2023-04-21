@@ -31,10 +31,10 @@ typedef struct __attribute ((packed)) {
         uint8_t deadzone; /* only for analog */
     } tt_sensor;
     struct {
-        uint8_t play_vol;
-        uint8_t filter;
-        uint8_t eq_low;
-        uint8_t eq_hi;
+        uint8_t e1;
+        uint8_t e2;
+        uint8_t e3;
+        uint8_t e4;
     } effects;
 } iidx_cfg_t;
 
