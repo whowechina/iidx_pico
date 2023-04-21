@@ -134,6 +134,7 @@ It's very small and requires higher accuracy.
   Note: For analog, crosstalk maybe no longer an issue, but ground level becomes a new concern. When driving the turntable LED ring, there's a considerable amount of current travelling through the ground cable which lifts AS5600 ground level. There're two ways to handle this. 
     * One is to use a 5 wire cable. You need to separate LED ground from the sensor ground. A typical Type-C to Type-C cable has 5 wires inside. You can use red and black to power the LED and others to serve sensor ground, sensor analog out and LED signal.  
     <img src="doc/5A_usb.jpg" width="300px">
+    <img src="doc/analog_wiring.png" width="500px">
 
     * The other one is to minimize the ground wire resistance. A metal braid shielding cable can be used with the metal shield serving as the ground line. Or you can find a 4 wire cable with thick core copper.
 * Turntable LED Ring  
