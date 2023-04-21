@@ -23,6 +23,11 @@
 #define TT_AS5600_SDA 26
 #define TT_AS5600_I2C i2c1
 
+// Alternative I2C pins
+//#define TT_AS5600_SCL 21
+//#define TT_AS5600_SDA 20
+//#define TT_AS5600_I2C i2c0
+
 #else
 
 #endif
