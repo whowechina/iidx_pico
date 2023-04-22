@@ -278,6 +278,20 @@ static void analog_key_change()
     } else if (JUST_PRESSED(E4)) {
         analog_ctx.channel = 3;
         analog_ctx.value = &iidx_cfg->effects.e4;
+    } else if (JUST_PRESSED(KEY_1)) {
+        *analog_ctx.value = 0;
+    } else if (JUST_PRESSED(KEY_2)) {
+        *analog_ctx.value = 43;
+    } else if (JUST_PRESSED(KEY_3)) {
+        *analog_ctx.value = 85;
+    } else if (JUST_PRESSED(KEY_4)) {
+        *analog_ctx.value = 128;
+    } else if (JUST_PRESSED(KEY_5)) {
+        *analog_ctx.value = 170;
+    } else if (JUST_PRESSED(KEY_6)) {
+        *analog_ctx.value = 213;
+    } else if (JUST_PRESSED(KEY_7)) {
+        *analog_ctx.value = 255;
     }
     check_exit();
 }
@@ -297,6 +311,19 @@ static void analog_rotate()
         new_value = 255;
     }
     *analog_ctx.value = new_value;
+}
+
+static uint32_t scale_color(uint32_t color, uint8_t value, uint8_t factor)
+{
+    uint8_t r = (color >> 16) & 0xff;
+    uint8_t g = (color >> 8) & 0xff;
+    uint8_t b = color & 0xff;
+
+    r = (r * value) / factor;
+    g = (g * value) / factor;
+    b = (b * value) / factor;
+
+    return (r << 16) | (g << 8) | b;
 }
 
 static void analog_loop()
@@ -325,10 +352,20 @@ static void analog_loop()
         setup_led_button[LED_E1] &= mask;
     }
 
-    int split = (int)*analog_ctx.value * iidx_cfg->tt_led.num / 255;
+    int tt_split = (int)*analog_ctx.value * iidx_cfg->tt_led.num / 255;
 
     for (int i = 1; i < iidx_cfg->tt_led.num - 1; i++) {
-        setup_led_tt[i] = i < split ? color : 0;
+        setup_led_tt[i] = i < tt_split ? color : 0;
+    }
+
+    int button_split = *analog_ctx.value / 37;
+    int scale = *analog_ctx.value % 37;
+    for (int i = 0; i < 7; i++) {
+        if (i == button_split) {
+            setup_led_button[LED_KEY_1 + i] = scale_color(color, scale, 37);
+        } else {
+            setup_led_button[LED_KEY_1 + i] = i < button_split ? color : 0;
+        }
     }
 }
 
