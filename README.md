@@ -100,9 +100,9 @@ It's very small and requires higher accuracy.
   FDM, PLA, **0.2 nozzle** is recommended, 0.1mm layer, 4 walls, 60% fill.
 
 #### Button keycaps  
-  * Option 1: SLA (resin), regular white, 0.05mm layer, check out my orientation:  
+  * Option 1 (Choc V1 or V2): SLA (resin), regular white, 0.05mm layer, check out my orientation:  
   <img src="doc/keycap_support.png" width="300px">
-  * Option 2: FDM, PLA white, 0.2mm nozzle recommended but 0.4mm nozzle works too, 0.10~0.16mm layer, use easy-to-remove material for support, like "Bambu Support W" or just PETG.  
+  * Option 2 (Choc V2 only): FDM, PLA white, 0.2mm nozzle recommended but 0.4mm nozzle works too, 0.10~0.16mm layer, use easy-to-remove material for support, like "Bambu Support W" or just PETG.  
   <img src="doc/keycap_fdm_1.jpg" width="300px">
   <img src="doc/keycap_fdm_2.jpg" width="300px">
 ### Step 3 - Solder

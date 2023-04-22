@@ -11,7 +11,9 @@ stem_d = 5.6; // socket stem diameter
 
 translate([0,0,0]) {
   cap();
-  stems();
+  *stems(); // Choc V1, SLA
+  *stems(v1=false); // Choc V2, SLA
+  stems(v1=false,sla=false); // Choc V2, FDM
 }
 
 
@@ -32,21 +34,31 @@ module mark(offset=[0,0,0],h=5.5,c="red") {
   }
 }
 
-module stems() {
-  translate([0,0,1.2]) {
-    stab_stem([0,12,0],stem_l,5.6,1.04,4.14,4.36,3.5);
-    stab_stem([0,-12,0],stem_l,5.6,1.04,4.14,4.36,3.5);
+module stems(v1=true,sla=true) {
+  if (sla) {
+    // for SLA printing
+    translate([0,0,1.2]) {
+      stab_stem([0,12,0],stem_l,5.6,1.04,4.14,4.36,3.5);
+      stab_stem([0,-12,0],stem_l,5.6,1.04,4.14,4.36,3.5);
+    }
+  } else {
+    // for FDM printing
+    translate([0,0,1.2]) {
+      stab_stem([0,12,0],stem_l,5.7,1.1,4.2,4.4,3.5);
+      stab_stem([0,-12,0],stem_l,5.7,1.1,4.2,4.4,3.5);
+    }
   }
-  
-  // choc v2
-  _translate([0,0,1.8]) {
-    stab_stem([0,0,0],stem_l-1.8,5.48,1.31,4.02,4.02,5);
-  }
-  
-  // choc v1
-  translate([0,0,1.4]) rotate([0,0,90]) color("cyan") {
-    choc_stem([0,2.85,0],4.5);
-    choc_stem([0,-2.85,0],4.5);
+  if (v1) {
+    // choc v1
+    translate([0,0,1.4]) rotate([0,0,90]) color("cyan") {
+      choc_stem([0,2.85,0],4.5);
+      choc_stem([0,-2.85,0],4.5);
+    }
+  } else {
+    // choc v2
+    translate([0,0,1.8]) {
+      stab_stem([0,0,0],stem_l-1.8,5.48,1.31,4.02,4.02,5);
+    }
   }
 }
 
