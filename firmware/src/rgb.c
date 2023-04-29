@@ -163,9 +163,9 @@ static void button_lights_update()
     for (int i = 0; i < BUTTON_RGB_NUM; i++) {
         int led = button_rgb_map[i];
         if (button_lights[i] > 0) {
-            button_led_buf[led] = rgb32_from_hsv((hsv_t){255,0,200});
+            button_led_buf[led] = rgb32_from_hsv(iidx_cfg->key_on[i]);
         } else {
-            button_led_buf[led] = rgb32_from_hsv((hsv_t){23*i,255,20});
+            button_led_buf[led] = rgb32_from_hsv(iidx_cfg->key_off[i]);
         }
     }
 }

@@ -44,5 +44,6 @@ extern uint32_t tt_led_angle;
 
 uint32_t button_rgb32(uint32_t r, uint32_t g, uint32_t b, bool gamma_fix);
 uint32_t tt_rgb32(uint32_t r, uint32_t g, uint32_t b, bool gamma_fix);
+uint32_t rgb32_from_hsv(hsv_t hsv);
 
 #endif
