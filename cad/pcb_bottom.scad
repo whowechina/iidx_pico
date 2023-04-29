@@ -80,11 +80,11 @@ module body() {
     
     // pads
     color("pink") translate([0,0,-1],$fn=48) {
-      translate([-82.5,117.5]) cylinder(d=13,h=2);
-      translate([-82.5,-27.5]) cylinder(d=13,h=2);
-      translate([82.5,117.5]) cylinder(d=13,h=2);
-      translate([82.5,-27.5]) cylinder(d=13,h=2);
-      translate([0,28]) cylinder(d=13,h=2);
+      translate([-82.5,117.5]) cylinder(d=13.8,h=2.2);
+      translate([-82.5,-27.5]) cylinder(d=13.8,h=2.2);
+      translate([82.5,117.5]) cylinder(d=13.8,h=2.2);
+      translate([82.5,-27.5]) cylinder(d=13.8,h=2.2);
+      translate([0,28]) cylinder(d=13.8,h=2.2);
     }
     
     // screws
