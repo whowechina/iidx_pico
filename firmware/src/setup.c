@@ -541,7 +541,7 @@ static void key_theme_key_change()
     check_exit();
 }
 
-static void key_them_loop()
+static void key_theme_loop()
 {
     for (int i = 0; i < 11; i++) {
         if (blink_slow) {
@@ -549,6 +549,24 @@ static void key_them_loop()
          } else {
             setup_led_button[i] = rgb32_from_hsv(iidx_cfg->key_off[i]);
          }
+    }
+}
+
+static void tt_theme_key_change()
+{
+    for (int i = 0; i < 7; i++) {
+        if (JUST_PRESSED(KEY_1 << i)) {
+            iidx_cfg->tt_led.effect = i;
+            break;
+        }
+    }
+    check_exit();
+}
+
+static void tt_theme_loop()
+{
+    for (int i = 0; i < 7; i++) {
+        setup_led_button[i] = iidx_cfg->tt_led.effect == i ? SILVER : 0;
     }
 }
 
@@ -561,8 +579,8 @@ static struct {
     [MODE_NONE] = { nop, nop, none_loop, nop},
     [MODE_TURNTABLE] = { tt_key_change, tt_rotate, tt_loop, tt_enter},
     [MODE_ANALOG] = { analog_key_change, analog_rotate, analog_loop, analog_enter},
-    [MODE_TT_THEME] = { nop, nop, check_exit, nop},
-    [MODE_KEY_THEME] = { key_theme_key_change, nop, key_them_loop, nop},
+    [MODE_TT_THEME] = { tt_theme_key_change, nop, tt_theme_loop, nop},
+    [MODE_KEY_THEME] = { key_theme_key_change, nop, key_theme_loop, nop},
     [MODE_KEY_OFF] = { key_change, key_rotate, key_loop, key_enter},
     [MODE_KEY_ON] = { key_change, key_rotate, key_loop, key_enter},
 };

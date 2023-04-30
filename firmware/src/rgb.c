@@ -29,7 +29,7 @@ uint32_t rgb_max_level = 255;
 static void trap() {}
 static tt_effect_t effects[10] = { {trap, trap, trap, trap, 0} };
 static size_t effect_num = 0;
-static size_t current_effect = 0;
+static unsigned current_effect = 0;
 
 #define _MAP_LED(x) _MAKE_MAPPER(x)
 #define _MAKE_MAPPER(x) MAP_LED_##x
@@ -97,6 +97,8 @@ void set_effect(uint32_t index)
     if (index < effect_num) {
         current_effect = index;
         effects[current_effect].init(effects[current_effect].context);
+    } else {
+        current_effect = effect_num;
     }
 }
 
@@ -256,7 +258,6 @@ void rgb_init()
     ws2812_program_init(pio0, 0, pio0_offset, BUTTON_RGB_PIN, 800000, false);
 
     /* We don't start the tt LED program yet */
-    set_effect(1);
 }
 
 static void follow_mode_change()
@@ -276,6 +277,7 @@ static void follow_mode_change()
 void rgb_update()
 {
     follow_mode_change();
+    set_effect(iidx_cfg->tt_led.effect);
     if (time_us_64() > force_expire_time) {
         effect_update();
         button_lights_update();
@@ -289,4 +291,5 @@ void rgb_reg_tt_effect(tt_effect_t effect)
 {
     effects[effect_num] = effect;
     effect_num++;
+    effects[effect_num] = (tt_effect_t) { trap, trap, trap, trap, 0 };
 }

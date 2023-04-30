@@ -105,14 +105,12 @@ static void core0_loop()
         uint16_t angle = turntable_read() >> 4;
         if (setup_run(buttons, angle)) {
             rgb_force_display(setup_led_button, setup_led_tt);
-            report_usb_hid();
-            continue;
+        } else {
+            hid_report.buttons = buttons;
+            rgb_set_button_light(buttons);
+            save_loop();
         }
-
-        hid_report.buttons = buttons;
         report_usb_hid();
-        rgb_set_button_light(buttons);
-        save_loop();
     }
 }
 
