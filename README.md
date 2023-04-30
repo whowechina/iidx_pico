@@ -77,8 +77,6 @@ Please don't hate me.
 * Acrylic disc  
   Choose the dxf file according to your disc size and find a vendor to cut the 4mm black acrylic.
 
-Documentation still in progress, come later...
-
 ### Step 2 - 3D Print
 #### Keyboard
 * PCB bottom (pcb_bottom_*.stl, choose one according to your connector choice)  
@@ -105,6 +103,7 @@ It's very small and requires higher accuracy.
   * Option 2 (Choc V2 only): FDM, PLA white, 0.2mm nozzle recommended but 0.4mm nozzle works too, 0.10~0.16mm layer, use easy-to-remove material for support, like "Bambu Support W" or just PETG.  
   <img src="doc/keycap_fdm_1.jpg" width="300px">
   <img src="doc/keycap_fdm_2.jpg" width="300px">
+
 ### Step 3 - Solder
 * Keyboard  
   * WS2812 choices for main 7 main keys, for each key: solder 1x WS2812B-3528 under the key switch, or 4x WS2812-1516 around the key switch.
@@ -114,7 +113,8 @@ It's very small and requires higher accuracy.
   * Connector choices: solder 2x pogopin connectors, or solder 1x 3.5mm headphone input jack.
   * It's very easy to miss the USB pins of the Raspberry Pico Pi, it's at the other side. And it's difficult to solder as you may leave an airbubble in the soldering hole. My trick is to use sharpest iron tip, super-slowly apply solder wire only at one side. This is my result:  
   <img src="doc/solder_usb_txrx.jpg" width="300px">
-  * You can use level shifter, or you can just bypass it by soldering a nearby resistor (10ohm).
+  * You can use level shifter (SN74LV1T34DBVR), or you can just bypass it by soldering a nearby resistor (10 ohm), or in early PCB version, short the two pads following the picture below.   
+    <img src="doc/bypass_level_shifter.png" width="300px">
   * IMPORTANT: leave R1 unsoldered.
   * Optional: TVS1 and TVS2 are rated 3.3V, protecting GPIOs. TVS3 should be rated 5V when using level shifter, and 3.3V when not using level shifter.
 * Turntable

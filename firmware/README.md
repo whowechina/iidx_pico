@@ -6,3 +6,5 @@ Features:
 * RGB turntable.
 * Configuration save.
 * Customizable through board_defs.h
+* Dymanic settings.
+
