@@ -34,7 +34,7 @@ typedef enum {
     MODE_NONE,
     MODE_TURNTABLE,
     MODE_ANALOG,
-    MODE_TT_EFFECT,
+    MODE_TT_THEME,
     MODE_KEY_THEME,
     MODE_KEY_OFF,
     MODE_KEY_ON,
@@ -113,6 +113,13 @@ static void check_exit()
     }
 }
 
+
+static setup_mode_t key_to_mode[11] = {
+    MODE_KEY_THEME, MODE_TT_THEME, MODE_KEY_ON, MODE_KEY_OFF,
+    MODE_NONE, MODE_NONE, MODE_NONE,
+    MODE_ANALOG, MODE_ANALOG, MODE_ANALOG, MODE_ANALOG,
+};
+
 static void none_loop()
 {
     static bool escaped = false;
@@ -131,22 +138,12 @@ static void none_loop()
         return;
     }
 
-    if (PRESSED_ANY(E1 | E2 | E3 | E4)) {
-        escaped = false;
-        join_mode(MODE_ANALOG);
-        return;
-    }
-
-    if (PRESSED_ANY(KEY_3)) {
-        escaped = false;
-        join_mode(MODE_KEY_ON);
-        return;
-    }
-
-    if (PRESSED_ANY(KEY_4)) {
-        escaped = false;
-        join_mode(MODE_KEY_OFF);
-        return;
+    for (int i = 0; i < 11; i++) {
+        if (PRESSED_ANY(KEY_1 << i)) {
+            escaped = false;
+            join_mode(key_to_mode[i]);
+            return;
+        }
     }
 
     if (time_us_64() - escape_time > 5000000) {
@@ -475,6 +472,86 @@ static void key_enter()
     }
 }
 
+#define K0_WHITE {.v = 5}
+#define K0_SKY {.h = 215, .s = 255, .v = 20}
+#define K0_RED {.h = 87, .s = 255, .v = 20}
+#define K0_GREEN {.h = 0, .s = 255, .v = 20}
+
+#define K1_WHITE {.v = 200}
+#define K1_SKY {.h = 215, .s = 255, .v = 230}
+#define K1_RED {.h = 87, .s = 255, .v = 230}
+#define K1_GREEN {.h = 0, .s = 255, .v = 230}
+
+#define K0_RAINBOW(x) {.h = 23 * x, .s = 255, .v = 20}
+#define K1_RAINBOW(x) {.h = 23 * x, .s = 255, .v = 230}
+
+static struct {
+    hsv_t key_off[11];
+    hsv_t key_on[11];
+} themes[7] = {
+    {{ { 0 }, },
+     { K1_WHITE, K1_WHITE, K1_WHITE, K1_WHITE, K1_WHITE, K1_WHITE, K1_WHITE, 
+       K1_WHITE, K1_WHITE, K1_WHITE, K1_WHITE },
+    },
+    {{ { 0 }, },
+     { K1_WHITE, K1_WHITE, K1_WHITE, K1_WHITE, K1_WHITE, K1_WHITE, K1_WHITE, 
+       K1_RED, K1_GREEN, K1_GREEN, K1_SKY },
+    },
+    {{ { 0 }, },
+     { K1_RED, K1_SKY, K1_RED, K1_SKY, K1_RED, K1_SKY, K1_RED, 
+       K1_RED, K1_GREEN, K1_GREEN, K1_GREEN },
+    },
+    {{ K0_WHITE, K0_WHITE, K0_WHITE, K0_WHITE, K0_WHITE, K0_WHITE, K0_WHITE, 
+       K0_WHITE, K0_WHITE, K0_WHITE, K0_WHITE },
+     { K1_WHITE, K1_WHITE, K1_WHITE, K1_WHITE, K1_WHITE, K1_WHITE, K1_WHITE, 
+       K1_WHITE, K1_WHITE, K1_WHITE, K1_WHITE },
+    },
+    {{ K0_RED, K0_SKY, K0_RED, K0_SKY, K0_RED, K0_SKY, K0_RED, 
+       K0_RED, K0_GREEN, K0_GREEN, K0_GREEN },
+     { K1_RED, K1_SKY, K1_RED, K1_SKY, K1_RED, K1_SKY, K1_RED, 
+       K1_RED, K1_GREEN, K1_GREEN, K1_GREEN },
+    },
+    {{ K0_RAINBOW(0), K0_RAINBOW(1), K0_RAINBOW(2), K0_RAINBOW(3),
+       K0_RAINBOW(4), K0_RAINBOW(5), K0_RAINBOW(6),
+       K0_RAINBOW(7), K0_RAINBOW(8), K0_RAINBOW(9), K0_RAINBOW(10)
+     },
+     { K1_WHITE, K1_WHITE, K1_WHITE, K1_WHITE, K1_WHITE, K1_WHITE, K1_WHITE, 
+       K1_WHITE, K1_WHITE, K1_WHITE, K1_WHITE },
+    },
+    {{ K0_RAINBOW(0), K0_RAINBOW(1), K0_RAINBOW(2), K0_RAINBOW(3),
+       K0_RAINBOW(4), K0_RAINBOW(5), K0_RAINBOW(6),
+       K0_RAINBOW(7), K0_RAINBOW(8), K0_RAINBOW(9), K0_RAINBOW(10)
+     },
+     { K1_RAINBOW(0), K1_RAINBOW(1), K1_RAINBOW(2), K1_RAINBOW(3),
+       K1_RAINBOW(4), K1_RAINBOW(5), K1_RAINBOW(6),
+       K1_RAINBOW(7), K1_RAINBOW(8), K1_RAINBOW(9), K1_RAINBOW(10)
+     }
+    },
+};
+
+static void key_theme_key_change()
+{
+    for (int i = 0; i < 7; i++) {
+        if (JUST_PRESSED(KEY_1 << i)) {
+            memcpy(iidx_cfg->key_off, themes[i].key_off, sizeof(iidx_cfg->key_off));
+            memcpy(iidx_cfg->key_on, themes[i].key_on, sizeof(iidx_cfg->key_on));
+            break;
+        }
+    }
+    check_exit();
+}
+
+static void key_them_loop()
+{
+    for (int i = 0; i < 11; i++) {
+        if (blink_slow) {
+            setup_led_button[i] = rgb32_from_hsv(iidx_cfg->key_on[i]);
+         } else {
+            setup_led_button[i] = rgb32_from_hsv(iidx_cfg->key_off[i]);
+         }
+    }
+}
+
 static struct {
     mode_func key_change;
     mode_func rotate;
@@ -484,7 +561,8 @@ static struct {
     [MODE_NONE] = { nop, nop, none_loop, nop},
     [MODE_TURNTABLE] = { tt_key_change, tt_rotate, tt_loop, tt_enter},
     [MODE_ANALOG] = { analog_key_change, analog_rotate, analog_loop, analog_enter},
-    [MODE_TT_EFFECT] = { nop, nop, check_exit, nop},
+    [MODE_TT_THEME] = { nop, nop, check_exit, nop},
+    [MODE_KEY_THEME] = { key_theme_key_change, nop, key_them_loop, nop},
     [MODE_KEY_OFF] = { key_change, key_rotate, key_loop, key_enter},
     [MODE_KEY_ON] = { key_change, key_rotate, key_loop, key_enter},
 };
