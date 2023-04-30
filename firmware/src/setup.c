@@ -24,8 +24,8 @@ static uint64_t setup_tick_ms = 0;
 #define TVAR(line) CONCAT(a, line)
 #define RUN_EVERY_N_MS(a, ms) { static uint64_t TVAR(__LINE__) = 0; \
     if (setup_tick_ms - TVAR(__LINE__) >= ms) { a; TVAR(__LINE__) = setup_tick_ms; } }
-static uint32_t blink_fast = 0xffffff;
-static uint32_t blink_slow = 0xffffff;
+static uint32_t blink_fast = 0xffffffff;
+static uint32_t blink_slow = 0xffffffff;
 
 uint32_t setup_led_tt[128];
 uint32_t setup_led_button[BUTTON_RGB_NUM];
@@ -59,10 +59,10 @@ static struct {
 #define KEY_5 0x0010 
 #define KEY_6 0x0020
 #define KEY_7 0x0040 
-#define E1  0x0080 
-#define E2 0x0100 
-#define E3   0x0200
-#define E4      0x0400 
+#define E1    0x0080 
+#define E2    0x0100 
+#define E3    0x0200
+#define E4    0x0400 
 #define AUX_NO  0x0800 
 #define AUX_YES 0x1000
 
@@ -89,6 +89,12 @@ static struct {
 #define YELLOW button_rgb32(99, 99, 0, false)
 #define SILVER button_rgb32(60, 60, 60, false)
 
+#define TT_RED tt_rgb32(99, 0, 0, false)
+#define TT_GREEN tt_rgb32(0, 99, 0, false)
+#define TT_CYAN tt_rgb32(0, 40, 99, false)
+#define TT_YELLOW tt_rgb32(99, 99, 0, false)
+#define TT_SILVER tt_rgb32(60, 60, 60, false)
+
 typedef void (*mode_func)();
 
 static void join_mode(setup_mode_t new_mode);
@@ -111,10 +117,6 @@ static void none_loop()
 {
     static bool escaped = false;
     static uint64_t escape_time = 0;
-
-    if (PRESSED_ALL(AUX_NO | AUX_YES | KEY_1 | KEY_7)) {
-        reset_usb_boot(0, 2); // usb boot to flash
-    }
 
     if (PRESSED_ALL(AUX_YES | AUX_NO)) {
         if (!escaped) {
@@ -273,7 +275,7 @@ static void tt_loop()
 
 static struct {
     uint8_t channel; /* 0:E1(Start), 1:E2(Effect), 2:E3(VEFX), 3:E4 */
-    uint8_t *value;
+    volatile uint8_t *value;
     int16_t start_angle;
 } analog_ctx;
 
@@ -342,40 +344,33 @@ static uint32_t scale_color(uint32_t color, uint8_t value, uint8_t factor)
 
 static void analog_loop()
 {
-    setup_led_button[LED_E1] = RED;
-    setup_led_button[LED_E2] = GREEN;
-    setup_led_button[LED_E3] = CYAN;
-    setup_led_button[LED_E4] = YELLOW;
+    uint32_t colors[4] = { RED, GREEN, CYAN, YELLOW};
+    uint32_t tt_colors[4] = { TT_RED, TT_GREEN, TT_CYAN, TT_YELLOW };
 
-    uint32_t color;
-    if (analog_ctx.channel == 1) {
-        color = GREEN;
-        setup_led_button[LED_E2] &= blink_fast;
-    } else if (analog_ctx.channel == 2) {
-        color = CYAN;
-        setup_led_button[LED_E3] &= blink_fast;
-    } else if (analog_ctx.channel == 3) {
-        color = YELLOW;
-        setup_led_button[LED_E4] &= blink_fast;
-    } else {
-        color = RED;
-        setup_led_button[LED_E1] &= blink_fast;
+    for (int i = 0; i < 4; i++) {
+        uint32_t color = colors[i];
+        if (analog_ctx.channel == i) {
+            color &= blink_fast;
+        }
+        setup_led_button[LED_E1 + i] = color;
     }
 
     int tt_split = (int)*analog_ctx.value * iidx_cfg->tt_led.num / 255;
 
     for (int i = 1; i < iidx_cfg->tt_led.num - 1; i++) {
-        setup_led_tt[i] = i < tt_split ? color : 0;
+        setup_led_tt[i] = i < tt_split ? tt_colors[analog_ctx.channel] : 0;
     }
 
     int button_split = *analog_ctx.value / 37;
     int scale = *analog_ctx.value % 37;
     for (int i = 0; i < 7; i++) {
+        uint32_t color = colors[analog_ctx.channel];
         if (i == button_split) {
-            setup_led_button[LED_KEY_1 + i] = scale_color(color, scale, 37);
-        } else {
-            setup_led_button[LED_KEY_1 + i] = i < button_split ? color : 0;
+            color = scale_color(color, scale, 37);
+        } else if (i > button_split) {
+            color = 0;
         }
+        setup_led_button[LED_KEY_1 + i] = color;
     }
 }
 
@@ -427,22 +422,39 @@ static void key_rotate()
 {
     int16_t new_value = *key_ctx.value;
     new_value += input.rotate;
-    if (new_value < 0) {
-        new_value = 0;
-    } else if (new_value > 255) {
-        new_value = 255;
+    if (key_ctx.phase > 0) {
+        if (new_value < 0) {
+            new_value = 0;
+        } else if (new_value > 255) {
+            new_value = 255;
+        }
     }
-    *key_ctx.value = new_value;
+    *key_ctx.value = (uint8_t)new_value;
 }
 
 static void key_loop()
 {
     for (int i = 0; i < 11; i ++) {
-        if (key_ctx.keys & (1 << i)) {
+        if (key_ctx.keys == 0) {
             setup_led_button[i] = rgb32_from_hsv(key_ctx.hsv) & blink_slow;
+        } else if (key_ctx.keys & (1 << i)) {
+            setup_led_button[i] = rgb32_from_hsv(key_ctx.hsv);
         } else {
-            setup_led_button[i] = rgb32_from_hsv(key_ctx.leds[i]);
+            setup_led_button[i] = 0;
         }
+    }
+
+    for (unsigned i = 0; i < iidx_cfg->tt_led.num; i++) {
+        hsv_t hsv = key_ctx.hsv;
+        unsigned pos = iidx_cfg->tt_led.mode ? i : iidx_cfg->tt_led.num - i - 1;
+        if (key_ctx.phase == 0) {
+            hsv.h += pos * 255 / iidx_cfg->tt_led.num;
+        } else if (key_ctx.phase == 1) {
+            hsv.s += pos * 255 / iidx_cfg->tt_led.num;
+        } else {
+            hsv.v += pos * 255 / iidx_cfg->tt_led.num;
+        }
+        setup_led_tt[i] = rgb32_from_hsv(hsv);
     }
 }
 
@@ -450,10 +462,10 @@ static void key_enter()
 {
     key_ctx = (typeof(key_ctx)) {
         .phase = 0,
-        .hsv = { .h = 200, .s = 255, .v = 80 },
+        .hsv = { .h = 200, .s = 255, .v = 128 },
         .value = &key_ctx.hsv.h,
         .start_angle = input.angle,
-        .keys = 0x7f,
+        .keys = 0,
         .leds = iidx_cfg->key_on,
     };
 
@@ -527,7 +539,7 @@ bool setup_run(uint16_t keys, uint16_t angle)
         mode_defs[current_mode].key_change();
     }
 
-    RUN_EVERY_N_MS(blink_fast = ~blink_fast, 50);
+    RUN_EVERY_N_MS(blink_fast = ~blink_fast, 100);
     RUN_EVERY_N_MS(blink_slow = ~blink_slow, 500);
 
     mode_defs[current_mode].loop();

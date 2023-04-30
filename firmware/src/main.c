@@ -87,12 +87,21 @@ static void core1_loop()
     }
 }
 
+static void boot_usb_check(uint16_t buttons)
+{
+    uint16_t expected = 0x1855; /* YES, NO, 1, 3, 5, 7 */
+    if ((buttons & expected) == expected) {
+        reset_usb_boot(0, 2); // usb boot to flash
+    }
+}
+
 static void core0_loop()
 {
     while (true)
     {
         tud_task();
         uint16_t buttons = button_read();
+        boot_usb_check(buttons);
         uint16_t angle = turntable_read() >> 4;
         if (setup_run(buttons, angle)) {
             rgb_force_display(setup_led_button, setup_led_tt);

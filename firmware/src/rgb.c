@@ -24,8 +24,7 @@
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
 static const uint8_t button_rgb_map[BUTTON_RGB_NUM] = BUTTON_RGB_MAP;
-static const uint8_t level_val[] = {0, 32, 64, 96, 128, 160, 192, 224, 255};
-uint32_t rgb_level = 0;
+uint32_t rgb_max_level = 255;
 
 static void trap() {}
 static tt_effect_t effects[10] = { {trap, trap, trap, trap, 0} };
@@ -42,9 +41,9 @@ static size_t current_effect = 0;
 
 static inline uint32_t _rgb32(uint32_t c1, uint32_t c2, uint32_t c3, bool gamma_fix)
 {
-    c1 = c1 * level_val[rgb_level] / 255;
-    c2 = c2 * level_val[rgb_level] / 255;
-    c3 = c3 * level_val[rgb_level] / 255;
+    c1 = c1 * rgb_max_level / 255;
+    c2 = c2 * rgb_max_level / 255;
+    c3 = c3 * rgb_max_level / 255;
 
     if (gamma_fix) {
         c1 = ((c1 + 1) * (c1 + 1) - 1) >> 8;
@@ -80,10 +79,10 @@ uint8_t rgb_button_num()
 
 void rgb_set_level(uint8_t level)
 {
-    if (rgb_level == level) {
+    if (rgb_max_level == level) {
         return;
     }
-    rgb_level = level;
+    rgb_max_level = level;
     effects[current_effect].set_level(level);
 }
 
@@ -257,8 +256,6 @@ void rgb_init()
     ws2812_program_init(pio0, 0, pio0_offset, BUTTON_RGB_PIN, 800000, false);
 
     /* We don't start the tt LED program yet */
-
-    rgb_set_level(8);
     set_effect(1);
 }
 
