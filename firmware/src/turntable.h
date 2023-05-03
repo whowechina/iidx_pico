@@ -10,7 +10,8 @@
 #include <stdbool.h>
 
 void turntable_init();
-uint16_t turntable_read();
+uint8_t turntable_read();
+uint16_t turntable_raw();
 void turntable_update();
 
 #endif

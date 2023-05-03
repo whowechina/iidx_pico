@@ -29,6 +29,7 @@ typedef struct __attribute ((packed)) {
     struct {
         uint8_t mode; /* 0: analog, 1: analog reversed, 2: i2c, 3: i2c reversed */
         uint8_t deadzone; /* only for analog */
+        uint8_t ppr; /* 0: 256, 1: 128, 2: 96, 3: 64, other: 256 */
     } tt_sensor;
     struct {
         uint8_t e1;

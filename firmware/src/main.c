@@ -72,11 +72,12 @@ static void core1_loop()
 #define RUN_EVERY_N_MS(a, ms) { if (frame % ms == 0) a; }
     uint32_t frame = 0;
     while (true) {
-        uint32_t angle = turntable_read();
+        uint32_t angle = turntable_raw();
         rgb_set_angle(angle);
 
-        hid_report.joy[0] = angle >> 4; // 12bit to 8bit
-        hid_report.joy[1] = 255 - hid_report.joy[0];
+        uint8_t angle8 = turntable_read();
+        hid_report.joy[0] = angle8;
+        hid_report.joy[1] = 255 - angle8;
 
         RUN_EVERY_N_MS(rgb_update(), 2);
         turntable_update();
@@ -102,7 +103,7 @@ static void core0_loop()
         tud_task();
         uint16_t buttons = button_read();
         boot_usb_check(buttons);
-        uint16_t angle = turntable_read() >> 4;
+        uint16_t angle = turntable_raw() >> 4;
         if (setup_run(buttons, angle)) {
             rgb_force_display(setup_led_button, setup_led_tt);
         } else {

@@ -26,6 +26,7 @@ static iidx_cfg_t default_cfg = {
     .tt_sensor = {
         .mode = 0,
         .deadzone = 0,
+        .ppr = 0,
     },
     .effects = {
         .e1 = 255,
@@ -53,6 +54,10 @@ static void config_loaded()
     }
     if (iidx_cfg->tt_sensor.mode > 3) {
         iidx_cfg->tt_sensor.mode = 0;
+        config_changed();
+    }
+    if (iidx_cfg->tt_sensor.ppr > 3) {
+        iidx_cfg->tt_sensor.ppr = 0;
         config_changed();
     }
 }

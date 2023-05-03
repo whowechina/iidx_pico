@@ -19,7 +19,6 @@
 #include "config.h"
 
 static uint16_t angle = 0;
-
 static uint8_t current_mode = 0;
 
 static void init_i2c()
@@ -178,8 +177,51 @@ void turntable_update()
     }
 }
 
-uint16_t turntable_read()
+uint16_t turntable_raw()
 {
     bool reversed = iidx_cfg->tt_sensor.mode & 0x01;
     return reversed ? 4095 - angle : angle; // 12bit
+}
+
+uint8_t turntable_read()
+{
+    static uint8_t counter = 0;
+    static int16_t old_angle = 0;
+
+    uint16_t step;
+    if (iidx_cfg->tt_sensor.ppr == 1) {
+        step = 4096 / 128;
+    } else if (iidx_cfg->tt_sensor.ppr == 2) {
+        step = 4096 / 96;
+    } else if (iidx_cfg->tt_sensor.ppr == 3) {
+        step = 4096 / 64;
+    } else {
+        return angle >> 4;
+    }
+
+    int16_t delta = angle - old_angle;
+    if (delta == 0) {
+        return counter;
+    } else if (delta > 2048) {
+        delta -= 4096;
+    } else if (delta < -2048) {
+        delta += 4096;
+    }
+
+    if (abs(delta) >= step) {
+        if (delta > 0) {
+            counter++;
+            old_angle += step;
+        } else {
+            counter--;
+            old_angle -= step;
+        }
+        if (old_angle > 4096) {
+            old_angle -= 4096;
+        } else if (old_angle < 0) {
+            old_angle += 4096;
+        }
+    }
+
+    return counter;
 }
