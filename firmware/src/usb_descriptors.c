@@ -42,7 +42,7 @@
 //--------------------------------------------------------------------+
 // Device Descriptors
 //--------------------------------------------------------------------+
-tusb_desc_device_t const desc_device_joy = {
+tusb_desc_device_t desc_device_joy = {
     .bLength = sizeof(tusb_desc_device_t),
     .bDescriptorType = TUSB_DESC_DEVICE,
     .bcdUSB = 0x0200,
@@ -127,7 +127,7 @@ uint8_t const* tud_descriptor_configuration_cb(uint8_t index) {
 //--------------------------------------------------------------------+
 
 // array of pointer to string descriptors
-char const* string_desc_arr[] = {
+const char *string_desc_arr[] = {
     (const char[]){0x09, 0x04},  // 0: is supported language is English (0x0409)
     "WHowe"       ,              // 1: Manufacturer
     "Pico IIDX Controller",      // 2: Product
@@ -184,4 +184,12 @@ uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t langid) {
   _desc_str[0] = (TUSB_DESC_STRING << 8) | (2 * chr_count + 2);
 
   return _desc_str;
+}
+
+void konami_mode()
+{
+    desc_device_joy.idVendor = 0x1ccf;
+    desc_device_joy.idProduct = 0x8048;
+    string_desc_arr[1] = "Konami Amusement";
+    string_desc_arr[2] = "beatmania IIDX controller premium model";
 }

@@ -37,6 +37,7 @@ typedef struct __attribute ((packed)) {
         uint8_t e3;
         uint8_t e4;
     } effects;
+    bool konami; /* konami spoof */
 } iidx_cfg_t;
 
 extern iidx_cfg_t *iidx_cfg;

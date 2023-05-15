@@ -57,6 +57,24 @@ void boot_check()
     }
 }
 
+void mode_check()
+{
+    uint16_t key1 = (1 << (button_num() - 1));
+    uint16_t key2 = (1 << (button_num() - 2));
+    uint16_t buttons = button_read();
+    if (buttons & key1) {
+        iidx_cfg->konami = true;
+        save_request();
+    } else if (buttons & key2) {
+        iidx_cfg->konami = false;
+        save_request();
+    }
+
+    if (iidx_cfg->konami) {
+        konami_mode();
+    }
+}
+
 static bool request_core1_pause = false;
 
 static void pause_core1(bool pause)
@@ -132,6 +150,8 @@ void init()
     setup_init();
     config_init();
     save_init(pause_core1);
+
+    mode_check();
 }
 
 int main(void)

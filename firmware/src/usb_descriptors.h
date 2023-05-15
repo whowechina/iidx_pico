@@ -64,4 +64,8 @@ enum {
       HID_USAGE_PAGE(HID_USAGE_PAGE_KEYBOARD), HID_USAGE_MIN(0),              \
       HID_USAGE_MAX(31 * 8 - 1), HID_INPUT(HID_VARIABLE), HID_COLLECTION_END
 
+
+/* Enable Konami spoof mode */
+void konami_mode();
+
 #endif /* USB_DESCRIPTORS_H_ */
