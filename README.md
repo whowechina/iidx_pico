@@ -9,8 +9,12 @@ Features:
 * It's thin, really thin.
 * Turntable and keyboard are detachable with magnetic connector, hotswap!
 * HID lights, of course!
+* Key color theme and customization.
 * Multiple turntable effects.
 * Many live settings.
+* Analog channels.
+* Konami device mode for IIDX Ultimate Mobile.
+* Bluetooth for IIDX Ultimate Mobile iOS (soon).
 * All source files open.
 
 Thanks to many respectful guys/companies who made their tools or materials free or open source (KiCad, OpenSCAD, InkScape, Raspberry things).
