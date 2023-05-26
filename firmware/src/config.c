@@ -38,6 +38,10 @@ static iidx_cfg_t default_cfg = {
 
 static void config_loaded()
 {
+    if (iidx_cfg->tt_led.num == 0) {
+        iidx_cfg->tt_led.num = 24;
+        config_changed();
+    }
     if ((iidx_cfg->tt_led.start > 8) ||
         (iidx_cfg->tt_led.start + iidx_cfg->tt_led.num > 128)) {
         iidx_cfg->tt_led.start = 0;

@@ -272,7 +272,6 @@ static void tt_loop()
             setup_led_button[LED_E4] = YELLOW;
             break;
     }
-
     setup_led_button[LED_KEY_2] = iidx_cfg->tt_sensor.deadzone == 0 ? SILVER : 0;
     setup_led_button[LED_KEY_4] = iidx_cfg->tt_sensor.deadzone == 1 ? SILVER : 0;
     setup_led_button[LED_KEY_6] = iidx_cfg->tt_sensor.deadzone == 2 ? SILVER : 0;
