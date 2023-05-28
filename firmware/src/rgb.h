@@ -27,7 +27,6 @@ void rgb_force_display(uint32_t *keyboard, uint32_t *tt);
 
 typedef struct {
     void (*init)(uint32_t context);
-    void (*set_level)(uint32_t level);
     void (*set_angle)(uint32_t angle);
     void (*update)(uint32_t context);
     uint32_t context;
@@ -44,6 +43,7 @@ extern uint32_t tt_led_angle;
 
 uint32_t button_rgb32(uint32_t r, uint32_t g, uint32_t b, bool gamma_fix);
 uint32_t tt_rgb32(uint32_t r, uint32_t g, uint32_t b, bool gamma_fix);
-uint32_t rgb32_from_hsv(hsv_t hsv);
+uint32_t button_hsv(hsv_t hsv);
+uint32_t tt_hsv(hsv_t hsv);
 
 #endif

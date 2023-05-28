@@ -24,10 +24,9 @@
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
 static const uint8_t button_rgb_map[BUTTON_RGB_NUM] = BUTTON_RGB_MAP;
-uint32_t rgb_max_level = 255;
 
 static void trap() {}
-static tt_effect_t effects[10] = { {trap, trap, trap, trap, 0} };
+static tt_effect_t effects[10] = { {trap, trap, trap, 0} };
 static size_t effect_num = 0;
 static unsigned current_effect = 0;
 
@@ -41,9 +40,9 @@ static unsigned current_effect = 0;
 
 static inline uint32_t _rgb32(uint32_t c1, uint32_t c2, uint32_t c3, bool gamma_fix)
 {
-    c1 = c1 * rgb_max_level / 255;
-    c2 = c2 * rgb_max_level / 255;
-    c3 = c3 * rgb_max_level / 255;
+    c1 = c1 * iidx_cfg->level / 255;
+    c2 = c2 * iidx_cfg->level / 255;
+    c3 = c3 * iidx_cfg->level / 255;
 
     if (gamma_fix) {
         c1 = ((c1 + 1) * (c1 + 1) - 1) >> 8;
@@ -75,15 +74,6 @@ uint32_t tt_rgb32(uint32_t r, uint32_t g, uint32_t b, bool gamma_fix)
 uint8_t rgb_button_num()
 {
     return BUTTON_RGB_NUM;
-}
-
-void rgb_set_level(uint8_t level)
-{
-    if (rgb_max_level == level) {
-        return;
-    }
-    rgb_max_level = level;
-    effects[current_effect].set_level(level);
 }
 
 uint8_t button_lights[BUTTON_RGB_NUM];
@@ -125,7 +115,7 @@ void drive_led()
     }
 }
 
-uint32_t rgb32_from_hsv(hsv_t hsv)
+static uint32_t rgb32_from_hsv(hsv_t hsv)
 {
     uint32_t region, remainder, p, q, t;
 
@@ -156,6 +146,32 @@ uint32_t rgb32_from_hsv(hsv_t hsv)
     }
 }
 
+uint32_t button_hsv(hsv_t hsv)
+{
+    uint32_t rgb = rgb32_from_hsv(hsv);
+    uint32_t r = (rgb >> 16) & 0xff;
+    uint32_t g = (rgb >> 8) & 0xff;
+    uint32_t b = (rgb >> 0) & 0xff;
+#if BUTTON_RGB_ORDER == GRB
+    return _rgb32(g, r, b, false);
+#else
+    return _rgb32(r, g, b, false);
+#endif
+}
+
+uint32_t tt_hsv(hsv_t hsv)
+{
+    uint32_t rgb = rgb32_from_hsv(hsv);
+    uint32_t r = (rgb >> 16) & 0xff;
+    uint32_t g = (rgb >> 8) & 0xff;
+    uint32_t b = (rgb >> 0) & 0xff;
+#if TT_RGB_ORDER == GRB
+    return _rgb32(g, r, b, false);
+#else
+    return _rgb32(r, g, b, false);
+#endif
+}
+
 #define HID_EXPIRE_DURATION 1000000ULL
 static uint64_t hid_expire_time = 0;
 
@@ -164,9 +180,9 @@ static void button_lights_update()
     for (int i = 0; i < BUTTON_RGB_NUM; i++) {
         int led = button_rgb_map[i];
         if (button_lights[i] > 0) {
-            button_led_buf[led] = rgb32_from_hsv(iidx_cfg->key_on[i]);
+            button_led_buf[led] = button_hsv(iidx_cfg->key_on[i]);
         } else {
-            button_led_buf[led] = rgb32_from_hsv(iidx_cfg->key_off[i]);
+            button_led_buf[led] = button_hsv(iidx_cfg->key_off[i]);
         }
     }
 }
@@ -291,5 +307,5 @@ void rgb_reg_tt_effect(tt_effect_t effect)
 {
     effects[effect_num] = effect;
     effect_num++;
-    effects[effect_num] = (tt_effect_t) { trap, trap, trap, trap, 0 };
+    effects[effect_num] = (tt_effect_t) { trap, trap, trap, 0 };
 }

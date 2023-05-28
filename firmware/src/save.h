@@ -16,6 +16,6 @@ void save_init(io_locker_func locker);
 void save_loop();
 
 void *save_alloc(size_t size, void *def, void (*after_load)());
-void save_request();
+void save_request(bool immediately);
 
 #endif

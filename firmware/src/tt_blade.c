@@ -89,10 +89,6 @@ static void init(uint32_t context)
 {
 }
 
-static void set_level(uint32_t level)
-{
-}
-
 static void set_angle(uint32_t angle)
 {
 }
@@ -140,7 +136,6 @@ void tt_blade_init()
 {
     tt_effect_t blade = {
         init,
-        set_level,
         set_angle,
         update,
         0,

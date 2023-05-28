@@ -44,14 +44,12 @@ static void generate_color_wheel()
     }
 }
 
+static uint8_t old_level = 0;
+
 static void init(uint32_t context)
 {
     generate_color_wheel();
-}
-
-static void set_level(uint32_t level)
-{
-    generate_color_wheel();
+    old_level = iidx_cfg->level;
 }
 
 static uint32_t phase = 0;
@@ -64,6 +62,12 @@ static void set_angle(uint32_t angle)
 
 static void update(uint32_t context)
 {
+    if (old_level != iidx_cfg->level) {
+        old_level = iidx_cfg->level;
+        generate_color_wheel();
+        return;
+    }
+
     for (int i = 0; i < TT_LED_NUM; i++) {
         uint32_t pitch = COLOR_WHEEL_SIZE * RGB_RING_CYCLE * i;
         uint32_t index = (phase + pitch / TT_LED_NUM) % COLOR_WHEEL_SIZE;
@@ -75,7 +79,6 @@ void tt_rainbow_init()
 {
     tt_effect_t rainbow = {
         init,
-        set_level,
         set_angle,
         update,
         0,

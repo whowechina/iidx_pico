@@ -86,7 +86,7 @@ static void save_load()
 
     if (data_page < 0) {
         load_default();
-        save_request();
+        save_request(false);
         return;
     }
 
@@ -137,12 +137,16 @@ void *save_alloc(size_t size, void *def, void (*after_load)())
     return new_data.data + offset;
 }
 
-void save_request()
+void save_request(bool immediately)
 {
-    requesting_time = time_us_64();
     if (!requesting_save) {
         printf("Save marked.\n");
         requesting_save = true;
         new_data.magic = SAVE_PAGE_MAGIC;
+        requesting_time = time_us_64();
+    }
+    if (immediately) {
+        requesting_time = 0;
+        save_loop();
     }
 }

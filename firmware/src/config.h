@@ -23,7 +23,6 @@ typedef struct __attribute ((packed)) {
         uint8_t num;
         uint8_t effect;
         uint8_t param;
-        uint8_t brightness;
         uint8_t mode; /* 0: on, 1: reversed, 2: off */
     } tt_led;
     struct {
@@ -37,6 +36,7 @@ typedef struct __attribute ((packed)) {
         uint8_t e3;
         uint8_t e4;
     } effects;
+    uint8_t level; /* led brightness limit */
     bool konami; /* konami spoof */
 } iidx_cfg_t;
 
@@ -44,5 +44,6 @@ extern iidx_cfg_t *iidx_cfg;
 
 void config_init();
 void config_changed(); // Notify the config has changed
+void config_factory_reset(); // Reset the config to factory default
 
 #endif

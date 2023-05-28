@@ -34,6 +34,7 @@ typedef enum {
     MODE_NONE,
     MODE_TURNTABLE,
     MODE_ANALOG,
+    MODE_LEVEL,
     MODE_TT_THEME,
     MODE_KEY_THEME,
     MODE_KEY_OFF,
@@ -113,6 +114,17 @@ static void check_exit()
     }
 }
 
+static int16_t input_delta(int16_t start_angle)
+{
+    int16_t delta = input.angle - start_angle;
+    if (delta > 128) {
+        delta -= 256;
+    }
+    if (delta < -128) {
+        delta += 256;
+    }
+    return delta;
+}
 
 static setup_mode_t key_to_mode[11] = {
     MODE_KEY_THEME, MODE_TT_THEME, MODE_KEY_ON, MODE_KEY_OFF,
@@ -120,34 +132,51 @@ static setup_mode_t key_to_mode[11] = {
     MODE_ANALOG, MODE_ANALOG, MODE_ANALOG, MODE_ANALOG,
 };
 
-static void none_loop()
-{
-    static bool escaped = false;
-    static uint64_t escape_time = 0;
+static struct {
+    bool escaped;
+    uint64_t escape_time;
+    uint16_t start_angle;
+} none_ctx = { 0 };
 
-    if (PRESSED_ALL(AUX_YES | AUX_NO)) {
-        if (!escaped) {
-            escaped = true;
-            escape_time = time_us_64();
-        }
-    } else {
-        escaped = false;
+static void none_rotate()
+{
+    if (!none_ctx.escaped) {
+        return;
     }
 
-    if (!escaped) {
+    int16_t delta = input_delta(none_ctx.start_angle);
+    if (abs(delta) > 10) {
+        join_mode(MODE_LEVEL);
+        none_ctx.escaped = false;
+    }
+}
+
+static void none_loop()
+{
+    if (PRESSED_ALL(AUX_YES | AUX_NO)) {
+        if (!none_ctx.escaped) {
+            none_ctx.escaped = true;
+            none_ctx.escape_time = time_us_64();
+            none_ctx.start_angle = input.angle;
+        }
+    } else {
+        none_ctx.escaped = false;
+    }
+
+    if (!none_ctx.escaped) {
         return;
     }
 
     for (int i = 0; i < 11; i++) {
         if (PRESSED_ANY(KEY_1 << i)) {
-            escaped = false;
+            none_ctx.escaped = false;
             join_mode(key_to_mode[i]);
             return;
         }
     }
 
-    if (time_us_64() - escape_time > 5000000) {
-        escaped = false;
+    if (time_us_64() - none_ctx.escape_time > 5000000) {
+        none_ctx.escaped = false;
         join_mode(MODE_TURNTABLE);
         return;
     }
@@ -196,7 +225,7 @@ static void tt_key_change()
 
 static void tt_rotate()
 {
-    int16_t delta = input.angle - tt_ctx.start_angle;
+    int16_t delta = input_delta(tt_ctx.start_angle);
     if (abs(delta) > 8) {
         tt_ctx.start_angle = input.angle;
 
@@ -279,6 +308,53 @@ static void tt_loop()
     setup_led_button[LED_KEY_3] = iidx_cfg->tt_sensor.ppr == 1 ? SILVER : 0;
     setup_led_button[LED_KEY_5] = iidx_cfg->tt_sensor.ppr == 2 ? SILVER : 0;
     setup_led_button[LED_KEY_7] = iidx_cfg->tt_sensor.ppr == 3 ? SILVER : 0;
+}
+
+static void level_rotate()
+{
+    int16_t new_value = iidx_cfg->level;
+    new_value += input.rotate;
+    if (new_value < 0) {
+        new_value = 0;
+    } else if (new_value > 255) {
+        new_value = 255;
+    }
+    iidx_cfg->level = new_value;
+    printf("Level: %d\n", iidx_cfg->level);
+}
+
+static void level_key_change()
+{
+    if (JUST_PRESSED(KEY_1)) {
+        iidx_cfg->level = 0;
+    } else if (JUST_PRESSED(KEY_2)) {
+        iidx_cfg->level = 20;
+    } else if (JUST_PRESSED(KEY_3)) {
+        iidx_cfg->level = 50;
+    } else if (JUST_PRESSED(KEY_4)) {
+        iidx_cfg->level = 85;
+    } else if (JUST_PRESSED(KEY_5)) {
+        iidx_cfg->level = 130;
+    } else if (JUST_PRESSED(KEY_6)) {
+        iidx_cfg->level = 190;
+    } else if (JUST_PRESSED(KEY_7)) {
+        iidx_cfg->level = 255;
+    }
+
+    check_exit();
+}
+
+static void level_loop()
+{
+    for (int i = 0; i < 7; i++) {
+        hsv_t key_color = {i * 255 / 7, 255, 255 };
+        setup_led_button[i] = button_hsv(key_color);
+    }
+
+    uint16_t pos = iidx_cfg->level * iidx_cfg->tt_led.num / 256;
+    for (unsigned i = 0; i < iidx_cfg->tt_led.num; i++) {
+        setup_led_tt[i] = (i == pos) ? tt_rgb32(90, 90, 90, false) : 0;
+    }
 }
 
 static struct {
@@ -444,25 +520,17 @@ static void key_loop()
 {
     for (int i = 0; i < 11; i ++) {
         if (key_ctx.keys == 0) {
-            setup_led_button[i] = rgb32_from_hsv(key_ctx.hsv) & blink_slow;
+            setup_led_button[i] = button_hsv(key_ctx.hsv) & blink_slow;
         } else if (key_ctx.keys & (1 << i)) {
-            setup_led_button[i] = rgb32_from_hsv(key_ctx.hsv);
+            setup_led_button[i] = button_hsv(key_ctx.hsv);
         } else {
             setup_led_button[i] = 0;
         }
     }
 
+    uint16_t pos = *key_ctx.value * iidx_cfg->tt_led.num / 256;
     for (unsigned i = 0; i < iidx_cfg->tt_led.num; i++) {
-        hsv_t hsv = key_ctx.hsv;
-        unsigned pos = iidx_cfg->tt_led.mode ? i : iidx_cfg->tt_led.num - i - 1;
-        if (key_ctx.phase == 0) {
-            hsv.h += pos * 255 / iidx_cfg->tt_led.num;
-        } else if (key_ctx.phase == 1) {
-            hsv.s += pos * 255 / iidx_cfg->tt_led.num;
-        } else {
-            hsv.v += pos * 255 / iidx_cfg->tt_led.num;
-        }
-        setup_led_tt[i] = rgb32_from_hsv(hsv);
+        setup_led_tt[i] = (i == pos) ? tt_rgb32(90, 90, 90, false) : 0;
     }
 }
 
@@ -556,9 +624,9 @@ static void key_theme_loop()
 {
     for (int i = 0; i < 11; i++) {
         if (blink_slow) {
-            setup_led_button[i] = rgb32_from_hsv(iidx_cfg->key_on[i]);
+            setup_led_button[i] = button_hsv(iidx_cfg->key_on[i]);
          } else {
-            setup_led_button[i] = rgb32_from_hsv(iidx_cfg->key_off[i]);
+            setup_led_button[i] = button_hsv(iidx_cfg->key_off[i]);
          }
     }
 }
@@ -587,9 +655,10 @@ static struct {
     mode_func loop;
     mode_func enter;
 } mode_defs[] = {
-    [MODE_NONE] = { nop, nop, none_loop, nop},
+    [MODE_NONE] = { nop, none_rotate, none_loop, nop},
     [MODE_TURNTABLE] = { tt_key_change, tt_rotate, tt_loop, tt_enter},
     [MODE_ANALOG] = { analog_key_change, analog_rotate, analog_loop, analog_enter},
+    [MODE_LEVEL] = { level_key_change, level_rotate, level_loop, nop},
     [MODE_TT_THEME] = { tt_theme_key_change, nop, tt_theme_loop, nop},
     [MODE_KEY_THEME] = { key_theme_key_change, nop, key_theme_loop, nop},
     [MODE_KEY_OFF] = { key_change, key_rotate, key_loop, key_enter},
@@ -624,13 +693,7 @@ bool setup_run(uint16_t keys, uint16_t angle)
     input.angle = angle;
     input.just_pressed = keys & ~input.last_keys;
     input.just_released = ~keys & input.last_keys;
-    input.rotate = input.angle - input.last_angle;
-    if (input.rotate > 128) {
-        input.rotate -= 256;
-    } else if (input.rotate < -128) {
-        input.rotate += 256;
-    }
-
+    input.rotate = input_delta(input.last_angle);
     if (input.rotate != 0) {
         printf("@ %3d %2x\n", input.rotate, input.angle);
         mode_defs[current_mode].rotate();

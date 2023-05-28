@@ -20,7 +20,6 @@ static iidx_cfg_t default_cfg = {
         .num = 24,
         .effect = 0,
         .param = 0,
-        .brightness = 5,
         .mode = 0,
     },
     .tt_sensor = {
@@ -33,7 +32,9 @@ static iidx_cfg_t default_cfg = {
         .e2 = 128,
         .e3 = 128,
         .e4 = 128,
-    }
+    },
+    .level = 128,
+    .konami = false,
 };
 
 static void config_loaded()
@@ -68,7 +69,13 @@ static void config_loaded()
 
 void config_changed()
 {
-    save_request();
+    save_request(false);
+}
+
+void config_factory_reset()
+{
+    *iidx_cfg = default_cfg;
+    save_request(true);
 }
 
 void config_init()

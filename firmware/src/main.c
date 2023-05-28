@@ -10,6 +10,10 @@
 #include "pico/multicore.h"
 #include "pico/bootrom.h"
 #include "pico/stdio.h"
+#include "hardware/watchdog.h"
+
+#include "btstack_event.h"
+#include "pico/cyw43_arch.h"
 
 #include "tusb.h"
 #include "usb_descriptors.h"
@@ -52,11 +56,11 @@ void boot_check()
     uint16_t key1 = (1 << (button_num() - 1));
     uint16_t key2 = (1 << (button_num() - 2));
     uint16_t buttons = button_read();
-    if ((buttons & key1) && (buttons & key2)) {
-        reset_usb_boot(button_gpio(button_num() - 1), 2);
+    if (!watchdog_caused_reboot() && (buttons & key1) && (buttons & key2)) {
+        reset_usb_boot(0, 2);
     }
 }
-
+ 
 void mode_check()
 {
     uint16_t key1 = (1 << (button_num() - 1));
@@ -64,10 +68,10 @@ void mode_check()
     uint16_t buttons = button_read();
     if (buttons & key1) {
         iidx_cfg->konami = true;
-        save_request();
+        save_request(false);
     } else if (buttons & key2) {
         iidx_cfg->konami = false;
-        save_request();
+        save_request(false);
     }
 
     if (iidx_cfg->konami) {
@@ -108,9 +112,16 @@ static void core1_loop()
 
 static void boot_usb_check(uint16_t buttons)
 {
-    uint16_t expected = 0x1855; /* YES, NO, 1, 3, 5, 7 */
-    if ((buttons & expected) == expected) {
+    uint16_t usb_boot_keys = 0x1855; /* YES, NO, 1, 3, 5, 7 */
+    if (buttons == usb_boot_keys) {
         reset_usb_boot(0, 2); // usb boot to flash
+    }
+
+    uint16_t factory_default_keys = 0x182a; /* YES, NO, 2, 4, 6 */
+    if (buttons == factory_default_keys) {
+        config_factory_reset();
+        watchdog_enable(1, 1);
+        while(1); // just reboot
     }
 }
 
@@ -133,11 +144,46 @@ static void core0_loop()
     }
 }
 
+
+static btstack_packet_callback_registration_t hci_event_callback_registration;
+
+static void packet_handler (uint8_t packet_type, uint16_t channel, uint8_t *packet, uint16_t size){
+    UNUSED(size);
+    UNUSED(channel);
+    bd_addr_t local_addr;
+    if (packet_type != HCI_EVENT_PACKET) return;
+    switch(hci_event_packet_get_type(packet)){
+        case BTSTACK_EVENT_STATE:
+            if (btstack_event_state_get_state(packet) != HCI_STATE_WORKING) return;
+            gap_local_bd_addr(local_addr);
+            printf("BTstack up and running on %s.\n", bd_addr_to_str(local_addr));
+            break;
+        default:
+            break;
+    }
+}
+
+int init_bluetooth()
+{
+    // initialize CYW43 driver architecture (will enable BT if/because CYW43_ENABLE_BLUETOOTH == 1)
+    if (cyw43_arch_init()) {
+        printf("failed to initialise cyw43_arch\n");
+        return -1;
+    }
+
+    // inform about BTstack state
+    hci_event_callback_registration.callback = &packet_handler;
+    hci_add_event_handler(&hci_event_callback_registration);
+
+    return 0;
+}
+
 void init()
 {
     board_init();
     tusb_init();
 
+    init_bluetooth();
     button_init();
     tt_rainbow_init();
     tt_blade_init();
