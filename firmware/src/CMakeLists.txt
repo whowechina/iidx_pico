@@ -6,13 +6,15 @@ function(make_firmware board board_def)
     add_executable(${board}
                    main.c buttons.c rgb.c save.c config.c setup.c
                    turntable.c tt_rainbow.c tt_blade.c
-                   usb_descriptors.c)
+                   usb_descriptors.c ble.c)
     target_compile_definitions(${board} PUBLIC ${board_def})
     pico_enable_stdio_usb(${board} 1)
     pico_enable_stdio_uart(${board} 0)
 
     pico_generate_pio_header(${board} ${CMAKE_CURRENT_LIST_DIR}/ws2812.pio)
-    #target_compile_options(${board} PRIVATE -Wall -Werror -Wfatal-errors -O3)
+    pico_btstack_make_gatt_header(${board} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/gamepad.gatt)
+
+    target_compile_options(${board} PRIVATE -Wfatal-errors -O3)
     target_include_directories(${board} PRIVATE ${CMAKE_CURRENT_LIST_DIR})
     target_include_directories(${board} PRIVATE 
                                ${BTSTACK_ROOT}/src
@@ -24,10 +26,10 @@ function(make_firmware board board_def)
         tinyusb_device tinyusb_board
         pico_cyw43_arch_none pico_btstack_ble pico_btstack_cyw43)
 
-    # Make a UF2 binary
     pico_add_extra_outputs(${board})
-    add_custom_target(${board}.uf2 ALL
-                      COMMAND cp ${board}.uf2 /mnt/d/Code/iidx_pico/firmware/build)
+
+    add_custom_command(TARGET ${board} POST_BUILD
+                       COMMAND cp ${board}.uf2 /mnt/d/Code/iidx_pico/firmware/build)
 endfunction()
 
 make_firmware(iidx_pico BOARD_IIDX_PICO)
