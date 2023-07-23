@@ -1,5 +1,7 @@
-pogo=true; // if you use pogopin connector
-jack35=true; // if you use 3.5mm headphone jack
+pogo=false; // if you use pogopin connector
+jack35=false; // if you use 3.5mm headphone jack
+hinge_left=false; // if you use left hinge
+hinge_right=true; // if you use right hinge
 
 body();
 stab();
@@ -28,8 +30,8 @@ module body() {
 
     // main button area holes
     color("brown") translate([0,0,2]) {
-      translate([-45,28]) rcube(84,12,10,2);
-      translate([45,28]) rcube(84,12,10,2);
+      translate([-35,28]) rcube(66,12,10,2);
+      translate([35,28]) rcube(66,12,10,2);
       translate([0,-27]) rcube(146,12,10,2);
 
       translate([-80.5,0]) rcube(14,37,10,2);
@@ -38,10 +40,10 @@ module body() {
       translate([41,0]) rcube(17,37,10,2);
       translate([80.5,0]) rcube(14,37,10,2);
       
-      translate([-70,56]) rcube(34,37,10,2);
+      translate([-61,56]) rcube(16,37,10,2);
       translate([-20.5,56]) rcube(17,37,10,2);
       translate([20.5,56]) rcube(17,37,10,2);
-      translate([67.5,56]) rcube(28.5,37,10,2);
+      translate([61,56]) rcube(16,37,10,2);
     }
     
     // pi pico area holes
@@ -101,6 +103,47 @@ module body() {
         translate([82.5,-27.5]) cylinder(d=6.7,h=4.5);
       }
     }
+    
+    // TT hinge junction
+    if (hinge_left) color("gray") {
+      translate([-90,44,2.5]) rcube(6,41,10,1);
+      difference() {
+        translate([-80,44,1]) rcube(16,41,10,0.1);
+        translate([-81,34,1]) rcube(4,8,10,1);
+        translate([-81,54,1]) rcube(4,8,10,1);
+      }
+      // cable
+      translate([0,0,1]) {
+        translate([-48.92,113]) rcube(20,24,10,0.3);
+        translate([-62,111,0]) rcube(24,20,10,2);
+        translate([-71,101,0]) rotate([0,0,45]) rcube(18,12,10,0.1);
+        translate([-73,87.5,0]) rcube(17,23,10,0.1);
+        translate([-71,74,0]) rotate([0,0,-45]) rcube(18,12,10,0.1);
+        translate([-61,56]) rcube(16,37,10,2);
+      }
+      wire_clamp([-81,44,3]);
+    }
+    if (hinge_right) color("gray") {
+      translate([90,44,2.5]) rcube(6,41,10,1);
+      difference() {
+        translate([80,44,1]) rcube(16,41,10,0.1);
+        translate([81,34,1]) rcube(4,8,10,1);
+        translate([81,54,1]) rcube(4,8,10,1);
+      }      
+      // cable
+      translate([0,0,1]) {
+        translate([71,74]) rcube(36,16,10,1);
+        translate([61,56]) rcube(16,37,10,2);
+      }
+      wire_clamp([81,44,3]);
+    }
+  }
+}
+
+module wire_clamp(pos) {
+  translate(pos) rotate([0,-90,0]) hull($fn=64) {
+    translate([0.6,-1.2]) cylinder(d=6,h=36,center=true);
+    translate([0.6,1.2]) cylinder(d=6,h=36,center=true);
   }
 }
 
