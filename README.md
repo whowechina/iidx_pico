@@ -14,7 +14,6 @@ Features:
 * Many live settings.
 * Analog channels.
 * Konami device mode for IIDX Ultimate Mobile.
-* Bluetooth for IIDX Ultimate Mobile iOS (soon).
 * All source files open.
 
 Thanks to many respectful guys/companies who made their tools or materials free or open source (KiCad, OpenSCAD, InkScape, Raspberry things).
@@ -176,7 +175,7 @@ It's very small and requires higher accuracy.
 
 ### What If?
 * I can't find pogopin connector.  
-**Solution:** I figured out another connector choice, which is a 3.5mm 4P headphone jack. It uses analog to communicate turntable movements, but I'm still testing it, so stay tuned. I will update this document.
+**Solution:** I figured out some another choices, one is using a 3.5mm 4P headphone jack. It uses analog to communicate turntable movements, but I'm still testing it, so stay tuned. I will update this document. The other is to use fixed connection (left or right hinge).
 * I don't have Bambu Lab's machine, or I don't have an AMS system.  
 **Solution:** There're many online vendors and people providing paid Bambu printing service. Or you can just use other 3D printers. It's just the numbers in the OpenSCAD source file or STL files are finetuned on my Bambu Lab X1. You may need to adjust a little on your 3D printer system to get perfect result. And regarding the multi-color thing, maybe you can just paint the top layer by hand. I know people do miniature painting, I think it would be similar.
 * STL files are not accurate, difficult to assemble.  
@@ -185,3 +184,6 @@ It's very small and requires higher accuracy.
 * I can't find Kailh low-profile stabilizer.
 * I don't have electronic DIY gears.  
 **Solution:** OK, this is an electronic hobby project, maybe it's not for you if you don't plan to do electronic DIYs. There're many good IIDX controllers you can purchase somewhere online.
+* I want Bluetooth support.  
+**Not A Solution:** I once wanted to implement the Bluetooth support. But after I tried bluetooth joystick, I gave up. You really don't want to play rhythm game with a Bluetooth connection!
+
