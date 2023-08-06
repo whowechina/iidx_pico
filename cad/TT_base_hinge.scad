@@ -1,7 +1,7 @@
-export_tt = true; // this is for main body
+export_tt = false; // this is for main body
 export_hinge = true; // actually this is for hinge cover
 
-disc_d=150; // disc size you need to specify
+disc_d=170; // disc size you need to specify
 
 
 d1=disc_d+14; // lower outer
@@ -69,17 +69,17 @@ module body() {
 
     // bearing screws
     color("gold") {
-      screw([-14.5,-14.5,-1.8]);
-      screw([14.5,14.5,-1.8]);
-      screw([-14.5,14.5,-1.8]);
-      screw([14.5,-14.5,-1.8]);
+      screw([-14.5,-14.5,-1.81]);
+      screw([14.5,14.5,-1.81]);
+      screw([-14.5,14.5,-1.81]);
+      screw([14.5,-14.5,-1.81]);
     }
     color("darkgreen") translate([0,0,pcb_h]) rcube(23.2,23.2,5,2.5);
     
     // pads
     for (i = [90:60:300]) {
-      pr=d2/2-1;
-      translate([cos(i)*pr, sin(i)*pr, -1]) cylinder(d=9.5,h=1.8);
+      pr=d2/2-2;
+      translate([cos(i)*pr, sin(i)*pr, -1]) cylinder(d=9.8,h=1.8);
     }
     
     hinge();
@@ -99,8 +99,8 @@ module rcube(w,h,d,r) {
 module screw(pos) {
   translate(pos) {
     cylinder(d=3.3,h=10,$fn=32);
-    cylinder(d=6.8,h=4.4,$fn=6);
-    cylinder(d=9.5,h=1.8,$fn=32);
+    cylinder(d=6.9,h=4.4,$fn=6);
+    cylinder(d=9.8,h=1.8,$fn=32);
   }
 }
 

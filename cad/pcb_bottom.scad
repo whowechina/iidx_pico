@@ -1,7 +1,7 @@
 pogo=false; // if you use pogopin connector
 jack35=false; // if you use 3.5mm headphone jack
-hinge_left=false; // if you use left hinge
-hinge_right=true; // if you use right hinge
+hinge_left=true; // if you use left hinge
+hinge_right=false; // if you use right hinge
 
 body();
 stab();
@@ -97,10 +97,10 @@ module body() {
       translate([82.5,-27.5]) cylinder(d=3.3,h=10);
 
       union($fn=6) {
-        translate([-82.5,117.5]) cylinder(d=6.7,h=4.5);
-        translate([-82.5,-27.5]) cylinder(d=6.7,h=4.5);
-        translate([82.5,117.5]) cylinder(d=6.7,h=4.5);
-        translate([82.5,-27.5]) cylinder(d=6.7,h=4.5);
+        translate([-82.5,117.5]) cylinder(d=6.9,h=4.5);
+        translate([-82.5,-27.5]) cylinder(d=6.9,h=4.5);
+        translate([82.5,117.5]) cylinder(d=6.9,h=4.5);
+        translate([82.5,-27.5]) cylinder(d=6.9,h=4.5);
       }
     }
     
