@@ -15,8 +15,6 @@
 #include "tusb.h"
 #include "usb_descriptors.h"
 
-#include "ble.h"
-
 #include "setup.h"
 
 #include "buttons.h"
@@ -148,7 +146,6 @@ void init()
     board_init();
     tusb_init();
 
-    init_bluetooth();
     button_init();
     tt_rainbow_init();
     tt_blade_init();
