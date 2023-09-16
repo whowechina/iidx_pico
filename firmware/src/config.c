@@ -80,5 +80,5 @@ void config_factory_reset()
 
 void config_init()
 {
-    iidx_cfg = (iidx_cfg_t *)save_alloc(sizeof(iidx_cfg), &default_cfg, config_loaded);
+    iidx_cfg = (iidx_cfg_t *)save_alloc(sizeof(*iidx_cfg), &default_cfg, config_loaded);
 }
