@@ -7,7 +7,7 @@
 
 Features:
 * It's thin, really thin.
-* Turntable and keyboard are detachable with magnetic connector, hotswap!
+* Detachable turntable using magnetic connector (soft hinge is another option).
 * HID lights, of course!
 * Key color theme and customization.
 * Multiple turntable effects.
@@ -18,20 +18,27 @@ Features:
 
 Thanks to many respectful guys/companies who made their tools or materials free or open source (KiCad, OpenSCAD, InkScape, Raspberry things).
 
-## Caution
-This is a difficult build, much more difficult than my previous Pico Popn project:  
-https://github.com/whowechina/popn_pico.  
-I suggest you to build my Pico Popn first.  
-This Pico IIDX project:  
-* Heavily depends on 3D printing, both FDM and SLA (resin).
-* Requires skills to solder tiny components and thin cables.
+## Notes
+This is a difficult build, it heavily depends on 3D printing, both FDM and SLA (resin). It also requires skills to solder tiny components and thin cables., much more difficult than my other projects such as Pico Popn.
 
 Move forward only if you're REALLY interested.  
 
+Also, you can check out my other cool projects.
+
+* Popn Pico: https://github.com/whowechina/popn_pico  
+<img src="https://raw.githubusercontent.com/whowechina/popn_pico/main/doc/main.jpg" width="180px">
+
+
+* IIDX Teeny: https://github.com/whowechina/iidx_teeny  
+<img src="https://raw.githubusercontent.com/whowechina/iidx_teeny/main/doc/main.jpg" width="220px">
+
+* Chu Pico: https://github.com/whowechina/chu_pico  
+<img src="https://raw.githubusercontent.com/whowechina/chu_pico/main/doc/main.jpg" width="250px">
+
+
 ## **Disclaimer** ##
-Due to my limited personal time, this document is still in progress. So stay tuned!  
-This project already has a working "release" but I haven't make it a real release yet. There will be updates to all components and firmware as I'm trying to make it better. Luckily, there hasn't been any big mistakes so far. But still there's a chance I will make some, which may lead to your time or money loss. This open source project is provided as is, I can't promise anything.  
-Please don't hate me.
+I made this project in my personal time with no financial benefit or sponsorship. I will continue to improve the project. I have done my best to ensure that everything is accurate and functional, there's always a chance that mistakes may occur. I cannot be held responsible for any loss of your time or money that may result from using this open source project. Thank you for your understanding.
+
 
 ## HOW TO BUILD
 ### Turntable Materials
@@ -171,7 +178,9 @@ It's very small and requires higher accuracy.
 ### Step 4 - Firmware
 * For the new build, hold the BOOTSEL button while connect the USB to a PC, there will be a disk named "RPI-RP2" showed up. Drag the uf2 firmware binary file into it. That's it. There's a small hole at the back side of the keyboard, it is facing right to the BOOTSEL button.
 * If it is already running my IIDX firmware, hold two small AUX buttons together will do the same as the BOOTSEL button.
-* For now, some configurations are hardcoded, if you want to change something, you need to build by yourself.
+* You need to setup your configuration such as AS5600 connection mode and LED ring.
+* Also you can setup the key color theme and turntable effects at runtime. I think I made the configuration too showey and complicated. Check out the manual.    
+[Nice Looking Manual Here](doc/Firmware_Manual.pdf)
 
 ### What If?
 * I can't find pogopin connector.  
