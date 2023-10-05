@@ -27,7 +27,7 @@ static struct {
 } modules[8] = {0};
 static int module_num = 0;
 
-#define SAVE_PAGE_MAGIC 0x13424321
+#define SAVE_PAGE_MAGIC 0xcafe4321
 #define SAVE_SECTOR_OFFSET (PICO_FLASH_SIZE_BYTES - FLASH_SECTOR_SIZE)
 
 typedef struct __attribute ((packed)) {
