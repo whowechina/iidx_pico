@@ -35,6 +35,9 @@ Also, you can check out my other cool projects.
 * Chu Pico: https://github.com/whowechina/chu_pico  
 <img src="https://raw.githubusercontent.com/whowechina/chu_pico/main/doc/main.jpg" width="250px">
 
+* Mai Pico: https://github.com/whowechina/mai_pico  
+<img src="https://raw.githubusercontent.com/whowechina/mai_pico/main/doc/main.jpg" width="250px">
+
 
 ## **Disclaimer** ##
 I made this project in my personal time with no financial benefit or sponsorship. I will continue to improve the project. I have done my best to ensure that everything is accurate and functional, there's always a chance that mistakes may occur. I cannot be held responsible for any loss of your time or money that may result from using this open source project. Thank you for your understanding.
