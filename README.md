@@ -112,10 +112,10 @@ It's very small and requires higher accuracy.
 
 #### Button keycaps  
   * Option 1 (Choc V1 or V2): SLA (resin), regular white, 0.05mm layer, check out my orientation:  
-  <img src="doc/keycap_support.png" width="300px">
+    <img src="doc/keycap_support.png" width="300px">
   * Option 2 (Choc V2 only): FDM, PLA white, 0.2mm nozzle recommended but 0.4mm nozzle works too, 0.10~0.16mm layer, use easy-to-remove material for support, like "Bambu Support W" or just PETG.  
-  <img src="doc/keycap_fdm_1.jpg" width="300px">
-  <img src="doc/keycap_fdm_2.jpg" width="300px">
+    <img src="doc/keycap_fdm_1.jpg" width="300px">
+    <img src="doc/keycap_fdm_2.jpg" width="300px">
 
 ### Step 3 - Solder
 * Keyboard  
@@ -125,26 +125,29 @@ It's very small and requires higher accuracy.
     <img src="doc/led_1615_orientation.jpg" width="300px">
   * Connector choices: solder 2x pogopin connectors, or solder 1x 3.5mm headphone input jack.
   * It's very easy to miss the USB pins of the Raspberry Pico Pi, it's at the other side. And it's difficult to solder as you may leave an airbubble in the soldering hole. My trick is to use sharpest iron tip, super-slowly apply solder wire only at one side. This is my result:  
-  <img src="doc/solder_usb_txrx.jpg" width="300px">
+    <img src="doc/solder_usb_txrx.jpg" width="300px">
+
   * You can use level shifter (SN74LV1T34DBVR), or you can just bypass it by soldering a nearby resistor (10 ohm), or in early PCB version, short the two pads following the picture below.   
     <img src="doc/bypass_level_shifter.png" width="300px">
+
   * IMPORTANT: leave R1 unsoldered.
   * Optional: TVS1 and TVS2 are rated 3.3V, protecting GPIOs. TVS3 should be rated 5V when using level shifter, and 3.3V when not using level shifter.
 * Turntable
   * General  
   Typical AS5600 development board comes with 3.3V configuration, we can't feed 5V to it directly, it would burn the AS5600 or the main Pi Pico. The GPIO we use to communicate with AS5600 can never go beyond 3.6V. So we need a lower voltage, I chose REF3030, a precise 3.0V voltage reference.  
   You need to scrape off some solder mask to expose the ground copper (don't scrape the solder mask under 5V pin). I found a good place to mount the REF3030, this is how I handled it:  
-  <img src="doc/ref3030.jpg" width="300px">
+    <img src="doc/ref3030.jpg" width="300px">
 
   * If you go with digital (magnetic pogo pin connector)  
   There're a set of I2C and a WS2812B signal line together in the cable that connects turntable and the keyboard. Unfortunately, these signals crosstalk. So, we have to use shield cables for them. Two I2C lines should have a shield cable, and the WS2812B signal should have another shield cable. Good thing is, an HDMI cable has 4 shield cables and bunch of other small cables. We can make use of it.  
-  <img src="doc/pogopin_wiring.jpg" width="300px">  
+    <img src="doc/pogopin_wiring.jpg" width="300px">  
 
   * If you go with analog (3.5mm headphone jack)  
   Here's the pin definition.  
-  <img src="doc/headphone_jack_wiring.png" width="200px">  
+    <img src="doc/headphone_jack_wiring.png" width="200px">
+  
   The "ANGLE" connects to the AS5600 analog OUT. You need to remove a resistor from as5600 board to get OUT pin working.  
-  <img src="doc/as5600_mod.png" width="300px">
+    <img src="doc/as5600_mod.png" width="300px">
 
   Note: For analog, crosstalk maybe no longer an issue, but ground level becomes a new concern. When driving the turntable LED ring, there's a considerable amount of current travelling through the ground cable which lifts AS5600 ground level. There're two ways to handle this. 
     * One is to use a 5 wire cable. You need to separate LED ground from the sensor ground. A typical Type-C to Type-C cable has 5 wires inside. You can use red and black to power the LED and others to serve sensor ground, sensor analog out and LED signal.  
