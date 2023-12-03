@@ -92,7 +92,7 @@ I made this project in my personal time with no financial benefit or sponsorship
 
 ### Step 2 - 3D Print
 #### Keyboard
-* PCB bottom (pcb_bottom_*.stl, choose one according to your connector choice)  
+* PCB bottom (pcb_bottom_*.stl, choose one according to your connector or hinge choice)  
   FDM, PLA/PETG transparent, 0.2mm layer, 4 walls.
 * PCB top (pcb_top.stl)  
   FDM, PLA transparent, 0.2mm layer, 4 walls.  
@@ -104,6 +104,7 @@ These are all printed with
 * Base (TT_base_xxx.stl), choose one of the 150, 170 or 180, based on your choice of disc size, 20-60% fill.
 * Bearing seat (bearing_seat_6804.stl), 20-60% fill.
 * Flange for disc (TTshaft_6804.stl), 60% fill.
+* If you opt for the hinge option, go with the files with "hinge" in the filename.
 
 #### Pogopin Connector
 It's very small and requires higher accuracy.
@@ -137,6 +138,8 @@ It's very small and requires higher accuracy.
   Typical AS5600 development board comes with 3.3V configuration, we can't feed 5V to it directly, it would burn the AS5600 or the main Pi Pico. The GPIO we use to communicate with AS5600 can never go beyond 3.6V. So we need a lower voltage, I chose REF3030, a precise 3.0V voltage reference.  
   You need to scrape off some solder mask to expose the ground copper (don't scrape the solder mask under 5V pin). I found a good place to mount the REF3030, this is how I handled it:  
     <img src="doc/ref3030.jpg" width="300px">
+
+  * Before proceeding further, it's important to note that the silicone hinge used in my IIDX Teeny has proven to be the most effective and stable. Therefore, it's highly recommended to opt for the hinge option, rather than the subsequent digital (pogopin) or analog (3.5mm headphone jack) options.
 
   * If you go with digital (magnetic pogo pin connector)  
   There're a set of I2C and a WS2812B signal line together in the cable that connects turntable and the keyboard. Unfortunately, these signals crosstalk. So, we have to use shield cables for them. Two I2C lines should have a shield cable, and the WS2812B signal should have another shield cable. Good thing is, an HDMI cable has 4 shield cables and bunch of other small cables. We can make use of it.  
