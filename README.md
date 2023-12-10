@@ -174,8 +174,9 @@ It's very small and requires higher accuracy.
 * For the new build, hold the BOOTSEL button while connect the USB to a PC, there will be a disk named "RPI-RP2" showed up. Drag the uf2 firmware binary file into it. That's it. There's a small hole at the back side of the keyboard, it is facing right to the BOOTSEL button.
 * If it is already running my IIDX firmware, hold two small AUX buttons together will do the same as the BOOTSEL button.
 * You need to setup your configuration such as AS5600 connection mode and LED ring.
-* Also you can setup the key color theme and turntable effects at runtime. I think I made the configuration too showey and complicated. Check out the manual.    
-[Nice Looking Manual Here](doc/Firmware_manual.pdf)
+* Also you can setup the key color theme and turntable effects at runtime. I think I made the configuration too showey and complicated. Check out the manual.   
+  [Nice Looking Manual Here](doc/Firmware_manual.pdf)
+  <img src="doc/manual.gif" width="80%">
 
 ### What If?
 * I can't find pogopin connector.  
