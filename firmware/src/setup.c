@@ -33,7 +33,6 @@ uint32_t setup_led_button[BUTTON_RGB_NUM];
 typedef enum {
     MODE_NONE,
     MODE_TURNTABLE,
-    MODE_ANALOG,
     MODE_LEVEL,
     MODE_TT_THEME,
     MODE_KEY_THEME,
@@ -129,7 +128,6 @@ static int16_t input_delta(int16_t start_angle)
 static setup_mode_t key_to_mode[11] = {
     MODE_KEY_THEME, MODE_TT_THEME, MODE_KEY_ON, MODE_KEY_OFF,
     MODE_NONE, MODE_NONE, MODE_NONE,
-    MODE_ANALOG, MODE_ANALOG, MODE_ANALOG, MODE_ANALOG,
 };
 
 static struct {
@@ -203,7 +201,7 @@ static void tt_key_change()
     } else if (JUST_PRESSED(E3)) {
         iidx_cfg->tt_led.mode = (iidx_cfg->tt_led.mode + 1) % 3;
     } else if (JUST_PRESSED(E4)) {
-        iidx_cfg->tt_sensor.mode = (iidx_cfg->tt_sensor.mode + 1) % 4;
+        iidx_cfg->tt_sensor.reversed = !iidx_cfg->tt_sensor.reversed;
     } else if (JUST_PRESSED(KEY_2)) {
         iidx_cfg->tt_sensor.deadzone = 0;
     } else if (JUST_PRESSED(KEY_4)) {
@@ -287,20 +285,8 @@ static void tt_loop()
             break;
     }
 
-    switch (iidx_cfg->tt_sensor.mode) {
-        case 0:
-            setup_led_button[LED_E4] = GREEN;
-            break;
-        case 1:
-            setup_led_button[LED_E4] = RED;
-            break;
-        case 2:
-            setup_led_button[LED_E4] = CYAN;
-            break;
-        default:
-            setup_led_button[LED_E4] = YELLOW;
-            break;
-    }
+    setup_led_button[LED_E4] = iidx_cfg->tt_sensor.reversed ? CYAN : YELLOW;
+
     setup_led_button[LED_KEY_2] = iidx_cfg->tt_sensor.deadzone == 0 ? SILVER : 0;
     setup_led_button[LED_KEY_4] = iidx_cfg->tt_sensor.deadzone == 1 ? SILVER : 0;
     setup_led_button[LED_KEY_6] = iidx_cfg->tt_sensor.deadzone == 2 ? SILVER : 0;
@@ -354,107 +340,6 @@ static void level_loop()
     uint16_t pos = iidx_cfg->level * iidx_cfg->tt_led.num / 256;
     for (unsigned i = 0; i < iidx_cfg->tt_led.num; i++) {
         setup_led_tt[i] = (i == pos) ? tt_rgb32(90, 90, 90, false) : 0;
-    }
-}
-
-static struct {
-    uint8_t channel; /* 0:E1(Start), 1:E2(Effect), 2:E3(VEFX), 3:E4 */
-    volatile uint8_t *value;
-    int16_t start_angle;
-} analog_ctx;
-
-static void analog_key_change()
-{
-    if (JUST_PRESSED(E1)) {
-        analog_ctx.channel = 0;
-        analog_ctx.value = &iidx_cfg->effects.e1;
-    } else if (JUST_PRESSED(E2)) {
-        analog_ctx.channel = 1;
-        analog_ctx.value = &iidx_cfg->effects.e2;
-    } else if (JUST_PRESSED(E3)) {
-        analog_ctx.channel = 2;
-        analog_ctx.value = &iidx_cfg->effects.e3;
-    } else if (JUST_PRESSED(E4)) {
-        analog_ctx.channel = 3;
-        analog_ctx.value = &iidx_cfg->effects.e4;
-    } else if (JUST_PRESSED(KEY_1)) {
-        *analog_ctx.value = 0;
-    } else if (JUST_PRESSED(KEY_2)) {
-        *analog_ctx.value = 43;
-    } else if (JUST_PRESSED(KEY_3)) {
-        *analog_ctx.value = 85;
-    } else if (JUST_PRESSED(KEY_4)) {
-        *analog_ctx.value = 128;
-    } else if (JUST_PRESSED(KEY_5)) {
-        *analog_ctx.value = 170;
-    } else if (JUST_PRESSED(KEY_6)) {
-        *analog_ctx.value = 213;
-    } else if (JUST_PRESSED(KEY_7)) {
-        *analog_ctx.value = 255;
-    }
-
-    check_exit();
-}
-
-static void analog_enter()
-{
-    analog_key_change();
-}
-
-static void analog_rotate()
-{
-    int16_t new_value = *analog_ctx.value;
-    new_value += input.rotate;
-    if (new_value < 0) {
-        new_value = 0;
-    } else if (new_value > 255) {
-        new_value = 255;
-    }
-    *analog_ctx.value = new_value;
-}
-
-static uint32_t scale_color(uint32_t color, uint8_t value, uint8_t factor)
-{
-    uint8_t r = (color >> 16) & 0xff;
-    uint8_t g = (color >> 8) & 0xff;
-    uint8_t b = color & 0xff;
-
-    r = (r * value) / factor;
-    g = (g * value) / factor;
-    b = (b * value) / factor;
-
-    return (r << 16) | (g << 8) | b;
-}
-
-static void analog_loop()
-{
-    uint32_t colors[4] = { RED, GREEN, CYAN, YELLOW};
-    uint32_t tt_colors[4] = { TT_RED, TT_GREEN, TT_CYAN, TT_YELLOW };
-
-    for (int i = 0; i < 4; i++) {
-        uint32_t color = colors[i];
-        if (analog_ctx.channel == i) {
-            color &= blink_fast;
-        }
-        setup_led_button[LED_E1 + i] = color;
-    }
-
-    int tt_split = (int)*analog_ctx.value * iidx_cfg->tt_led.num / 255;
-
-    for (int i = 1; i < iidx_cfg->tt_led.num - 1; i++) {
-        setup_led_tt[i] = i < tt_split ? tt_colors[analog_ctx.channel] : 0;
-    }
-
-    int button_split = *analog_ctx.value / 37;
-    int scale = *analog_ctx.value % 37;
-    for (int i = 0; i < 7; i++) {
-        uint32_t color = colors[analog_ctx.channel];
-        if (i == button_split) {
-            color = scale_color(color, scale, 37);
-        } else if (i > button_split) {
-            color = 0;
-        }
-        setup_led_button[LED_KEY_1 + i] = color;
     }
 }
 
@@ -657,7 +542,6 @@ static struct {
 } mode_defs[] = {
     [MODE_NONE] = { nop, none_rotate, none_loop, nop},
     [MODE_TURNTABLE] = { tt_key_change, tt_rotate, tt_loop, tt_enter},
-    [MODE_ANALOG] = { analog_key_change, analog_rotate, analog_loop, analog_enter},
     [MODE_LEVEL] = { level_key_change, level_rotate, level_loop, nop},
     [MODE_TT_THEME] = { tt_theme_key_change, nop, tt_theme_loop, nop},
     [MODE_KEY_THEME] = { key_theme_key_change, nop, key_theme_loop, nop},
@@ -672,18 +556,19 @@ static void join_mode(setup_mode_t new_mode)
     memset(&setup_led_button, 0, sizeof(setup_led_button));
     current_mode = new_mode;
     mode_defs[current_mode].enter();
-    printf("Entering setup %d\n", new_mode);
+    printf("Entering setup mode %d\n", new_mode);
 }
 
 static void quit_mode(bool apply)
 {
+    printf("Setup %s\n", apply ? "accepted." : "discarded.");
+
     if (apply) {
         config_changed();
     } else {
         *iidx_cfg = cfg_save;
     }
     current_mode = MODE_NONE;
-    printf("Quit setup %s\n", apply ? "saved." : "discarded.");
 }
  
 bool setup_run(uint16_t keys, uint16_t angle)
@@ -693,16 +578,10 @@ bool setup_run(uint16_t keys, uint16_t angle)
     input.angle = angle;
     input.just_pressed = keys & ~input.last_keys;
     input.just_released = ~keys & input.last_keys;
+
     input.rotate = input_delta(input.last_angle);
     if (input.rotate != 0) {
-        printf("@ %3d %2x\n", input.rotate, input.angle);
         mode_defs[current_mode].rotate();
-    }
-    if (input.just_pressed) {
-        printf("+ %04x\n", input.just_pressed);
-    }
-    if (input.just_released) {
-        printf("- %04x\n", input.just_released);
     }
 
     if (input.just_pressed || input.just_released) {

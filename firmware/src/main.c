@@ -24,26 +24,19 @@
 #include "tt_blade.h"
 #include "tt_rainbow.h"
 
-#include "config.h"
 #include "save.h"
-
-/* Measure the time of a function call */
-#define RUN_TIME(func) \
-   { uint64_t _t = time_us_64(); func; \
-     printf(#func ":%lld\n", time_us_64() - _t); }
+#include "config.h"
+#include "cli.h"
+#include "commands.h"
 
 struct {
     uint16_t buttons;
-    uint8_t joy[6];
+    uint8_t joy[2];
 } hid_report;
 
 void report_usb_hid()
 {
     if (tud_hid_ready()) {
-        hid_report.joy[2] = iidx_cfg->effects.e1;
-        hid_report.joy[3] = iidx_cfg->effects.e2;
-        hid_report.joy[4] = iidx_cfg->effects.e3;
-        hid_report.joy[5] = iidx_cfg->effects.e4;
         tud_hid_n_report(0x00, REPORT_ID_JOYSTICK, &hid_report, sizeof(hid_report));
     }
 }
@@ -76,20 +69,9 @@ void mode_check()
     }
 }
 
-static bool request_core1_pause = false;
-
-static void pause_core1(bool pause)
-{
-    request_core1_pause = pause;
-    if (pause) {
-        sleep_ms(5); /* wait for any IO ops to finish */
-    }
-}
-
+static mutex_t core1_io_lock;
 static void core1_loop()
 {
-#define RUN_EVERY_N_MS(a, ms) { if (frame % ms == 0) a; }
-    uint32_t frame = 0;
     while (true) {
         uint32_t angle = turntable_raw();
         rgb_set_angle(angle);
@@ -98,37 +80,28 @@ static void core1_loop()
         hid_report.joy[0] = angle8;
         hid_report.joy[1] = 255 - angle8;
 
-        RUN_EVERY_N_MS(rgb_update(), 2);
-        turntable_update();
-        frame++;
-        do {
-            sleep_ms(1);
-        } while (request_core1_pause);
-    }
-}
+        if (mutex_try_enter(&core1_io_lock, NULL)) {
+            rgb_update();
+            mutex_exit(&core1_io_lock);
+        }
 
-static void boot_usb_check(uint16_t buttons)
-{
-    uint16_t usb_boot_keys = 0x1855; /* YES, NO, 1, 3, 5, 7 */
-    if (buttons == usb_boot_keys) {
-        reset_usb_boot(0, 2); // usb boot to flash
-    }
-
-    uint16_t factory_default_keys = 0x182a; /* YES, NO, 2, 4, 6 */
-    if (buttons == factory_default_keys) {
-        config_factory_reset();
-        watchdog_enable(1, 1);
-        while(1); // just reboot
+        cli_fps_count(1);
+        sleep_us(500);
     }
 }
 
 static void core0_loop()
 {
+    uint64_t next_frame = 0;
+
     while (true)
     {
         tud_task();
+        cli_run();
+
+        turntable_update();
+
         uint16_t buttons = button_read();
-        boot_usb_check(buttons);
         uint16_t angle = turntable_raw() >> 4;
         if (setup_run(buttons, angle)) {
             rgb_force_display(setup_led_button, setup_led_tt);
@@ -138,6 +111,10 @@ static void core0_loop()
             save_loop();
         }
         report_usb_hid();
+        cli_fps_count(0);
+
+        sleep_until(next_frame);
+        next_frame = time_us_64() + 1000; // 1KHz
     }
 }
 
@@ -157,19 +134,20 @@ void init()
 
     setup_init();
     config_init();
-    save_init(pause_core1);
+    mutex_init(&core1_io_lock);
+    save_init(0xca341234, &core1_io_lock);
 
+    cli_init("iidx_pico>", "\n   << IIDX Pico|Teeny Controller >>\n"
+                            " https://github.com/whowechina\n\n");
+    commands_init();
     mode_check();
 }
 
-int main(void)
+void main(void)
 {
     init();
     multicore_launch_core1(core1_loop);
-
     core0_loop();
-
-    return 0;
 }
 
 // Invoked when received GET_REPORT control request

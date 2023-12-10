@@ -26,16 +26,10 @@ typedef struct __attribute ((packed)) {
         uint8_t mode; /* 0: on, 1: reversed, 2: off */
     } tt_led;
     struct {
-        uint8_t mode; /* 0: analog, 1: analog reversed, 2: i2c, 3: i2c reversed */
+        bool reversed;
         uint8_t deadzone; /* only for analog */
         uint8_t ppr; /* 0: 256, 1: 128, 2: 96, 3: 64, other: 256 */
     } tt_sensor;
-    struct {
-        uint8_t e1;
-        uint8_t e2;
-        uint8_t e3;
-        uint8_t e4;
-    } effects;
     uint8_t level; /* led brightness limit */
     bool konami; /* konami spoof */
 } iidx_cfg_t;

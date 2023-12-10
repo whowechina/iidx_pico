@@ -292,7 +292,15 @@ static void follow_mode_change()
 
 void rgb_update()
 {
+    static uint64_t last = 0;
+    uint64_t now = time_us_64();
+    if (now - last < 4000) { // no faster than 250Hz
+        return;
+    }
+    last = now;
+
     follow_mode_change();
+
     set_effect(iidx_cfg->tt_led.effect);
     if (time_us_64() > force_expire_time) {
         effect_update();

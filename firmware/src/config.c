@@ -23,15 +23,9 @@ static iidx_cfg_t default_cfg = {
         .mode = 0,
     },
     .tt_sensor = {
-        .mode = 2,
+        .reversed = false,
         .deadzone = 1,
         .ppr = 1,
-    },
-    .effects = {
-        .e1 = 255,
-        .e2 = 128,
-        .e3 = 128,
-        .e4 = 128,
     },
     .level = 128,
     .konami = false,
@@ -55,10 +49,6 @@ static void config_loaded()
     }
     if (iidx_cfg->tt_led.mode > 2) {
         iidx_cfg->tt_led.mode = 0;
-        config_changed();
-    }
-    if (iidx_cfg->tt_sensor.mode > 3) {
-        iidx_cfg->tt_sensor.mode = 2;
         config_changed();
     }
     if (iidx_cfg->tt_sensor.ppr > 3) {

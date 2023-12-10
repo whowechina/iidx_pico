@@ -12,7 +12,6 @@ Features:
 * Key color theme and customization.
 * Multiple turntable effects.
 * Many live settings.
-* Analog channels.
 * Konami device mode for IIDX Ultimate Mobile.
 * All source files open.
 
@@ -72,7 +71,6 @@ I made this project in my personal time with no financial benefit or sponsorship
 * 2x SN74LV1T34DBVR (SOT-23-5) level shifter, optional, for better voltage tolerance.
 * 2x 0603 10ohm resistors to bypass said level shifters, optional.
 * 1x 0603 5.1kohm resistors for USB.
-* 1x 0805 1nF capacitor for filtering analog signal, optional.
 * 5x 0805 1uF capacitors.
 * 4x Kailh low-profile keycaps.
 * 4x M3*6mm screws and hex nuts to fix parts together.
@@ -139,28 +137,16 @@ It's very small and requires higher accuracy.
   You need to scrape off some solder mask to expose the ground copper (don't scrape the solder mask under 5V pin). I found a good place to mount the REF3030, this is how I handled it:  
     <img src="doc/ref3030.jpg" width="300px">
 
-  * Before proceeding further, it's important to note that the silicone hinge used in my IIDX Teeny has proven to be the most effective and stable. Therefore, it's highly recommended to opt for the hinge option, rather than the subsequent digital (pogopin) or analog (3.5mm headphone jack) options.
+  * Before proceeding further, it's important to note that the silicone hinge used in my IIDX Teeny has proven to be the most effective and stable. Therefore, it's highly recommended to opt for the hinge option, rather than the subsequent digital (pogopin). I've also removed the analog (3.5mm headphone jack) option simply because it's not good.
 
   * If you go with digital (magnetic pogo pin connector)  
   There're a set of I2C and a WS2812B signal line together in the cable that connects turntable and the keyboard. Unfortunately, these signals crosstalk. So, we have to use shield cables for them. Two I2C lines should have a shield cable, and the WS2812B signal should have another shield cable. Good thing is, an HDMI cable has 4 shield cables and bunch of other small cables. We can make use of it.  
     <img src="doc/pogopin_wiring.jpg" width="300px">  
 
-  * If you go with analog (3.5mm headphone jack)  
-  Here's the pin definition.  
-    <img src="doc/headphone_jack_wiring.png" width="200px">
-  
-  The "ANGLE" connects to the AS5600 analog OUT. You need to remove a resistor from as5600 board to get OUT pin working.  
-    <img src="doc/as5600_mod.png" width="300px">
-
-  Note: For analog, crosstalk maybe no longer an issue, but ground level becomes a new concern. When driving the turntable LED ring, there's a considerable amount of current travelling through the ground cable which lifts AS5600 ground level. There're two ways to handle this. 
-    * One is to use a 5 wire cable. You need to separate LED ground from the sensor ground. A typical Type-C to Type-C cable has 5 wires inside. You can use red and black to power the LED and others to serve sensor ground, sensor analog out and LED signal.  
-    <img src="doc/5A_usb.jpg" width="300px">
-    <img src="doc/analog_wiring.png" width="500px">
-
-    * The other one is to minimize the ground wire resistance. A metal braid shielding cable can be used with the metal shield serving as the ground line. Or you can find a 4 wire cable with thick core copper.
 * Turntable LED Ring  
   I recommend to use LED strip over LED board, becuase the LED board's light is facing up, but using strip, the light can spread out pefectly.  
   Use transparent double-sided tape to stick the LED around the turntable inner wall.
+
 ### Step 4 - Assemble
 * Assemble the turntable  
   I don't know how to draw an explosion diagram, this is done by coding in OpenSCAD:  
@@ -189,7 +175,7 @@ It's very small and requires higher accuracy.
 * If it is already running my IIDX firmware, hold two small AUX buttons together will do the same as the BOOTSEL button.
 * You need to setup your configuration such as AS5600 connection mode and LED ring.
 * Also you can setup the key color theme and turntable effects at runtime. I think I made the configuration too showey and complicated. Check out the manual.    
-[Nice Looking Manual Here](doc/Firmware_Manual.pdf)
+[Nice Looking Manual Here](doc/Firmware_manual.pdf)
 
 ### What If?
 * I can't find pogopin connector.  
