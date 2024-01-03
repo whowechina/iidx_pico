@@ -1,3 +1,0 @@
-(fp_lib_table
-  (lib (name "iidx_tt")(type "KiCad")(uri "${KIPRJMOD}/iidx_tt.pretty")(options "")(descr ""))
-)

@@ -49,7 +49,7 @@ I made this project in my personal time with no financial benefit or sponsorship
 * 1x 6mm\*2mm magnet (must be radially magnetized), normally comes with the AS5600 board set.
 * 1x 61804-2RS deep groove ball bearing (20x32x7mm), normally < 5US$;
 * 1x WS2812B LED ring board, or RGB LED strip (recommended). Choose ones with dense LED arrangement (>=32 LEDs per board, or >90 LEDS per meter);
-* 3x M4*10mm screws (large flat head is better) and hex nuts, for bearing.
+* 3x M4*10mm screws (large flat head is better) and hex nuts, for bearing. For hinge version, use M3 screws.
 * 4x M3*12mm screws, for spinning disc. 
 * 1x REF3030 (3.0V Voltage Reference, SOT-23-3).
 * 1x Custom cut black acrylic disc, 4mm thickness.
@@ -126,10 +126,7 @@ It's very small and requires higher accuracy.
   * It's very easy to miss the USB pins of the Raspberry Pico Pi, it's at the other side. And it's difficult to solder as you may leave an airbubble in the soldering hole. My trick is to use sharpest iron tip, super-slowly apply solder wire only at one side. This is my result:  
     <img src="doc/solder_usb_txrx.jpg" width="300px">
 
-  * You can use level shifter (SN74LV1T34DBVR), or you can just bypass it by soldering a nearby resistor (10 ohm), or in early PCB version, short the two pads following the picture below.   
-    <img src="doc/bypass_level_shifter.png" width="300px">
-
-  * IMPORTANT: leave R1 unsoldered.
+  * You can use level shifter (SN74LV1T34DBVR, U2/U3), or you can just bypass it by soldering a nearby resistor (10 ohm, R1/R2).
   * Optional: TVS1 and TVS2 are rated 3.3V, protecting GPIOs. TVS3 should be rated 5V when using level shifter, and 3.3V when not using level shifter.
 * Turntable
   * General  
@@ -137,7 +134,9 @@ It's very small and requires higher accuracy.
   You need to scrape off some solder mask to expose the ground copper (don't scrape the solder mask under 5V pin). I found a good place to mount the REF3030, this is how I handled it:  
     <img src="doc/ref3030.jpg" width="300px">
 
-  * Before proceeding further, it's important to note that the silicone hinge used in my IIDX Teeny has proven to be the most effective and stable. Therefore, it's highly recommended to opt for the hinge option, rather than the subsequent digital (pogopin). I've also removed the analog (3.5mm headphone jack) option simply because it's not good.
+  
+  * **Very Important**  
+  Before proceeding further, it's important to know that the silicone hinge option used in my IIDX Teeny has proven to be the most effective and stable. Therefore, it's highly recommended to opt for the hinge option, rather than the subsequent digital (pogopin). I've also removed the analog (3.5mm headphone jack) option simply because it's not good. If you use Teeny's silicone hinge option, use the added J3/J4 3.3v soldering pads to power the AS5600.
 
   * If you go with digital (magnetic pogo pin connector)  
   There're a set of I2C and a WS2812B signal line together in the cable that connects turntable and the keyboard. Unfortunately, these signals crosstalk. So, we have to use shield cables for them. Two I2C lines should have a shield cable, and the WS2812B signal should have another shield cable. Good thing is, an HDMI cable has 4 shield cables and bunch of other small cables. We can make use of it.  
