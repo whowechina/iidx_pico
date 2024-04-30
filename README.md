@@ -1,4 +1,4 @@
-# Pico IIDX - Beatmania IIDX controller
+# IIDX Pico - Beatmania IIDX controller
 
 <img src="doc/main.jpg" width="80%">
 <img src="doc/stacked.jpg" width="80%">
