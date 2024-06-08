@@ -22,7 +22,7 @@ static uint16_t angle = 0;
 
 static void init_i2c()
 {
-    i2c_init(TT_AS5600_I2C, 573 * 1000);
+    i2c_init(TT_AS5600_I2C, 400 * 1000);
     gpio_set_function(TT_AS5600_SCL, GPIO_FUNC_I2C);
     gpio_set_function(TT_AS5600_SDA, GPIO_FUNC_I2C);
     gpio_set_drive_strength(TT_AS5600_SCL, GPIO_DRIVE_STRENGTH_8MA);
@@ -36,16 +36,46 @@ void turntable_init()
     init_i2c();
 }
 
-void turntable_update()
+static int read_angle()
 {
     const uint8_t as5600_addr = 0x36;
     uint8_t buf[2] = {0x0c, 0x00};
-    i2c_write_blocking_until(TT_AS5600_I2C, as5600_addr, buf, 1, true,
+    int ret = i2c_write_blocking_until(TT_AS5600_I2C, as5600_addr, buf, 1, true,
                              make_timeout_time_ms(1));
-    i2c_read_blocking_until(TT_AS5600_I2C, as5600_addr, buf, 2, false,
-                            make_timeout_time_ms(1));
+    if (ret != 1) {
+        return -1;
+    }
 
-    angle = ((uint16_t)buf[0] & 0x0f) << 8 | buf[1];
+    ret = i2c_read_blocking_until(TT_AS5600_I2C, as5600_addr, buf, 2, false,
+                            make_timeout_time_ms(1));
+    if (ret != 2) {
+        return -1;
+    }
+
+    return (buf[0] & 0x0f) << 8 | buf[1];
+}
+void turntable_update()
+{
+    int candidate = read_angle();
+    if (candidate < 0) {
+        return;
+    }
+
+    for (int i = 0; i < 2; i++) {
+        int update = read_angle();
+
+        if (abs(update - candidate) > 2) {
+            return;
+        }
+    
+        if (update > candidate) {
+            candidate++;
+        } else if (update < candidate) {
+            candidate--;
+        }
+    }
+
+    angle = candidate;
 }
 
 uint16_t turntable_raw()

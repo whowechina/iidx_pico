@@ -92,7 +92,7 @@ static void core1_loop()
 
 static void core0_loop()
 {
-    uint64_t next_frame = 0;
+    absolute_time_t next_frame = {0};
 
     while (true)
     {
@@ -114,7 +114,7 @@ static void core0_loop()
         cli_fps_count(0);
 
         sleep_until(next_frame);
-        next_frame = time_us_64() + 1000; // 1KHz
+        next_frame = make_timeout_time_us(1000);
     }
 }
 
