@@ -143,7 +143,10 @@ const char *string_desc_arr[] = {
     "E1",
     "E2",
     "E3",
-    "E4"
+    "E4",
+    "TT R",
+    "TT G",
+    "TT B"
 };
 
 static uint16_t _desc_str[64];

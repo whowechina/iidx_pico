@@ -27,6 +27,7 @@ static const uint8_t button_rgb_map[BUTTON_RGB_NUM] = BUTTON_RGB_MAP;
 
 static void trap() {}
 static tt_effect_t effects[10] = { {trap, trap, trap, 0} };
+uint8_t tt_hid[3];
 static size_t effect_num = 0;
 static unsigned current_effect = 0;
 
@@ -37,6 +38,9 @@ static unsigned current_effect = 0;
 
 #define REMAP_BUTTON_RGB _MAP_LED(BUTTON_RGB_ORDER)
 #define REMAP_TT_RGB _MAP_LED(TT_RGB_ORDER)
+
+#define HID_EXPIRE_DURATION 1000000ULL
+static uint64_t hid_expire_time = 0;
 
 static inline uint32_t _rgb32(uint32_t c1, uint32_t c2, uint32_t c3, bool gamma_fix)
 {
@@ -105,10 +109,16 @@ void drive_led()
     for (int i = 0; i < iidx_cfg->tt_led.start; i++) {
         pio_sm_put_blocking(pio1, 0, 0);
     }
-    for (int i = 0; i < TT_LED_NUM; i++) {
-        bool reversed = iidx_cfg->tt_led.mode & 0x01;
-        uint8_t id = reversed ? TT_LED_NUM - i - 1 : i;
-        pio_sm_put_blocking(pio1, 0, tt_led_buf[id] << 8u);
+    if (time_us_64() < hid_expire_time && (tt_hid[0] != 0 || tt_hid[1] != 0 || tt_hid[2] != 0) ) {
+        for (int i = 0; i < TT_LED_NUM; i++) {
+            pio_sm_put_blocking(pio1, 0, tt_rgb32(tt_hid[0], tt_hid[1], tt_hid[2], false) << 8u);
+        }
+    }else{
+        for (int i = 0; i < TT_LED_NUM; i++) {
+            bool reversed = iidx_cfg->tt_led.mode & 0x01;
+            uint8_t id = reversed ? TT_LED_NUM - i - 1 : i;
+            pio_sm_put_blocking(pio1, 0, tt_led_buf[id] << 8u); //
+        }
     }
     for (int i = 0; i < 8; i++) { // a few more to wipe out the last led
         pio_sm_put_blocking(pio1, 0, 0);
@@ -172,9 +182,6 @@ uint32_t tt_hsv(hsv_t hsv)
 #endif
 }
 
-#define HID_EXPIRE_DURATION 1000000ULL
-static uint64_t hid_expire_time = 0;
-
 static void button_lights_update()
 {
     for (int i = 0; i < BUTTON_RGB_NUM; i++) {
@@ -208,6 +215,11 @@ void rgb_set_hid_light(uint8_t const *lights, uint8_t num)
 {
     memcpy(button_lights, lights, num);
     hid_expire_time = time_us_64() + HID_EXPIRE_DURATION;
+}
+
+void rgb_set_tt_light(uint8_t const *lights, uint8_t num)
+{
+    memcpy(tt_hid, lights, num);
 }
 
 static void effect_update()
