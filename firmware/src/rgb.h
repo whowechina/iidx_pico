@@ -22,6 +22,7 @@ void rgb_set_level(uint8_t level);
 
 void rgb_set_button_light(uint16_t buttons);
 void rgb_set_hid_light(uint8_t const *lights, uint8_t num);
+void rgb_set_tt_light(uint8_t const *lights, uint8_t num);
 
 void rgb_force_display(uint32_t *keyboard, uint32_t *tt);
 

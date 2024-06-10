@@ -34,7 +34,7 @@ enum {
 #define GAMECON_REPORT_DESC_LIGHTS(...)                                        \
   HID_USAGE_PAGE(HID_USAGE_PAGE_DESKTOP), HID_USAGE(0x00),                     \
       HID_COLLECTION(HID_COLLECTION_APPLICATION),                              \
-      __VA_ARGS__ HID_REPORT_COUNT(11), /* LED NUM */                          \
+      __VA_ARGS__ HID_REPORT_COUNT(14), /* LED NUM */                          \
       HID_REPORT_SIZE(8), HID_LOGICAL_MIN(0x00), HID_LOGICAL_MAX_N(0x00ff, 2), \
       HID_USAGE_PAGE(HID_USAGE_PAGE_ORDINAL),                                  \
       HID_STRING_MINIMUM(5), HID_STRING_MAXIMUM(17),                           \
