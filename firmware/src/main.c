@@ -168,9 +168,8 @@ void tud_hid_set_report_cb(uint8_t itf, uint8_t report_id,
 {
     if ((report_id == REPORT_ID_LIGHTS) &&
         (report_type == HID_REPORT_TYPE_OUTPUT)) {
-        if (bufsize >= rgb_button_num() + 3) {
-           rgb_set_hid_light(buffer, rgb_button_num());
-           rgb_set_tt_light(buffer + rgb_button_num(), 3);
+        if (bufsize >= rgb_hid_light_num()) {
+           rgb_set_hid_light(buffer, bufsize);
         }
     }
 }

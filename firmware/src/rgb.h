@@ -15,6 +15,8 @@ void rgb_init();
 void rgb_set_hardware(uint16_t tt_start, uint16_t tt_num, bool tt_reversed);
 
 uint8_t rgb_button_num();
+uint8_t rgb_hid_light_num();
+
 void rgb_update();
 
 void rgb_set_angle(uint32_t angle);
@@ -22,7 +24,6 @@ void rgb_set_level(uint8_t level);
 
 void rgb_set_button_light(uint16_t buttons);
 void rgb_set_hid_light(uint8_t const *lights, uint8_t num);
-void rgb_set_tt_light(uint8_t const *lights, uint8_t num);
 
 void rgb_force_display(uint32_t *keyboard, uint32_t *tt);
 

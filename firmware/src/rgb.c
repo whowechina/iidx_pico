@@ -27,7 +27,6 @@ static const uint8_t button_rgb_map[BUTTON_RGB_NUM] = BUTTON_RGB_MAP;
 
 static void trap() {}
 static tt_effect_t effects[10] = { {trap, trap, trap, 0} };
-uint8_t tt_hid[3];
 static size_t effect_num = 0;
 static unsigned current_effect = 0;
 
@@ -40,7 +39,8 @@ static unsigned current_effect = 0;
 #define REMAP_TT_RGB _MAP_LED(TT_RGB_ORDER)
 
 #define HID_EXPIRE_DURATION 1000000ULL
-static uint64_t hid_expire_time = 0;
+static uint64_t hid_light_button_expire = 0;
+static uint64_t hid_light_tt_expire = 0;
 
 static inline uint32_t _rgb32(uint32_t c1, uint32_t c2, uint32_t c3, bool gamma_fix)
 {
@@ -80,7 +80,14 @@ uint8_t rgb_button_num()
     return BUTTON_RGB_NUM;
 }
 
-uint8_t button_lights[BUTTON_RGB_NUM];
+static uint8_t hid_lights[BUTTON_RGB_NUM + 3];
+static uint8_t *tt_hid = hid_lights + BUTTON_RGB_NUM;
+
+uint8_t rgb_hid_light_num()
+{
+    return sizeof(hid_lights);
+}
+
 uint32_t tt_led_buf[128] = {0};
 uint32_t tt_led_angle = 0;
 
@@ -99,7 +106,7 @@ void set_effect(uint32_t index)
 void drive_led()
 {
     for (int i = 0; i < ARRAY_SIZE(button_led_buf); i++) {
-        pio_sm_put_blocking(pio0, 0, button_led_buf[i] << 8u);
+        pio_sm_put_blocking(pio0, 0, button_led_buf[i] << 8);
     }
 
     if (iidx_cfg->tt_led.mode == 2) {
@@ -109,18 +116,14 @@ void drive_led()
     for (int i = 0; i < iidx_cfg->tt_led.start; i++) {
         pio_sm_put_blocking(pio1, 0, 0);
     }
-    if (time_us_64() < hid_expire_time && (tt_hid[0] != 0 || tt_hid[1] != 0 || tt_hid[2] != 0) ) {
-        for (int i = 0; i < TT_LED_NUM; i++) {
-            pio_sm_put_blocking(pio1, 0, tt_rgb32(tt_hid[0], tt_hid[1], tt_hid[2], false) << 8u);
-        }
-    }else{
-        for (int i = 0; i < TT_LED_NUM; i++) {
-            bool reversed = iidx_cfg->tt_led.mode & 0x01;
-            uint8_t id = reversed ? TT_LED_NUM - i - 1 : i;
-            pio_sm_put_blocking(pio1, 0, tt_led_buf[id] << 8u); //
-        }
+
+    for (int i = 0; i < TT_LED_NUM; i++) {
+        bool reversed = iidx_cfg->tt_led.mode & 0x01;
+        uint8_t id = reversed ? TT_LED_NUM - i - 1 : i;
+        pio_sm_put_blocking(pio1, 0, tt_led_buf[id] << 8);
     }
-    for (int i = 0; i < 8; i++) { // a few more to wipe out the last led
+
+    for (int i = 0; i < 8; i++) { // a few more to wipe out the last leds
         pio_sm_put_blocking(pio1, 0, 0);
     }
 }
@@ -186,7 +189,7 @@ static void button_lights_update()
 {
     for (int i = 0; i < BUTTON_RGB_NUM; i++) {
         int led = button_rgb_map[i];
-        if (button_lights[i] > 0) {
+        if (hid_lights[i] > 0) {
             button_led_buf[led] = button_hsv(iidx_cfg->key_on[i]);
         } else {
             button_led_buf[led] = button_hsv(iidx_cfg->key_off[i]);
@@ -202,37 +205,53 @@ void rgb_set_angle(uint32_t angle)
 
 void rgb_set_button_light(uint16_t buttons)
 {
-    if (time_us_64() < hid_expire_time) {
+    if (time_us_64() < hid_light_button_expire) {
         return;
     }
     for (int i = 0; i < BUTTON_RGB_NUM; i++) {
         uint16_t flag = 1 << i;
-        button_lights[i] = (buttons & flag) > 0 ? 0xff : 0;
+        hid_lights[i] = (buttons & flag) > 0 ? 0xff : 0;
     }
 }
 
 void rgb_set_hid_light(uint8_t const *lights, uint8_t num)
 {
-    memcpy(button_lights, lights, num);
-    hid_expire_time = time_us_64() + HID_EXPIRE_DURATION;
+    if (num < sizeof(hid_lights)) {
+        return;
+    }
+
+    memcpy(hid_lights, lights, sizeof(hid_lights));
+
+    uint64_t now = time_us_64();
+    
+    hid_light_button_expire = now + HID_EXPIRE_DURATION;
+
+    if (tt_hid[0] || tt_hid[1] || tt_hid[2]) {
+        hid_light_tt_expire = now + HID_EXPIRE_DURATION;
+    }
 }
 
-void rgb_set_tt_light(uint8_t const *lights, uint8_t num)
+static void tt_lights_update()
 {
-    memcpy(tt_hid, lights, num);
-}
+    if (time_us_64() < hid_light_tt_expire) {
+        /* Higher priority for the HID lights */
+        uint32_t color = tt_rgb32(tt_hid[0], tt_hid[1], tt_hid[2], false);
+        for (int i = 0; i < TT_LED_NUM; i++) {
+            tt_led_buf[i] = color;
+        }
+        return;
+    }
 
-static void effect_update()
-{
+    /* Lower priority for the local effects */
     effects[current_effect].update(effects[current_effect].context);
 }
 
 #define FORCE_EXPIRE_DURATION 100000ULL
-static uint64_t force_expire_time = 0;
+static uint64_t forced_expire_time = 0;
 uint32_t *force_buttons = NULL;
 uint32_t *force_tt = NULL;
 
-void force_update()
+static void forced_update()
 {
     for (int i = 0; i < BUTTON_RGB_NUM; i++) {
         int led = button_rgb_map[i];
@@ -246,7 +265,7 @@ void rgb_force_display(uint32_t *buttons, uint32_t *tt)
 {
     force_buttons = buttons;
     force_tt = tt;
-    force_expire_time = time_us_64() + FORCE_EXPIRE_DURATION;
+    forced_expire_time = time_us_64() + FORCE_EXPIRE_DURATION;
 }
 
 static void wipe_out_tt_led()
@@ -314,11 +333,11 @@ void rgb_update()
     follow_mode_change();
 
     set_effect(iidx_cfg->tt_led.effect);
-    if (time_us_64() > force_expire_time) {
-        effect_update();
+    if (time_us_64() > forced_expire_time) {
+        tt_lights_update();
         button_lights_update();
     } else {
-        force_update();
+        forced_update();
     }
     drive_led();
 }
