@@ -15,7 +15,10 @@ Features:
 * Konami device mode for IIDX Ultimate Mobile.
 * All source files open.
 
-Thanks to many respectful guys/companies who made their tools or materials free or open source (KiCad, OpenSCAD, InkScape, Raspberry things).
+Thanks to many respectful guys/companies who made their tools or materials free or open source (KiCad, OpenSCAD, InkScape, Raspberry things). And also:
+* RP_Silicon_KiCad: https://github.com/HeadBoffin/RP_Silicon_KiCad
+* Switch_Keyboard_Kailh: https://github.com/kiswitch/keyswitch-kicad-library
+* Type-C: https://github.com/ai03-2725/Type-C.pretty
 
 ## Notes
 This is a difficult build, it heavily depends on 3D printing, both FDM and SLA (resin). It also requires skills to solder tiny components and thin cables., much more difficult than my other projects such as Pico Popn.
