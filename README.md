@@ -163,6 +163,12 @@ It's very small and requires higher accuracy.
 * Install the low-profile stabilizers.  
   https://docs.keeb.io/choc-stabs  
   A little trick here. As the PCB footprint is made to support both choc v1 and v2, that leaves some wobble space for choc v1 and makes it difficult to align. So leave the key switch unsoldered, when the stabilizer, the key switch and the keycap are all in place, push the keycap down and then solder the key switch. This way the key switch will be aligned to the stabilizers better.
+
+  **VERY IMPORTANT**
+
+  I made a terrible mistake in early PCBs which causes main buttons sticky (not physically responsive as expected). If you're using PCB v1.3 or later version, you're fine. If you're using PCB v1.2 or earlier version, there's a simple fix. Just manually cut some bevelling on the PCB, so stabilizer's shaft can move freely. You need to do all the buttons. Please don't cut through the PCB, just cut the edge a little at the bottom.  
+  <img src="doc/pcb_stab_fix_1.jpg" width="25%"> <img src="doc/pcb_stab_fix_2.jpg" width="60%">
+
 * Assemble the keyboard  
   It's very easy.  
   <img src="doc/kb_assemble.png" width="500px">  
