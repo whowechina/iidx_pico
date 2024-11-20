@@ -1,4 +1,4 @@
-23958460143988802
+23975870656850031
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -97867,6 +97867,13 @@ mounting hole 3.2mm no annular m3
 0
 0
 iidx_pico
+P2.0_4P_Solder
+JST SH series connector, SM04B-SRSS-TB (http://www.jst-mfg.com/product/pdf/eng/eSH.pdf), generated with kicad-footprint-generator
+connector JST SH horizontal
+0
+4
+4
+iidx_pico
 PJ393-8P
 PJ31060-I 6pin SMD 3.5mm headphones jack (http://www.china-bsun.com/Product48/1577.html)
 headphones jack plug stereo 3.5mm PJ31060-I PJ31060
@@ -97880,6 +97887,55 @@ Through hole pin header THT 1x05 2.54mm single row
 0
 5
 5
+iidx_pico
+RPi_Pico_SMD_Pins
+Through hole straight pin header, 2x20, 2.54mm pitch, double rows
+Through hole pin header THT 2x20 2.54mm double row
+0
+45
+45
+iidx_pico
+RPi_Pico_SMD_Pins_No_SWD
+Through hole straight pin header, 2x20, 2.54mm pitch, double rows
+Through hole pin header THT 2x20 2.54mm double row
+0
+42
+42
+iidx_pico
+RPi_Pico_SMD_Pins_No_SWD_No_Text
+Through hole straight pin header, 2x20, 2.54mm pitch, double rows
+Through hole pin header THT 2x20 2.54mm double row
+0
+42
+42
+iidx_pico
+SH1.0_3P
+JST SH series connector, SM04B-SRSS-TB (http://www.jst-mfg.com/product/pdf/eng/eSH.pdf), generated with kicad-footprint-generator
+connector JST SH horizontal
+0
+7
+4
+iidx_pico
+SH1.0_3P_Solder_Combo
+JST SH series connector, SM04B-SRSS-TB (http://www.jst-mfg.com/product/pdf/eng/eSH.pdf), generated with kicad-footprint-generator
+connector JST SH horizontal
+0
+8
+4
+iidx_pico
+SH1.0_4P_Solder_Combo
+JST SH series connector, SM04B-SRSS-TB (http://www.jst-mfg.com/product/pdf/eng/eSH.pdf), generated with kicad-footprint-generator
+connector JST SH horizontal
+0
+10
+5
+iidx_pico
+SH1.0_5P
+JST SH series connector, SM04B-SRSS-TB (http://www.jst-mfg.com/product/pdf/eng/eSH.pdf), generated with kicad-footprint-generator
+connector JST SH horizontal
+0
+9
+6
 iidx_pico
 SOT-23-5_Jumper
 SOT, 5 Pin (https://www.jedec.org/sites/default/files/docs/Mo-178c.PDF variant AA), generated with kicad-footprint-generator ipc_gullwing_generator.py
@@ -97924,6 +97980,20 @@ WS2812B-1615
 4
 iidx_pico
 WS2812B-2835
+
+
+0
+4
+4
+iidx_pico
+WS2812B-4020
+
+
+0
+4
+4
+iidx_pico
+WS2812B-4020_UP
 
 
 0
