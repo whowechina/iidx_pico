@@ -15,45 +15,47 @@
 #include "hardware/adc.h"
 #include "hardware/i2c.h"
 
+#include "as5600.h"
+#include "tmag5273.h"
+
 #include "board_defs.h"
 #include "config.h"
 
-static uint16_t angle = 0;
-
-static void init_i2c()
-{
-    i2c_init(TT_AS5600_I2C, 400 * 1000);
-    gpio_set_function(TT_AS5600_SCL, GPIO_FUNC_I2C);
-    gpio_set_function(TT_AS5600_SDA, GPIO_FUNC_I2C);
-    gpio_set_drive_strength(TT_AS5600_SCL, GPIO_DRIVE_STRENGTH_8MA);
-    gpio_set_drive_strength(TT_AS5600_SDA, GPIO_DRIVE_STRENGTH_8MA);
-    gpio_pull_up(TT_AS5600_SCL);
-    gpio_pull_up(TT_AS5600_SDA);
-}
+static uint16_t raw_angle = 0;
+static bool use_as5600 = true;
 
 void turntable_init()
 {
-    init_i2c();
+    i2c_init(TT_SENSOR_I2C, 400 * 1000);
+    gpio_init(TT_SENSOR_SCL);
+    gpio_init(TT_SENSOR_SDA);
+    gpio_set_function(TT_SENSOR_SCL, GPIO_FUNC_I2C);
+    gpio_set_function(TT_SENSOR_SDA, GPIO_FUNC_I2C);
+    gpio_pull_up(TT_SENSOR_SCL);
+    gpio_pull_up(TT_SENSOR_SDA);
+
+    tmag5273_init(0, TT_SENSOR_I2C);
+    if (tmag5273_is_present(0)) {
+        tmag5273_use(0);
+        tmag5273_init_sensor();
+        use_as5600 = false;
+        return;
+    }
+
+    as5600_init(TT_SENSOR_I2C);
+    as5600_init_sensor();
+    use_as5600 = true;
 }
 
 static int read_angle()
 {
-    const uint8_t as5600_addr = 0x36;
-    uint8_t buf[2] = {0x0c, 0x00};
-    int ret = i2c_write_blocking_until(TT_AS5600_I2C, as5600_addr, buf, 1, true,
-                             make_timeout_time_ms(1));
-    if (ret != 1) {
-        return -1;
+    if (use_as5600) {
+        return as5600_read_angle();
     }
 
-    ret = i2c_read_blocking_until(TT_AS5600_I2C, as5600_addr, buf, 2, false,
-                            make_timeout_time_ms(1));
-    if (ret != 2) {
-        return -1;
-    }
-
-    return (buf[0] & 0x0f) << 8 | buf[1];
+    return tmag5273_read_angle() * 0x1000 / 360 / 16;
 }
+
 void turntable_update()
 {
     int candidate = read_angle();
@@ -75,12 +77,12 @@ void turntable_update()
         }
     }
 
-    angle = candidate;
+    raw_angle = candidate;
 }
 
 uint16_t turntable_raw()
 {
-    return iidx_cfg->tt_sensor.reversed ? 4095 - angle : angle; // 12bit
+    return iidx_cfg->tt_sensor.reversed ? 4095 - raw_angle : raw_angle; // 12bit
 }
 
 uint8_t turntable_read()
@@ -96,10 +98,10 @@ uint8_t turntable_read()
     } else if (iidx_cfg->tt_sensor.ppr == 3) {
         step = 4096 / 64;
     } else {
-        return angle >> 4;
+        return raw_angle >> 4;
     }
 
-    int16_t delta = angle - old_angle;
+    int16_t delta = raw_angle - old_angle;
     if (delta == 0) {
         return counter;
     } else if (delta > 2048) {

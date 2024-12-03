@@ -13,14 +13,12 @@
 #define BUTTON_RGB_NUM 11
 #define BUTTON_RGB_MAP { 6, 0, 5, 1, 4, 2, 3, 7, 8, 9, 10}
 
-
 #define TT_RGB_PIN 28
 #define TT_RGB_ORDER GRB // or RGB
 
-#define TT_AS5600_ANALOG 26
-#define TT_AS5600_SCL 27
-#define TT_AS5600_SDA 26
-#define TT_AS5600_I2C i2c1
+#define TT_SENSOR_SCL 27
+#define TT_SENSOR_SDA 26
+#define TT_SENSOR_I2C i2c1
 
 // Alternative I2C pins
 //#define TT_AS5600_SCL 21
