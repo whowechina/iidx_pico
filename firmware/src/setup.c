@@ -143,7 +143,7 @@ static void none_rotate()
     }
 
     int16_t delta = input_delta(none_ctx.start_angle);
-    if (abs(delta) > 10) {
+    if (abs(delta) > 20) {
         join_mode(MODE_LEVEL);
         none_ctx.escaped = false;
     }
@@ -297,7 +297,6 @@ static void level_rotate()
         new_value = 255;
     }
     iidx_cfg->level = new_value;
-    printf("Level: %d\n", iidx_cfg->level);
 }
 
 static void level_key_change()

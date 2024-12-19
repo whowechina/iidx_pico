@@ -146,7 +146,7 @@ static void process_cmd()
 void cli_run()
 {
     int c = getchar_timeout_us(0);
-    if (c == EOF) {
+    if (c < 0) {
         return;
     }
 

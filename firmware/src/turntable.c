@@ -26,7 +26,7 @@ static bool use_as5600 = true;
 
 void turntable_init()
 {
-    i2c_init(TT_SENSOR_I2C, 400 * 1000);
+    i2c_init(TT_SENSOR_I2C, 333 * 1000);
     gpio_init(TT_SENSOR_SCL);
     gpio_init(TT_SENSOR_SDA);
     gpio_set_function(TT_SENSOR_SCL, GPIO_FUNC_I2C);
@@ -56,28 +56,15 @@ static int read_angle()
     return tmag5273_read_angle() * 0x1000 / 360 / 16;
 }
 
+static const int average_count = 4;
 void turntable_update()
 {
-    int candidate = read_angle();
-    if (candidate < 0) {
-        return;
+    int sum = 0;
+    for (int i = 0; i < average_count; i++) {
+        sum += read_angle();
     }
 
-    for (int i = 0; i < 2; i++) {
-        int update = read_angle();
-
-        if (abs(update - candidate) > 2) {
-            return;
-        }
-    
-        if (update > candidate) {
-            candidate++;
-        } else if (update < candidate) {
-            candidate--;
-        }
-    }
-
-    raw_angle = candidate;
+    raw_angle = sum / average_count;
 }
 
 uint16_t turntable_raw()
