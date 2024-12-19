@@ -25,11 +25,13 @@
 
 static const uint8_t button_rgb_map[BUTTON_RGB_NUM] = BUTTON_RGB_MAP;
 
-static tt_effect_t effects[7] = { };
+static tt_effect_t effects[4] = { };
 static size_t effect_num = 0;
 #define EFFECT_MAX count_of(effects)
 
-static unsigned current_effect = 0;
+static unsigned current_effect_id = 0;
+#define CURRENT_EFFECT (effects[(current_effect_id & 0x0f) % 4])
+#define CURRENT_CONTEXT ((current_effect_id >> 4) % 3)
 
 #define _MAP_LED(x) _MAKE_MAPPER(x)
 #define _MAKE_MAPPER(x) MAP_LED_##x
@@ -106,17 +108,14 @@ static void effect_reset()
         effects[i].init = fn_nop;
         effects[i].set_angle = fn_nop;
         effects[i].update = fn_tt_led_off;
-        effects[i].context = 0;
     }
 }
 
-static void set_effect(uint32_t index)
+static void set_effect(uint32_t effect_id)
 {
-    if (index < EFFECT_MAX) {
-        if (current_effect != index) {
-            current_effect = index;
-            effects[current_effect].init(effects[current_effect].context);
-        }
+    if (current_effect_id != effect_id) {
+        current_effect_id = effect_id;
+        CURRENT_EFFECT.init(CURRENT_CONTEXT);
     }
 }
 
@@ -205,7 +204,7 @@ uint32_t tt_hsv(hsv_t hsv)
 void rgb_set_angle(uint32_t angle)
 {
     tt_led_angle = angle;
-    effects[current_effect].set_angle(angle);
+    CURRENT_EFFECT.set_angle(CURRENT_CONTEXT, angle);
 }
 
 void rgb_set_button_light(uint16_t buttons)
@@ -262,7 +261,7 @@ static void tt_lights_update()
 
     set_effect(iidx_cfg->tt_led.effect);
     /* Lower priority for the local effects */
-    effects[current_effect].update(effects[current_effect].context);
+    CURRENT_EFFECT.update(CURRENT_CONTEXT);
 }
 
 static void button_lights_update()

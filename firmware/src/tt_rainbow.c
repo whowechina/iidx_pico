@@ -54,10 +54,11 @@ static void init(uint32_t context)
 
 static uint32_t phase = 0;
 
-static void set_angle(uint32_t angle)
+static void set_angle(uint32_t context, uint32_t angle)
 {
     angle >>= 4;
-    phase = COLOR_WHEEL_SIZE * RGB_RING_CYCLE * (256 - angle) / 256;
+    unsigned cycle = 1 << (context % 3);
+    phase = COLOR_WHEEL_SIZE * cycle * (256 - angle) / 256;
 }
 
 static void update(uint32_t context)
@@ -68,8 +69,9 @@ static void update(uint32_t context)
         return;
     }
 
+    unsigned cycle = 1 << (context % 3);
     for (int i = 0; i < TT_LED_NUM; i++) {
-        uint32_t pitch = COLOR_WHEEL_SIZE * RGB_RING_CYCLE * i;
+        uint32_t pitch = COLOR_WHEEL_SIZE * cycle * i;
         uint32_t index = (phase + pitch / TT_LED_NUM) % COLOR_WHEEL_SIZE;
         tt_led_buf[i] = color_wheel[index];
     }
@@ -81,8 +83,6 @@ void tt_rainbow_init()
         init,
         set_angle,
         update,
-        0,
     };
-
     rgb_reg_tt_effect(rainbow);
 }

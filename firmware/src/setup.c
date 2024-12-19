@@ -509,9 +509,16 @@ static void key_theme_loop()
 
 static void tt_theme_key_change()
 {
-    for (int i = 0; i < 7; i++) {
-        if (JUST_PRESSED(KEY_1 << i)) {
-            iidx_cfg->tt_led.effect = i;
+    for (int i = 0; i < 4; i++) {
+        if (JUST_PRESSED(KEY_1 << (i * 2))) {
+            iidx_cfg->tt_led.effect = iidx_cfg->tt_led.effect & 0xf0 | i;
+            break;
+        }
+    }
+
+    for (int i = 0; i < 3; i++) {
+        if (JUST_PRESSED(KEY_2 << (i * 2))) {
+            iidx_cfg->tt_led.effect = iidx_cfg->tt_led.effect & 0x0f | (i << 4);
             break;
         }
     }
@@ -520,8 +527,17 @@ static void tt_theme_key_change()
 
 static void tt_theme_loop()
 {
+    int effect = (iidx_cfg->tt_led.effect & 0x0f) % 4;
+    int context = (iidx_cfg->tt_led.effect >> 4) % 3;
+
     for (int i = 0; i < 7; i++) {
-        setup_led_button[i] = iidx_cfg->tt_led.effect == i ? SILVER : 0;
+        if (i == effect * 2) {
+            setup_led_button[i] = SILVER;
+        } else if (i == context * 2 + 1) {
+            setup_led_button[i] = CYAN;
+        } else {
+            setup_led_button[i] = 0;
+        }
     }
 }
 

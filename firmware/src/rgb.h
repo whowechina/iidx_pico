@@ -30,9 +30,8 @@ void rgb_override_button(uint32_t *button);
 
 typedef struct {
     void (*init)(uint32_t context);
-    void (*set_angle)(uint32_t angle);
+    void (*set_angle)(uint32_t context, uint32_t angle);
     void (*update)(uint32_t context);
-    uint32_t context;
 } tt_effect_t;
 
 void rgb_reg_tt_effect(tt_effect_t effect);

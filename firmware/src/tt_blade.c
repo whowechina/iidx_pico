@@ -54,34 +54,34 @@ static void blade_put_pixel(uint32_t pos, uint32_t color, uint32_t level)
     blade_color_mix(index_right, color, dis_right, level);
 }
 
-static uint32_t color[] = {
-    //rrggbb,
-    0x808080,
-    0xc0c040,
-    0xffff00,
-    0xfff000,
-    0xffe000,
-    0xffd000,
-    0xffc000,
-    0xffb000,
-    0xffa000,
-    0xff9000,
-    0xff8000,
-    0xff7000,
-    0xff6000,
-    0xff5000,
-    0xff4000,
-    0xff3000,
-    0xff2000,
-    0xff1000,
-
-    0xff0000,
-    0xc00000,
-    0x800000,
-    0x400000,
+static uint32_t spectrum[3][24] = {
+    {
+        0x808080, 0xc0c040, 0xffff00, 0xfff000,
+        0xffe000, 0xffd000, 0xffc000, 0xffb000,
+        0xffa000, 0xff9000, 0xff8000, 0xff7000,
+        0xff6000, 0xff5000, 0xff4000, 0xff3000,
+        0xff2000, 0xff1000, 0xff0000, 0xc00000,
+        0x800000, 0x400000, 0x200000, 0x100000,
+    },
+    {
+        0x808080, 0xc040c0, 0xff00ff, 0xf000ff,
+        0xe000ff, 0xd000ff, 0xc000ff, 0xb000ff,
+        0xa000ff, 0x9000ff, 0x8000ff, 0x7000ff,
+        0x6000ff, 0x5000ff, 0x4000ff, 0x3000ff,
+        0x2000ff, 0x1000ff, 0x0000ff, 0x0000c0,
+        0x000080, 0x000040, 0x000020, 0x000010,
+    },
+    {
+        0x808080, 0xc0c040, 0xffff00, 0xf0ff00,
+        0xe0ff00, 0xd0ff00, 0xc0ff00, 0xb0ff00,
+        0xa0ff00, 0x90ff00, 0x80ff00, 0x70ff00,
+        0x60ff00, 0x50ff00, 0x40ff00, 0x30ff00,
+        0x20ff00, 0x10ff00, 0x00ff00, 0x00c000,
+        0x008000, 0x004000, 0x002000, 0x001000,
+    },
 };
 
-#define SNAKE_SIZE (sizeof(color) / sizeof(color[0]))
+#define SNAKE_SIZE (count_of(spectrum[0]))
 uint32_t snake[SNAKE_SIZE] = {0};
 uint32_t life[SNAKE_SIZE] = {0};
 
@@ -89,7 +89,7 @@ static void init(uint32_t context)
 {
 }
 
-static void set_angle(uint32_t angle)
+static void set_angle(uint32_t context, uint32_t angle)
 {
 }
 
@@ -122,7 +122,7 @@ static void update(uint32_t context)
     }
     blade_clear();
     for (int i = 0; i < SNAKE_SIZE; i++) {
-        blade_put_pixel(snake[i], color[i], life[i]);
+        blade_put_pixel(snake[i], spectrum[context % 3][i], life[i]);
         if (life[i] > 0) {
             life[i]--;
         }
@@ -138,7 +138,6 @@ void tt_blade_init()
         init,
         set_angle,
         update,
-        0,
     };
 
     rgb_reg_tt_effect(blade);
