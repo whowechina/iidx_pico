@@ -25,7 +25,8 @@ void rgb_set_level(uint8_t level);
 void rgb_set_button_light(uint16_t buttons);
 void rgb_set_hid_light(uint8_t const *lights, uint8_t num);
 
-void rgb_force_display(uint32_t *keyboard, uint32_t *tt);
+void rgb_override_tt(uint32_t *tt);
+void rgb_override_button(uint32_t *button);
 
 typedef struct {
     void (*init)(uint32_t context);

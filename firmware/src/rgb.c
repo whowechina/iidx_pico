@@ -25,9 +25,10 @@
 
 static const uint8_t button_rgb_map[BUTTON_RGB_NUM] = BUTTON_RGB_MAP;
 
-static void trap() {}
-static tt_effect_t effects[10] = { {trap, trap, trap, 0} };
+static tt_effect_t effects[7] = { };
 static size_t effect_num = 0;
+#define EFFECT_MAX count_of(effects)
+
 static unsigned current_effect = 0;
 
 #define _MAP_LED(x) _MAKE_MAPPER(x)
@@ -93,17 +94,33 @@ uint32_t tt_led_angle = 0;
 
 static uint32_t button_led_buf[BUTTON_RGB_NUM] = {0};
 
-void set_effect(uint32_t index)
+static void fn_nop() {};
+static void fn_tt_led_off()
 {
-    if (index < effect_num) {
-        current_effect = index;
-        effects[current_effect].init(effects[current_effect].context);
-    } else {
-        current_effect = effect_num;
+    memset(tt_led_buf, 0, sizeof(tt_led_buf));
+}
+
+static void effect_reset()
+{
+    for (int i = 0; i < EFFECT_MAX; i++) {
+        effects[i].init = fn_nop;
+        effects[i].set_angle = fn_nop;
+        effects[i].update = fn_tt_led_off;
+        effects[i].context = 0;
     }
 }
 
-void drive_led()
+static void set_effect(uint32_t index)
+{
+    if (index < EFFECT_MAX) {
+        if (current_effect != index) {
+            current_effect = index;
+            effects[current_effect].init(effects[current_effect].context);
+        }
+    }
+}
+
+static void drive_led()
 {
     for (int i = 0; i < ARRAY_SIZE(button_led_buf); i++) {
         pio_sm_put_blocking(pio0, 0, button_led_buf[i] << 8);
@@ -185,18 +202,6 @@ uint32_t tt_hsv(hsv_t hsv)
 #endif
 }
 
-static void button_lights_update()
-{
-    for (int i = 0; i < BUTTON_RGB_NUM; i++) {
-        int led = button_rgb_map[i];
-        if (hid_lights[i] > 0) {
-            button_led_buf[led] = button_hsv(iidx_cfg->key_on[i]);
-        } else {
-            button_led_buf[led] = button_hsv(iidx_cfg->key_off[i]);
-        }
-    }
-}
-
 void rgb_set_angle(uint32_t angle)
 {
     tt_led_angle = angle;
@@ -231,9 +236,22 @@ void rgb_set_hid_light(uint8_t const *lights, uint8_t num)
     }
 }
 
+#define OVERRIDE_EXPIRE 100000ULL
+static uint64_t override_tt_expire_time = 0;
+static uint64_t override_button_expire_time = 0;
+uint32_t *override_tt_buf = NULL;
+uint32_t *override_button_buf = NULL;
+
 static void tt_lights_update()
 {
-    if (time_us_64() < hid_light_tt_expire) {
+    uint64_t now = time_us_64();
+
+    if (now < override_tt_expire_time) {
+        memcpy(tt_led_buf, override_tt_buf, TT_LED_NUM * sizeof(uint32_t));
+        return;
+    }
+
+    if (now < hid_light_tt_expire) {
         /* Higher priority for the HID lights */
         uint32_t color = tt_rgb32(tt_hid[0], tt_hid[1], tt_hid[2], false);
         for (int i = 0; i < TT_LED_NUM; i++) {
@@ -242,30 +260,42 @@ static void tt_lights_update()
         return;
     }
 
+    set_effect(iidx_cfg->tt_led.effect);
     /* Lower priority for the local effects */
     effects[current_effect].update(effects[current_effect].context);
 }
 
-#define FORCE_EXPIRE_DURATION 100000ULL
-static uint64_t forced_expire_time = 0;
-uint32_t *force_buttons = NULL;
-uint32_t *force_tt = NULL;
-
-static void forced_update()
+static void button_lights_update()
 {
-    for (int i = 0; i < BUTTON_RGB_NUM; i++) {
-        int led = button_rgb_map[i];
-        button_led_buf[led] = force_buttons[i];
+    uint64_t now = time_us_64();
+    if (now < override_button_expire_time) {
+        for (int i = 0; i < BUTTON_RGB_NUM; i++) {
+            int led = button_rgb_map[i];
+            button_led_buf[led] = override_button_buf[i];
+        }
+        return;
     }
 
-    memcpy(tt_led_buf, force_tt, TT_LED_NUM * sizeof(uint32_t));
+    for (int i = 0; i < BUTTON_RGB_NUM; i++) {
+        int led = button_rgb_map[i];
+        if (hid_lights[i] > 0) {
+            button_led_buf[led] = button_hsv(iidx_cfg->key_on[i]);
+        } else {
+            button_led_buf[led] = button_hsv(iidx_cfg->key_off[i]);
+        }
+    }
 }
 
-void rgb_force_display(uint32_t *buttons, uint32_t *tt)
+void rgb_override_tt(uint32_t *tt)
 {
-    force_buttons = buttons;
-    force_tt = tt;
-    forced_expire_time = time_us_64() + FORCE_EXPIRE_DURATION;
+    override_tt_buf = tt;
+    override_tt_expire_time = time_us_64() + OVERRIDE_EXPIRE;
+}
+
+void rgb_override_button(uint32_t *button)
+{
+    override_button_buf = button;
+    override_button_expire_time = time_us_64() + OVERRIDE_EXPIRE;
 }
 
 static void wipe_out_tt_led()
@@ -304,7 +334,7 @@ void rgb_init()
     gpio_set_drive_strength(BUTTON_RGB_PIN, GPIO_DRIVE_STRENGTH_2MA);
     ws2812_program_init(pio0, 0, pio0_offset, BUTTON_RGB_PIN, 800000, false);
 
-    /* We don't start the tt LED program yet */
+    effect_reset();
 }
 
 static void follow_mode_change()
@@ -332,19 +362,22 @@ void rgb_update()
 
     follow_mode_change();
 
-    set_effect(iidx_cfg->tt_led.effect);
-    if (time_us_64() > forced_expire_time) {
-        tt_lights_update();
-        button_lights_update();
-    } else {
-        forced_update();
-    }
+    tt_lights_update();
+    button_lights_update();
+
     drive_led();
+}
+
+static void trap()
+{
+    return;
 }
 
 void rgb_reg_tt_effect(tt_effect_t effect)
 {
+    if (effect_num >= EFFECT_MAX) {
+        return;
+    }
     effects[effect_num] = effect;
     effect_num++;
-    effects[effect_num] = (tt_effect_t) { trap, trap, trap, 0 };
 }

@@ -530,14 +530,16 @@ static struct {
     mode_func rotate;
     mode_func loop;
     mode_func enter;
+    bool tt_led;
+    bool button_led;
 } mode_defs[] = {
-    [MODE_NONE] = { nop, none_rotate, none_loop, nop},
-    [MODE_TURNTABLE] = { tt_key_change, tt_rotate, tt_loop, tt_enter},
-    [MODE_LEVEL] = { level_key_change, level_rotate, level_loop, nop},
-    [MODE_TT_THEME] = { tt_theme_key_change, nop, tt_theme_loop, nop},
-    [MODE_KEY_THEME] = { key_theme_key_change, nop, key_theme_loop, nop},
-    [MODE_KEY_OFF] = { key_change, key_rotate, key_loop, key_enter},
-    [MODE_KEY_ON] = { key_change, key_rotate, key_loop, key_enter},
+    [MODE_NONE] = { nop, none_rotate, none_loop, nop, false, false },
+    [MODE_TURNTABLE] = { tt_key_change, tt_rotate, tt_loop, tt_enter, true, true },
+    [MODE_LEVEL] = { level_key_change, level_rotate, level_loop, nop, true, true },
+    [MODE_TT_THEME] = { tt_theme_key_change, nop, tt_theme_loop, nop, false, true },
+    [MODE_KEY_THEME] = { key_theme_key_change, nop, key_theme_loop, nop, false, true },
+    [MODE_KEY_OFF] = { key_change, key_rotate, key_loop, key_enter, true, true },
+    [MODE_KEY_ON] = { key_change, key_rotate, key_loop, key_enter, true, true },
 };
 
 static void join_mode(setup_mode_t new_mode)
@@ -562,7 +564,7 @@ static void quit_mode(bool apply)
     current_mode = MODE_NONE;
 }
  
-bool setup_run(uint16_t keys, uint16_t angle)
+void setup_run(uint16_t keys, uint16_t angle)
 {
     setup_tick_ms = time_us_64() / 1000;
     input.keys = keys;
@@ -586,8 +588,16 @@ bool setup_run(uint16_t keys, uint16_t angle)
 
     input.last_keys = keys;
     input.last_angle = angle;
+}
 
-    return current_mode != MODE_NONE;    
+bool setup_needs_tt_led()
+{
+    return mode_defs[current_mode].tt_led;
+}
+
+bool setup_needs_button_led()
+{
+    return mode_defs[current_mode].button_led;
 }
 
 void setup_init()

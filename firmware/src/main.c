@@ -103,13 +103,24 @@ static void core0_loop()
 
         uint16_t buttons = button_read();
         uint16_t angle = turntable_raw() >> 4;
-        if (setup_run(buttons, angle)) {
-            rgb_force_display(setup_led_button, setup_led_tt);
+        setup_run(buttons, angle);
+
+        bool ov_tt = setup_needs_tt_led();
+        bool ov_btn = setup_needs_button_led();
+
+        if (ov_tt) {
+            rgb_override_tt(setup_led_tt);
+        }
+        if (ov_btn) {
+            rgb_override_button(setup_led_button);
         } else {
-            hid_report.buttons = buttons;
             rgb_set_button_light(buttons);
+        }
+
+        if (!ov_tt && !ov_btn) {
             save_loop();
         }
+
         report_usb_hid();
         cli_fps_count(0);
 
@@ -124,10 +135,11 @@ void init()
     tusb_init();
 
     button_init();
+    turntable_init();
+
+    rgb_init();
     tt_rainbow_init();
     tt_blade_init();
-    rgb_init();
-    turntable_init();
 
     boot_check();
     stdio_init_all();
