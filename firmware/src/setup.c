@@ -202,12 +202,6 @@ static void tt_key_change()
         iidx_cfg->tt_led.mode = (iidx_cfg->tt_led.mode + 1) % 3;
     } else if (JUST_PRESSED(E4)) {
         iidx_cfg->tt_sensor.reversed = !iidx_cfg->tt_sensor.reversed;
-    } else if (JUST_PRESSED(KEY_2)) {
-        iidx_cfg->tt_sensor.deadzone = 0;
-    } else if (JUST_PRESSED(KEY_4)) {
-        iidx_cfg->tt_sensor.deadzone = 1;
-    } else if (JUST_PRESSED(KEY_6)) {
-        iidx_cfg->tt_sensor.deadzone = 2;
     } else if (JUST_PRESSED(KEY_1)) {
         iidx_cfg->tt_sensor.ppr = 0;
     } else if (JUST_PRESSED(KEY_3)) {
@@ -287,9 +281,6 @@ static void tt_loop()
 
     setup_led_button[LED_E4] = iidx_cfg->tt_sensor.reversed ? CYAN : YELLOW;
 
-    setup_led_button[LED_KEY_2] = iidx_cfg->tt_sensor.deadzone == 0 ? SILVER : 0;
-    setup_led_button[LED_KEY_4] = iidx_cfg->tt_sensor.deadzone == 1 ? SILVER : 0;
-    setup_led_button[LED_KEY_6] = iidx_cfg->tt_sensor.deadzone == 2 ? SILVER : 0;
     setup_led_button[LED_KEY_1] = iidx_cfg->tt_sensor.ppr == 0 ? SILVER : 0;
     setup_led_button[LED_KEY_3] = iidx_cfg->tt_sensor.ppr == 1 ? SILVER : 0;
     setup_led_button[LED_KEY_5] = iidx_cfg->tt_sensor.ppr == 2 ? SILVER : 0;

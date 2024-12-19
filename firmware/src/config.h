@@ -27,8 +27,8 @@ typedef struct __attribute ((packed)) {
     } tt_led;
     struct {
         bool reversed;
-        uint8_t deadzone; /* only for analog */
         uint8_t ppr; /* 0: 256, 1: 128, 2: 96, 3: 64, other: 256 */
+        uint8_t reserved;
     } tt_sensor;
     uint8_t level; /* led brightness limit */
     bool konami; /* konami spoof */

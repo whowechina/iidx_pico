@@ -24,7 +24,6 @@ static iidx_cfg_t default_cfg = {
     },
     .tt_sensor = {
         .reversed = false,
-        .deadzone = 1,
         .ppr = 1,
     },
     .level = 128,
@@ -41,10 +40,6 @@ static void config_loaded()
         (iidx_cfg->tt_led.start + iidx_cfg->tt_led.num > 128)) {
         iidx_cfg->tt_led.start = 0;
         iidx_cfg->tt_led.num = 24;
-        config_changed();
-    }
-    if (iidx_cfg->tt_sensor.deadzone > 2) {
-        iidx_cfg->tt_sensor.deadzone = 0;
         config_changed();
     }
     if (iidx_cfg->tt_led.mode > 2) {
