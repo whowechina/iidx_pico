@@ -70,15 +70,14 @@ void mode_check()
 }
 
 static mutex_t core1_io_lock;
+static uint8_t latest_angle;
 static void core1_loop()
 {
     while (true) {
         uint32_t angle = turntable_raw();
         rgb_set_angle(angle);
 
-        uint8_t angle8 = turntable_read();
-        hid_report.joy[0] = angle8;
-        hid_report.joy[1] = 255 - angle8;
+        latest_angle = turntable_read();
 
         if (mutex_try_enter(&core1_io_lock, NULL)) {
             rgb_update();
@@ -117,7 +116,11 @@ static void core0_loop()
             rgb_set_button_light(buttons);
         }
 
+        hid_report.buttons = 0;
         if (!ov_tt && !ov_btn) {
+            hid_report.buttons = buttons;
+            hid_report.joy[0] = latest_angle;
+            hid_report.joy[1] = 255 - latest_angle;
             save_loop();
         }
 
