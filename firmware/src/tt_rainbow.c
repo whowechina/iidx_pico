@@ -80,9 +80,10 @@ static void update(uint32_t context)
 void tt_rainbow_init()
 {
     tt_effect_t rainbow = {
-        init,
-        set_angle,
-        update,
+        .init = init,
+        .set_angle = set_angle,
+        .set_button = NULL,
+        .update = update,
     };
     rgb_reg_tt_effect(rainbow);
 }

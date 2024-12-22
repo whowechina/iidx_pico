@@ -82,16 +82,8 @@ static uint32_t spectrum[3][24] = {
 };
 
 #define SNAKE_SIZE (count_of(spectrum[0]))
-uint32_t snake[SNAKE_SIZE] = {0};
-uint32_t life[SNAKE_SIZE] = {0};
-
-static void init(uint32_t context)
-{
-}
-
-static void set_angle(uint32_t context, uint32_t angle)
-{
-}
+static uint32_t snake[SNAKE_SIZE] = {0};
+static uint32_t life[SNAKE_SIZE] = {0};
 
 static uint32_t apply_level(uint32_t color)
 {
@@ -101,11 +93,17 @@ static uint32_t apply_level(uint32_t color)
     return tt_rgb32(r, g, b, false);
 }
 
+static uint32_t led_angle = 0;
+static void set_angle(uint32_t context, uint32_t angle)
+{
+    led_angle = angle;
+}
+
 static void update(uint32_t context)
 {
-    uint32_t delta = tt_led_angle > snake[0] ? tt_led_angle - snake[0] : snake[0] - tt_led_angle;
+    uint32_t delta = led_angle > snake[0] ? led_angle - snake[0] : snake[0] - led_angle;
 
-    snake[0] = tt_led_angle;
+    snake[0] = led_angle;
     life[0] = 255;
     life[1] = delta > 7 ? 255: delta * 8;
 
@@ -135,9 +133,10 @@ static void update(uint32_t context)
 void tt_blade_init()
 {
     tt_effect_t blade = {
-        init,
-        set_angle,
-        update,
+        .init = NULL,
+        .set_angle = set_angle,
+        .set_button = NULL,
+        .update = update,
     };
 
     rgb_reg_tt_effect(blade);

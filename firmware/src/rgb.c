@@ -115,7 +115,9 @@ static void set_effect(uint32_t effect_id)
 {
     if (current_effect_id != effect_id) {
         current_effect_id = effect_id;
-        CURRENT_EFFECT.init(CURRENT_CONTEXT);
+        if (CURRENT_EFFECT.init) {
+            CURRENT_EFFECT.init(CURRENT_CONTEXT);
+        }
     }
 }
 
@@ -203,8 +205,16 @@ uint32_t tt_hsv(hsv_t hsv)
 
 void rgb_set_angle(uint32_t angle)
 {
-    tt_led_angle = angle;
-    CURRENT_EFFECT.set_angle(CURRENT_CONTEXT, angle);
+    if (CURRENT_EFFECT.set_angle) {
+        CURRENT_EFFECT.set_angle(CURRENT_CONTEXT, angle);
+    }
+}
+
+void rgb_set_button(uint16_t buttons)
+{
+    if (CURRENT_EFFECT.set_button) {
+        CURRENT_EFFECT.set_button(CURRENT_CONTEXT, buttons);
+    }
 }
 
 void rgb_set_button_light(uint16_t buttons)
@@ -260,8 +270,11 @@ static void tt_lights_update()
     }
 
     set_effect(iidx_cfg->tt_led.effect);
+
     /* Lower priority for the local effects */
-    CURRENT_EFFECT.update(CURRENT_CONTEXT);
+    if (CURRENT_EFFECT.update) {
+        CURRENT_EFFECT.update(CURRENT_CONTEXT);
+    }
 }
 
 static void button_lights_update()

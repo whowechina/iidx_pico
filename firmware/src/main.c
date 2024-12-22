@@ -71,11 +71,13 @@ void mode_check()
 
 static mutex_t core1_io_lock;
 static uint8_t latest_angle;
+static uint16_t latest_buttons;
 static void core1_loop()
 {
     while (true) {
-        uint32_t angle = turntable_raw();
-        rgb_set_angle(angle);
+        uint32_t raw_angle = turntable_raw();
+        rgb_set_angle(raw_angle);
+        rgb_set_button(latest_buttons);
 
         latest_angle = turntable_read();
 
@@ -100,9 +102,9 @@ static void core0_loop()
 
         turntable_update();
 
-        uint16_t buttons = button_read();
+        latest_buttons = button_read();
         uint16_t angle = turntable_raw() >> 4;
-        setup_run(buttons, angle);
+        setup_run(latest_buttons, angle);
 
         bool ov_tt = setup_needs_tt_led();
         bool ov_btn = setup_needs_button_led();
@@ -113,12 +115,12 @@ static void core0_loop()
         if (ov_btn) {
             rgb_override_button(setup_led_button);
         } else {
-            rgb_set_button_light(buttons);
+            rgb_set_button_light(latest_buttons);
         }
 
         hid_report.buttons = 0;
         if (!ov_tt && !ov_btn) {
-            hid_report.buttons = buttons;
+            hid_report.buttons = latest_buttons;
             hid_report.joy[0] = latest_angle;
             hid_report.joy[1] = 255 - latest_angle;
             save_loop();
