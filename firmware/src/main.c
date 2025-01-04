@@ -130,7 +130,7 @@ static void core0_loop()
         cli_fps_count(0);
 
         sleep_until(next_frame);
-        next_frame = make_timeout_time_us(1000);
+        next_frame += 1001;
     }
 }
 
