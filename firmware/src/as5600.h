@@ -8,6 +8,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "hardware/i2c.h"
 
 void as5600_init(i2c_inst_t *i2c_port);
 bool as5600_init_sensor();
