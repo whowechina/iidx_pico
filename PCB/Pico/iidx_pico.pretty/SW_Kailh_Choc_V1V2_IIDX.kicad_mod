@@ -197,8 +197,8 @@
 		(uuid "649c4422-2d51-4a6e-b8c7-2d1a07f67b0c")
 	)
 	(fp_line
-		(start -6.8 -13.6)
-		(end -6.8 -10.4)
+		(start -7.09 -13.65)
+		(end -7.09 -10.35)
 		(stroke
 			(width 0.2)
 			(type solid)
@@ -207,8 +207,8 @@
 		(uuid "7bc972bb-f5e0-4a97-b928-65478c4e070b")
 	)
 	(fp_line
-		(start -6.8 10.4)
-		(end -6.8 13.6)
+		(start -7.09 10.35)
+		(end -7.09 13.65)
 		(stroke
 			(width 0.2)
 			(type solid)
@@ -217,8 +217,8 @@
 		(uuid "38c963f0-68ac-489f-89ae-7b338def4781")
 	)
 	(fp_line
-		(start -2.6 -15.15)
-		(end -2.6 -13.6)
+		(start -2.69 -15.2)
+		(end -2.69 -13.65)
 		(stroke
 			(width 0.2)
 			(type solid)
@@ -227,8 +227,8 @@
 		(uuid "7e32d883-11d5-4cb8-b6cf-d807677ba361")
 	)
 	(fp_line
-		(start -2.6 -15.15)
-		(end 4 -15.15)
+		(start -2.69 -15.2)
+		(end 4.01 -15.2)
 		(stroke
 			(width 0.2)
 			(type solid)
@@ -237,8 +237,8 @@
 		(uuid "c889471a-baba-47d1-a37a-b2c85db7b8c0")
 	)
 	(fp_line
-		(start -2.6 -13.6)
-		(end -6.8 -13.6)
+		(start -2.69 -13.65)
+		(end -7.09 -13.65)
 		(stroke
 			(width 0.2)
 			(type solid)
@@ -247,8 +247,8 @@
 		(uuid "7a7fcb71-57cc-4f85-bbc2-11bdf15935a1")
 	)
 	(fp_line
-		(start -2.6 -10.4)
-		(end -6.8 -10.4)
+		(start -2.69 -10.35)
+		(end -7.09 -10.35)
 		(stroke
 			(width 0.2)
 			(type solid)
@@ -257,8 +257,8 @@
 		(uuid "91df2dc3-1603-42b7-8665-c245b9f64ff5")
 	)
 	(fp_line
-		(start -2.6 -10.4)
-		(end -2.6 -8.85)
+		(start -2.69 -10.35)
+		(end -2.69 -8.8)
 		(stroke
 			(width 0.2)
 			(type solid)
@@ -267,8 +267,8 @@
 		(uuid "63d65455-4ece-4292-936f-cc6f3a1c8e57")
 	)
 	(fp_line
-		(start -2.6 -8.85)
-		(end 4 -8.85)
+		(start -2.69 -8.8)
+		(end 4.01 -8.8)
 		(stroke
 			(width 0.2)
 			(type solid)
@@ -277,8 +277,8 @@
 		(uuid "eb1009ff-7828-4bc0-a11b-ac5a736fe9b1")
 	)
 	(fp_line
-		(start -2.6 8.85)
-		(end -2.6 10.4)
+		(start -2.69 8.8)
+		(end -2.69 10.35)
 		(stroke
 			(width 0.2)
 			(type solid)
@@ -287,8 +287,8 @@
 		(uuid "dfd23cf8-79c3-4125-a04f-4d54ddc91cf9")
 	)
 	(fp_line
-		(start -2.6 8.85)
-		(end 4 8.85)
+		(start -2.69 8.8)
+		(end 4.01 8.8)
 		(stroke
 			(width 0.2)
 			(type solid)
@@ -297,8 +297,8 @@
 		(uuid "849967d7-6607-412e-b5ab-04071559e125")
 	)
 	(fp_line
-		(start -2.6 10.4)
-		(end -6.8 10.4)
+		(start -2.69 10.35)
+		(end -7.09 10.35)
 		(stroke
 			(width 0.2)
 			(type solid)
@@ -307,8 +307,8 @@
 		(uuid "3910ec1e-d86c-4882-a688-e554ca01b8d8")
 	)
 	(fp_line
-		(start -2.6 13.6)
-		(end -6.8 13.6)
+		(start -2.69 13.65)
+		(end -7.09 13.65)
 		(stroke
 			(width 0.2)
 			(type solid)
@@ -317,8 +317,8 @@
 		(uuid "c98ac0cb-7182-4850-808e-07279a827d0e")
 	)
 	(fp_line
-		(start -2.6 13.6)
-		(end -2.6 15.15)
+		(start -2.69 13.65)
+		(end -2.69 15.2)
 		(stroke
 			(width 0.2)
 			(type solid)
@@ -327,8 +327,8 @@
 		(uuid "222f7bc3-634b-4dce-92ea-0f91f5f6c5f8")
 	)
 	(fp_line
-		(start -2.6 15.15)
-		(end 4 15.15)
+		(start -2.69 15.2)
+		(end 4.01 15.2)
 		(stroke
 			(width 0.2)
 			(type solid)
@@ -337,8 +337,8 @@
 		(uuid "b5b25f04-7d06-48a7-9435-50fb1b5a162b")
 	)
 	(fp_line
-		(start 4 -15.15)
-		(end 4 -8.85)
+		(start 4.01 -15.2)
+		(end 4.01 -8.8)
 		(stroke
 			(width 0.2)
 			(type solid)
@@ -347,8 +347,8 @@
 		(uuid "e6363c1f-9b99-41d2-b441-50e11a8f14fa")
 	)
 	(fp_line
-		(start 4 8.85)
-		(end 4 15.15)
+		(start 4.01 8.8)
+		(end 4.01 15.2)
 		(stroke
 			(width 0.2)
 			(type solid)
@@ -417,8 +417,8 @@
 		(uuid "93107288-4cae-4ac2-9c86-1667789154a8")
 	)
 	(fp_line
-		(start 0 -12)
-		(end 1.4 -12)
+		(start -0.04 -12)
+		(end 1.36 -12)
 		(stroke
 			(width 0.1)
 			(type solid)
@@ -427,8 +427,8 @@
 		(uuid "bc8d79a8-e682-49cd-8fa4-b3fdb1d068b9")
 	)
 	(fp_line
-		(start 0 12)
-		(end 1.4 12)
+		(start -0.04 12)
+		(end 1.36 12)
 		(stroke
 			(width 0.1)
 			(type solid)
@@ -437,8 +437,8 @@
 		(uuid "f24d7f45-355d-45bd-9670-d10df4a78d96")
 	)
 	(fp_line
-		(start 0.7 -11.3)
-		(end 0.7 -12.7)
+		(start 0.66 -11.3)
+		(end 0.66 -12.7)
 		(stroke
 			(width 0.1)
 			(type solid)
@@ -447,8 +447,8 @@
 		(uuid "4a585181-4ac1-4bb1-9e6b-568208c3d288")
 	)
 	(fp_line
-		(start 0.7 12.7)
-		(end 0.7 11.3)
+		(start 0.66 12.7)
+		(end 0.66 11.3)
 		(stroke
 			(width 0.1)
 			(type solid)
