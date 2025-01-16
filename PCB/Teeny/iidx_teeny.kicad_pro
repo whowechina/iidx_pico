@@ -486,7 +486,7 @@
       "gencad": "",
       "idf": "",
       "netlist": "",
-      "plot": "../../Production/PCB/Keyboard/",
+      "plot": "../../Production/PCB/Teeny/",
       "pos_files": "",
       "specctra_dsn": "",
       "step": "iidx_teeny_v1.3.step",
