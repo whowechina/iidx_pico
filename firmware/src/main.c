@@ -23,6 +23,7 @@
 
 #include "tt_blade.h"
 #include "tt_rainbow.h"
+#include "tt_heatbar.h"
 
 #include "save.h"
 #include "config.h"
@@ -148,6 +149,7 @@ void init()
     rgb_init();
     tt_rainbow_init();
     tt_blade_init();
+    tt_heatbar_init();
 
     boot_check();
     stdio_init_all();
