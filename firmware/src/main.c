@@ -29,15 +29,18 @@
 #include "cli.h"
 #include "commands.h"
 
-struct {
+struct __attribute__((packed)) {
     uint16_t buttons;
-    uint8_t joy[2];
-} hid_report;
+    uint8_t axis[2];
+} hid_joy, hid_joy_sent;
 
 void report_usb_hid()
 {
-    if (tud_hid_ready()) {
-        tud_hid_n_report(0x00, REPORT_ID_JOYSTICK, &hid_report, sizeof(hid_report));
+    if (tud_hid_ready() &&
+        (memcmp(&hid_joy, &hid_joy_sent, sizeof(hid_joy)) != 0)) {
+        if (tud_hid_report(REPORT_ID_JOYSTICK, &hid_joy, sizeof(hid_joy))) {
+            hid_joy_sent = hid_joy;
+        }
     }
 }
 
@@ -118,11 +121,11 @@ static void core0_loop()
             rgb_set_button_light(latest_buttons);
         }
 
-        hid_report.buttons = 0;
+        hid_joy.buttons = 0;
         if (!ov_tt && !ov_btn) {
-            hid_report.buttons = latest_buttons;
-            hid_report.joy[0] = latest_angle;
-            hid_report.joy[1] = 255 - latest_angle;
+            hid_joy.buttons = latest_buttons;
+            hid_joy.axis[0] = latest_angle;
+            hid_joy.axis[1] = 255 - latest_angle;
             save_loop();
         }
 
