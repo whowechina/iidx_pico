@@ -54,6 +54,7 @@ https://discord.gg/M8f2PPQFEA
 * 1x M2.5*6 screw and hex nut, to fix disc seat, magnet seat and bearing together.
 * 4x M3*8mm screws, to fix bearing seat to the base.
 * 4x M3*12mm screws, for the disc. 
+* 2x M3*8mm screws and hex nuts, for the banner.
 * 1x Custom cut black acrylic disc, 3mm thickness for IIDX Pico and IIDX Jumbo.
 * Some 10mm non slip self-adhesive silicon pads (also for Keyboard).
 * Silicone tube, inner diameter 25mm, outer diameter 27mm, worked as a hinge.
@@ -68,10 +69,11 @@ https://discord.gg/M8f2PPQFEA
   https://www.kailhswitch.com/mechanical-keyboard-switches/key-switches/kailh-low-profile-switch-choc-v2.html
 * 7x Kailh low-profile stabilizers.  
   https://chosfox.com/products/kailh-1350-choc-switch-6-25u-stabilizer-set
-* 2x Panasonic 6mm square tactile switch EVQP1K05M for IIDX Pico and IIDX Jumbo.  
+* 2x Panasonic EVQP1K05M square tactile switches for IIDX Pico and IIDX Jumbo.  
   https://www3.panasonic.biz/ac/e/dl/catalog/index.jsp?series_cd=3473&part_no=EVQP1K05M
-* 6x Panasonic 6mm square tactile switch EVQP1K05M for IIDX Teeny.  
-  https://www3.panasonic.biz/ac/e/dl/catalog/index.jsp?series_cd=3473&part_no=EVQP1K05M
+* 6x Panasonic EVQP1K05M or ALPS SKPMAPE010 square tactile switches for IIDX Teeny.  
+  https://www3.panasonic.biz/ac/e/dl/catalog/index.jsp?series_cd=3473&part_no=EVQP1K05M  
+  https://tech.alpsalpine.com/e/products/detail/SKPMAPE010/
 * 1x USB Type-C socket (918-418K2023S40001 or KH-TYPE-C-16P)
 * 1x AS5600 (SOP8) or TMAG5273 (SOT23-6) hall angular sensor chip.
 * RGB LEDs
@@ -90,9 +92,10 @@ https://discord.gg/M8f2PPQFEA
 
 ### Step 1 - Buy
 * Main PCB  
-  Just go [JLC](https://jlcpcb.com/) and make the order. Make sure the board thickness is **1.2mm**, it's very important!
+  Just go [JLC](https://jlcpcb.com/) or some other PCB vendor you like and make the order. Make sure the board thickness is **1.2mm**, it's very important!
 * Acrylic disc for IIDX Pico and IIDX Jumbo  
-  Find a vendor to cut a 3mm thick black acrylic using corresponding DXF file.
+  Find a vendor to cut a 3mm thick black acrylic using corresponding DXF file.  
+  You can 3D print a turntable disc, but it is prone to heat deformation.
 
 ### Step 2 - 3D Print
 #### Keyboard
@@ -106,7 +109,7 @@ For following prints, FDM, PLA, 0.4 nozzle, 0.2mm layer, 3 to 4 walls.
 * Bearing seat ("Turntable - Bearing Seat"), 40% to 60% infill.
 * Magnet seat ("Turntable - Magnet Seat"), 40% to 60% infill.
 * Disc seat ("Turntable - Disc Seat"), 40% to 60% infill.
-* For IIDX Teeny only, the disc ("Turntable Teeny - Disc"), use a textured PEI bed and concentric pattern for a better surface.
+* For IIDX Teeny only, the disc ("Turntable Teeny - Disc"), 80%+ infill, use a textured PEI bed and concentric pattern for a better surface.
 * Banner ("Turntable * - Banner"), 20-40% infill. You can render the text in black if you have multi-color printing system.
 * NOTE: IIDX Jumbo with 2 bearings is abbreviated as "Jumbo 2B" in the file name.
 
@@ -114,7 +117,7 @@ For following prints, FDM, PLA, 0.4 nozzle, 0.2mm layer, 3 to 4 walls.
 * Keycap ("Keycap *.stl"), resin printing is recommended but FDM also works.
 
 ### Step 3 - Soldering and Assembly Tips
-* Keyboard  
+* Keyboard
   * It's very easy to miss two USB pins of the Raspberry Pico Pi, it's at the other side. It's difficult to solder as you may leave airbubbles in the soldering hole. Trick is to use sharpest iron tip, slowly apply solder wire.  
     <img src="doc/solder_usb_txrx.jpg" width="400px">
   * As long as you have Pi Pico soldered, you can upload firmware and test the board. Please test frequently during the soldering and assembly process.
@@ -137,12 +140,13 @@ For following prints, FDM, PLA, 0.4 nozzle, 0.2mm layer, 3 to 4 walls.
     <img src="doc/turntable_3.jpg" width="400px">
   * Silicone tube is to connect the turntable and the keyboard. Ribbon cable needs to go through the tube. You need a 7mm hole punch to make holes on the silicone tube, to match the hooks at both turntable base and the keyboard sides.
 
-### Step 4 - Firmware
-* For the new build, hold the BOOTSEL button while connect the USB to a PC, there will be a disk named "RPI-RP2" showed up. Drag the uf2 firmware binary file into it. That's it. There's a small hole at the back side of the keyboard, it is facing right to the BOOTSEL button.
+### Firmware
+* The UF2 file is in the `Production\Firmware` folder. IIDX Pico/Teeny/Jumbo share the same IIDX Pico firmware.
+* For the new build, hold the BOOTSEL button while connect the USB to a PC, there will be a disk named "RPI-RP2" showed up. Drag the UF2 firmware binary file into it and that's it. There's a small hole at the back side of the keyboard, it is facing right to the BOOTSEL button.
 * If it is already running my IIDX firmware, hold two small AUX buttons together will do the same as the BOOTSEL button.
-* You need to setup your configuration such as AS5600 connection mode and LED ring.
-* Also you can setup the key color theme and turntable effects at runtime. I think I made the configuration too showey and complicated. Check out the manual.   
-  [Nice Looking Manual Here](doc/Firmware_manual.pdf)
+* You need to setup your turntable LED strip first, check the manual for the SETUP mode.
+* You can set the brightness, turntable LED theme, button LED theme.
+* [Nice Looking Manual Here](doc/Firmware_manual.pdf)  
   <img src="doc/manual.gif" width="80%">
 
 ## CAD Source File
