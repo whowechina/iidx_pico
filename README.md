@@ -138,7 +138,7 @@ For following prints, FDM, PLA, 0.4 nozzle, 0.2mm layer, 3 to 4 walls.
   * RGB LED strip is sticked to the circular LED wall, both winding directions work.  
   * The 7-wire ribbon cable is for both the RGB LED and the sensor board, 3 for RGB LED, 4 for the sensor board.  
     <img src="doc/turntable_3.jpg" width="400px">
-  * Silicone tube is to connect the turntable and the keyboard. Ribbon cable needs to go through the tube. You need a 7mm hole punch to make holes on the silicone tube, to match the hooks at both turntable base and the keyboard sides.
+  * Silicone tube is to connect the turntable and the keyboard. Ribbon cable needs to go through the tube. You need a 7mm or 8mm hole punch to make holes on the silicone tube, to match the hooks at both turntable base and the keyboard sides.
 
 ### Firmware
 * The UF2 file is in the `Production\Firmware` folder. IIDX Pico/Teeny/Jumbo share the same IIDX Pico firmware.

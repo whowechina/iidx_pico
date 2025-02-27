@@ -139,7 +139,7 @@ https://discord.gg/M8f2PPQFEA
   * RGB LED 灯带粘在圆形 LED 墙上，顺时针或者逆时针都可以。
   * 7 线的排线，其中 3 线用于 RGB 灯带，另外 4 线用于传感器板。  
     <img src="doc/turntable_3.jpg" width="400px">
-  * 硅胶管用来作为铰链连接转盘和键盘，排线会从管子穿过。你需要一个 7mm 的打孔器在硅胶管上打孔，以匹配转盘底座和键盘两侧的挂钩。
+  * 硅胶管用来作为铰链连接转盘和键盘，排线会从管子穿过。你需要一个 7mm 或者 8mm 的打孔器在硅胶管上打孔，以匹配转盘底座和键盘两侧的挂钩。
 
 ### 固件
 * UF2 文件在 `Production\Firmware` 文件夹中，IIDX Pico/Teeny/Jumbo 共享同一个 IIDX Pico 固件。
