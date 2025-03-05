@@ -21,28 +21,35 @@
 #include "pico/multicore.h"
 #include "pico/unique_id.h"
 
+#define SAVEDATA_MAX_PAGES 4
+
 static struct {
     size_t size;
     size_t offset;
     void (*after_load)();
+    void *def;
 } modules[8] = {0};
 static int module_num = 0;
+
+static uint32_t savedata_size = 0;
+static uint32_t pages_per_savedata = 1;
+static uint32_t savedata_pkt_size = 0;
 
 static uint32_t my_magic = 0xcafecafe;
 
 #define SAVE_TIMEOUT_US 5000000
 
 #define SAVE_SECTOR_OFFSET (PICO_FLASH_SIZE_BYTES - FLASH_SECTOR_SIZE)
+#define SAVE_TOTAL_PAGE_NUM (FLASH_SECTOR_SIZE / FLASH_PAGE_SIZE)
 
 typedef struct __attribute ((packed)) {
     uint32_t magic;
-    uint8_t data[FLASH_PAGE_SIZE - 4];
-} page_t;
+    uint8_t data[SAVEDATA_MAX_PAGES * FLASH_PAGE_SIZE - 4];
+} savedata_t;
 
-static page_t old_data = {0};
-static page_t new_data = {0};
-static page_t default_data = {0};
-static int data_page = -1;
+static savedata_t old_data = {0};
+static savedata_t new_data = {0};
+static int savedata_page = -1;
 
 static bool requesting_save = false;
 static uint64_t requesting_time = 0;
@@ -51,20 +58,23 @@ static mutex_t *io_lock;
 
 static void save_program()
 {
-    old_data = new_data;
+    memcpy(&old_data, &new_data, savedata_pkt_size);
 
-    data_page = (data_page + 1) % (FLASH_SECTOR_SIZE / FLASH_PAGE_SIZE);
+    savedata_page += pages_per_savedata;
+    if (savedata_page >= SAVE_TOTAL_PAGE_NUM) {
+        savedata_page = 0;
+    }
     if (mutex_enter_timeout_us(io_lock, 200000)) {
         sleep_ms(20); /* wait for all io operations to finish */
         uint32_t ints = save_and_disable_interrupts();
-        if (data_page == 0) {
+        if (savedata_page == 0) {
             flash_range_erase(SAVE_SECTOR_OFFSET, FLASH_SECTOR_SIZE);
         }
-        flash_range_program(SAVE_SECTOR_OFFSET + data_page * FLASH_PAGE_SIZE,
-                            (uint8_t *)&old_data, FLASH_PAGE_SIZE);
+        flash_range_program(SAVE_SECTOR_OFFSET + savedata_page * FLASH_PAGE_SIZE,
+                            (uint8_t *)&old_data, savedata_pkt_size);
         restore_interrupts(ints);
         mutex_exit(io_lock);
-        printf("\nProgram Flash %d %8lx done.\n", data_page, old_data.magic);
+        printf("\nProgram Flash %d %8lx done.\n", savedata_page, old_data.magic);
     } else {
         printf("Program Flash failed.\n");
     }
@@ -73,34 +83,42 @@ static void save_program()
 static void load_default()
 {
     printf("Load Default\n");
-    new_data = default_data;
+    for (int i = 0; i < module_num; i++) {
+        memcpy(new_data.data + modules[i].offset, modules[i].def, modules[i].size);
+    }
     new_data.magic = my_magic;
 }
 
-static const page_t *get_page(int id)
+static const savedata_t *get_savedata(int id)
 {
     int addr = XIP_BASE + SAVE_SECTOR_OFFSET;
-    return (page_t *)(addr + FLASH_PAGE_SIZE * id);
+    return (savedata_t *)(addr + FLASH_PAGE_SIZE * pages_per_savedata * id);
+}
+
+static void save_prepare()
+{
+    savedata_pkt_size = 4 + savedata_size;
+    pages_per_savedata = (savedata_pkt_size + FLASH_PAGE_SIZE - 1) / FLASH_PAGE_SIZE;
 }
 
 static void save_load()
 {
-    for (int i = 0; i < FLASH_SECTOR_SIZE / FLASH_PAGE_SIZE; i++) {
-        if (get_page(i)->magic != my_magic) {
+    for (int i = 0; i < SAVE_TOTAL_PAGE_NUM / pages_per_savedata; i++) {
+        if (get_savedata(i)->magic != my_magic) {
             break;
         }
-        data_page = i;
+        savedata_page = i;
     }
 
-    if (data_page < 0) {
+    if (savedata_page < 0) {
         load_default();
         save_request(false);
         return;
     }
 
-    old_data = *get_page(data_page);
-    new_data = old_data;
-    printf("Page Loaded %d %8lx\n", data_page, new_data.magic);
+    memcpy(&old_data, get_savedata(savedata_page), savedata_pkt_size);
+    memcpy(&new_data, &old_data, savedata_pkt_size);
+    printf("Page Loaded %d %8lx\n", savedata_page, new_data.magic);
 }
 
 static void save_loaded()
@@ -135,6 +153,7 @@ void save_init(uint32_t magic, mutex_t *locker)
 {
     my_magic = magic;
     io_lock = locker;
+    save_prepare();
     save_load();
     save_loop();
     save_loaded();
@@ -145,7 +164,7 @@ void save_loop()
     if (requesting_save && (time_us_64() - requesting_time > SAVE_TIMEOUT_US)) {
         requesting_save = false;
         /* only when data is actually changed */
-        if (memcmp(&old_data, &new_data, sizeof(old_data)) == 0) {
+        if (memcmp(&old_data, &new_data, savedata_pkt_size) == 0) {
             return;
         }
         save_program();
@@ -155,11 +174,12 @@ void save_loop()
 void *save_alloc(size_t size, void *def, void (*after_load)())
 {
     modules[module_num].size = size;
-    size_t offset = module_num > 0 ? modules[module_num - 1].offset + size : 0;
+    size_t offset = savedata_size;
     modules[module_num].offset = offset;
     modules[module_num].after_load = after_load;
+    modules[module_num].def = def;
+    savedata_size += size;
     module_num++;
-    memcpy(default_data.data + offset, def, size); // backup the default
     return new_data.data + offset;
 }
 
