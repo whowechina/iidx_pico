@@ -9,29 +9,68 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-typedef struct __attribute ((packed)) {
-    uint8_t h; // hue;
-    uint8_t s; // saturation;
-    uint8_t v; // value;
+typedef struct {
+    uint8_t h;
+    uint8_t s;
+    uint8_t v;
 } hsv_t;
 
+typedef struct {
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+} rgb_t;
+
+typedef enum {
+    COLOR_MODE_HSV = 0,
+    COLOR_MODE_RGB,
+} color_mode_t;
+
 typedef struct __attribute ((packed)) {
-    hsv_t key_off[11];
-    hsv_t key_on[11];
+    color_mode_t mode;
+    union {
+        rgb_t rgb;
+        hsv_t hsv;
+    };
+} color_t;
+
+typedef struct __attribute ((packed)) {
     struct {
-        uint8_t start;
-        uint8_t num;
-        uint8_t effect;
-        uint8_t param;
-        uint8_t mode; /* 0: on, 1: reversed, 2: off */
-    } tt_led;
+        struct {
+            uint8_t main : 2;
+            uint8_t tt : 2;
+            uint8_t effect : 2;
+            uint8_t not_used : 2;
+        } format;
+        struct {
+            uint8_t keys;
+            uint8_t tt;
+        } level;
+        struct {
+            uint8_t reversed : 1;
+            uint8_t start : 7;
+            uint8_t num;
+        } tt;
+    } rgb;
     struct {
-        bool reversed;
-        uint8_t ppr; /* 0: 256, 1: 128, 2: 96, 3: 64, other: 256 */
-        uint8_t reserved;
-    } tt_sensor;
-    uint8_t level; /* led brightness limit */
-    bool konami; /* konami spoof */
+        uint8_t reversed : 1;
+        uint8_t ppr : 7; /* 0: 256, 1: 128, 2: 96, 3: 64, other: 256 */
+        uint8_t res;
+    } sensor;
+    struct {
+        bool konami; /* konami spoof */
+        uint8_t res;
+    } hid;
+    struct {
+        uint8_t tt_theme;
+        uint8_t tt_param;
+        uint8_t key_theme;
+        uint8_t key_param;
+        struct {
+            color_t on[11];
+            color_t off[11];
+        } keys[4];
+    } effect;
 } iidx_cfg_t;
 
 extern iidx_cfg_t *iidx_cfg;

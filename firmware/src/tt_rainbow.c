@@ -44,12 +44,12 @@ static void generate_color_wheel()
     }
 }
 
-static uint8_t old_level = 0;
+static uint8_t old_tt_level = 0;
 
 static void init(uint32_t context)
 {
     generate_color_wheel();
-    old_level = iidx_cfg->level;
+    old_tt_level = iidx_cfg->rgb.level.tt;
 }
 
 static uint32_t phase = 0;
@@ -63,8 +63,8 @@ static void set_angle(uint32_t context, uint32_t angle)
 
 static void update(uint32_t context)
 {
-    if (old_level != iidx_cfg->level) {
-        old_level = iidx_cfg->level;
+    if (old_tt_level != iidx_cfg->rgb.level.tt) {
+        old_tt_level = iidx_cfg->rgb.level.tt;
         generate_color_wheel();
         return;
     }

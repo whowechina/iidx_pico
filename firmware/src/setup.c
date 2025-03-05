@@ -24,6 +24,8 @@ static uint64_t setup_tick_ms = 0;
 #define TVAR(line) CONCAT(a, line)
 #define RUN_EVERY_N_MS(a, ms) { static uint64_t TVAR(__LINE__) = 0; \
     if (setup_tick_ms - TVAR(__LINE__) >= ms) { a; TVAR(__LINE__) = setup_tick_ms; } }
+
+static uint32_t blink_rapid = 0xffffffff;
 static uint32_t blink_fast = 0xffffffff;
 static uint32_t blink_slow = 0xffffffff;
 
@@ -183,10 +185,12 @@ static void none_loop()
 static struct {
     uint8_t adjust_led; /* 0: nothing, 1: adjust start, 2: adjust stop */
     int16_t start_angle;
+    uint8_t value;
 } tt_ctx;
 
 static void tt_enter()
 {
+    tt_ctx.adjust_led = 0;
     tt_ctx.start_angle = input.angle;
 }
 
@@ -199,17 +203,17 @@ static void tt_key_change()
         tt_ctx.adjust_led = (tt_ctx.adjust_led == 2) ? 0 : 2;
         tt_ctx.start_angle = input.angle;
     } else if (JUST_PRESSED(E3)) {
-        iidx_cfg->tt_led.mode = (iidx_cfg->tt_led.mode + 1) % 3;
+        iidx_cfg->rgb.tt.reversed ^= 1;
     } else if (JUST_PRESSED(E4)) {
-        iidx_cfg->tt_sensor.reversed = !iidx_cfg->tt_sensor.reversed;
+        iidx_cfg->sensor.reversed ^= 1;
     } else if (JUST_PRESSED(KEY_1)) {
-        iidx_cfg->tt_sensor.ppr = 0;
+        iidx_cfg->sensor.ppr = 0;
     } else if (JUST_PRESSED(KEY_3)) {
-        iidx_cfg->tt_sensor.ppr = 1;
+        iidx_cfg->sensor.ppr = 1;
     } else if (JUST_PRESSED(KEY_5)) {
-        iidx_cfg->tt_sensor.ppr = 2;
+        iidx_cfg->sensor.ppr = 2;
     } else if (JUST_PRESSED(KEY_7)) {
-        iidx_cfg->tt_sensor.ppr = 3;
+        iidx_cfg->sensor.ppr = 3;
     }
 
     check_exit();
@@ -221,8 +225,8 @@ static void tt_rotate()
     if (abs(delta) > 8) {
         tt_ctx.start_angle = input.angle;
 
-        #define LED_START iidx_cfg->tt_led.start
-        #define LED_NUM iidx_cfg->tt_led.num
+        #define LED_START iidx_cfg->rgb.tt.start
+        #define LED_NUM iidx_cfg->rgb.tt.num
 
         if (tt_ctx.adjust_led == 1) {
             if ((delta > 0) & (LED_START < 8)) {
@@ -246,13 +250,12 @@ static void tt_rotate()
 
 static void tt_loop()
 {
-    for (int i = 1; i < iidx_cfg->tt_led.num - 1; i++) {
+    for (int i = 1; i < iidx_cfg->rgb.tt.num - 1; i++) {
         setup_led_tt[i] = tt_rgb32(10, 10, 10, false);
     }
 
-    bool led_reversed = (iidx_cfg->tt_led.mode == 1);
-    int head = led_reversed ? TT_LED_NUM - 1 : 0;
-    int tail = led_reversed ? 0 : TT_LED_NUM - 1;
+    int head = iidx_cfg->rgb.tt.reversed ? TT_LED_NUM - 1 : 0;
+    int tail = TT_LED_NUM - 1 - head;
 
     setup_led_tt[head] = tt_rgb32(0xa0, 0, 0, false);
     setup_led_tt[tail] = tt_rgb32(0, 0xa0, 0, false);
@@ -267,55 +270,67 @@ static void tt_loop()
         setup_led_button[LED_E2] = GREEN & blink_fast;
     }
 
-    switch (iidx_cfg->tt_led.mode) {
-        case 0:
-            setup_led_button[LED_E3] = GREEN;
-            break;
-        case 1:
-            setup_led_button[LED_E3] = RED;
-            break;
-        default:
-            setup_led_button[LED_E3] = 0;
-            break;
-    }
+    setup_led_button[LED_E3] = iidx_cfg->rgb.tt.reversed ? GREEN : RED;
+    setup_led_button[LED_E4] = iidx_cfg->sensor.reversed ? CYAN : YELLOW;
 
-    setup_led_button[LED_E4] = iidx_cfg->tt_sensor.reversed ? CYAN : YELLOW;
+    setup_led_button[LED_KEY_1] = iidx_cfg->sensor.ppr == 0 ? SILVER : 0;
+    setup_led_button[LED_KEY_3] = iidx_cfg->sensor.ppr == 1 ? SILVER : 0;
+    setup_led_button[LED_KEY_5] = iidx_cfg->sensor.ppr == 2 ? SILVER : 0;
+    setup_led_button[LED_KEY_7] = iidx_cfg->sensor.ppr == 3 ? SILVER : 0;
+}
 
-    setup_led_button[LED_KEY_1] = iidx_cfg->tt_sensor.ppr == 0 ? SILVER : 0;
-    setup_led_button[LED_KEY_3] = iidx_cfg->tt_sensor.ppr == 1 ? SILVER : 0;
-    setup_led_button[LED_KEY_5] = iidx_cfg->tt_sensor.ppr == 2 ? SILVER : 0;
-    setup_led_button[LED_KEY_7] = iidx_cfg->tt_sensor.ppr == 3 ? SILVER : 0;
+static struct {
+    bool adjust_tt;
+    bool adjust_keys;
+    uint8_t value;
+} level_ctx;
+
+static void level_update()
+{
+    iidx_cfg->rgb.level.tt = level_ctx.adjust_tt ? level_ctx.value : cfg_save.rgb.level.tt;
+    iidx_cfg->rgb.level.keys = level_ctx.adjust_keys ? level_ctx.value : cfg_save.rgb.level.keys;
 }
 
 static void level_rotate()
 {
-    int16_t new_value = iidx_cfg->level;
-    new_value += input.rotate;
+    int16_t new_value = level_ctx.value;
+
+    new_value += input.rotate > 0 ? 1 : -1;
     if (new_value < 0) {
         new_value = 0;
     } else if (new_value > 255) {
         new_value = 255;
     }
-    iidx_cfg->level = new_value;
+    level_ctx.value = new_value;
+
+    level_update();
 }
 
 static void level_key_change()
 {
+    int short_cut = -1;
     if (JUST_PRESSED(KEY_1)) {
-        iidx_cfg->level = 0;
+        short_cut = 0;
     } else if (JUST_PRESSED(KEY_2)) {
-        iidx_cfg->level = 20;
+        short_cut = 20;
     } else if (JUST_PRESSED(KEY_3)) {
-        iidx_cfg->level = 50;
+        short_cut = 50;
     } else if (JUST_PRESSED(KEY_4)) {
-        iidx_cfg->level = 85;
+        short_cut = 85;
     } else if (JUST_PRESSED(KEY_5)) {
-        iidx_cfg->level = 130;
+        short_cut = 130;
     } else if (JUST_PRESSED(KEY_6)) {
-        iidx_cfg->level = 190;
+        short_cut = 190;
     } else if (JUST_PRESSED(KEY_7)) {
-        iidx_cfg->level = 255;
+        short_cut = 255;
+    } else if (JUST_PRESSED(E1 | E2)) {
+        level_ctx.adjust_tt = PRESSED_ANY(E1);
+        level_ctx.adjust_keys = PRESSED_ANY(E2);
     }
+    if (short_cut >= 0) {
+        level_ctx.value = short_cut;
+    }
+    level_update();
 
     check_exit();
 }
@@ -323,14 +338,24 @@ static void level_key_change()
 static void level_loop()
 {
     for (int i = 0; i < 7; i++) {
-        hsv_t key_color = {i * 255 / 7, 255, 255 };
-        setup_led_button[i] = button_hsv(key_color);
+        hsv_t color = {i * 255 / 7, 255, 255};
+        setup_led_button[i] = button_hsv(color);
     }
 
-    uint16_t pos = iidx_cfg->level * iidx_cfg->tt_led.num / 256;
-    for (unsigned i = 0; i < iidx_cfg->tt_led.num; i++) {
-        setup_led_tt[i] = (i == pos) ? tt_rgb32(90, 90, 90, false) : 0;
+    setup_led_button[LED_E1] = level_ctx.adjust_tt ? (0x404040 & blink_rapid) : 0;
+    setup_led_button[LED_E2] = level_ctx.adjust_keys ? (0x404040 & blink_rapid) : 0;
+
+    for (unsigned i = 0; i < iidx_cfg->rgb.tt.num; i++) {
+        hsv_t color = { i * 255 / iidx_cfg->rgb.tt.num, 255, 255 };
+        setup_led_tt[i] = tt_hsv(color);
     }
+}
+
+static void level_enter()
+{
+    level_ctx.adjust_keys = true;
+    level_ctx.adjust_tt = true;
+    level_ctx.value = 128;
 }
 
 static struct {
@@ -339,14 +364,15 @@ static struct {
     uint8_t *value;
     int16_t start_angle;
     uint16_t keys;
-    hsv_t *leds;
+    color_t *leds;
 } key_ctx;
 
 static void key_apply()
 {
     for (int i = 0; i < 11; i++) {
         if (key_ctx.keys & (1 << i)) {
-            key_ctx.leds[i] = key_ctx.hsv;
+            key_ctx.leds[i].mode = 0;
+            key_ctx.leds[i].hsv = key_ctx.hsv;
         }
     }
 }
@@ -403,8 +429,8 @@ static void key_loop()
         }
     }
 
-    uint16_t pos = *key_ctx.value * iidx_cfg->tt_led.num / 256;
-    for (unsigned i = 0; i < iidx_cfg->tt_led.num; i++) {
+    uint16_t pos = *key_ctx.value * iidx_cfg->rgb.tt.num / 256;
+    for (unsigned i = 0; i < iidx_cfg->rgb.tt.num; i++) {
         setup_led_tt[i] = (i == pos) ? tt_rgb32(90, 90, 90, false) : 0;
     }
 }
@@ -417,12 +443,12 @@ static void key_enter()
         .value = &key_ctx.hsv.h,
         .start_angle = input.angle,
         .keys = 0,
-        .leds = iidx_cfg->key_on,
+        .leds = iidx_cfg->effect.keys[0].on,
     };
 
     if (current_mode == MODE_KEY_OFF) {
         key_ctx.hsv = (hsv_t) { .h = 60, .s = 255, .v = 5 };
-        key_ctx.leds = iidx_cfg->key_off;
+        key_ctx.leds = iidx_cfg->effect.keys[0].off;
     }
 }
 
@@ -485,13 +511,23 @@ static struct {
 
 static void key_theme_key_change()
 {
+    int theme = -1;
     for (int i = 0; i < 7; i++) {
         if (JUST_PRESSED(KEY_1 << i)) {
-            memcpy(iidx_cfg->key_off, themes[i].key_off, sizeof(iidx_cfg->key_off));
-            memcpy(iidx_cfg->key_on, themes[i].key_on, sizeof(iidx_cfg->key_on));
+            theme = i;
             break;
         }
     }
+
+    if (theme >= 0) {
+        for (int i = 0; i < 11; i++) {
+            iidx_cfg->effect.keys[0].on[i].mode = COLOR_MODE_HSV;
+            iidx_cfg->effect.keys[0].off[i].mode = COLOR_MODE_HSV;
+            iidx_cfg->effect.keys[0].on[i].hsv = themes[theme].key_on[i];
+            iidx_cfg->effect.keys[0].off[i].hsv = themes[theme].key_off[i];
+        }
+    }
+
     check_exit();
 }
 
@@ -499,9 +535,9 @@ static void key_theme_loop()
 {
     for (int i = 0; i < 11; i++) {
         if (blink_slow) {
-            setup_led_button[i] = button_hsv(iidx_cfg->key_on[i]);
+            setup_led_button[i] = button_hsv(iidx_cfg->effect.keys[0].on[i].hsv);
          } else {
-            setup_led_button[i] = button_hsv(iidx_cfg->key_off[i]);
+            setup_led_button[i] = button_hsv(iidx_cfg->effect.keys[0].off[i].hsv);
          }
     }
 }
@@ -510,14 +546,14 @@ static void tt_theme_key_change()
 {
     for (int i = 0; i < 4; i++) {
         if (JUST_PRESSED(KEY_1 << (i * 2))) {
-            iidx_cfg->tt_led.effect = iidx_cfg->tt_led.effect & 0xf0 | i;
+            iidx_cfg->effect.tt_theme = iidx_cfg->effect.tt_theme & 0xf0 | i;
             break;
         }
     }
 
     for (int i = 0; i < 3; i++) {
         if (JUST_PRESSED(KEY_2 << (i * 2))) {
-            iidx_cfg->tt_led.effect = iidx_cfg->tt_led.effect & 0x0f | (i << 4);
+            iidx_cfg->effect.tt_theme = iidx_cfg->effect.tt_theme & 0x0f | (i << 4);
             break;
         }
     }
@@ -526,8 +562,8 @@ static void tt_theme_key_change()
 
 static void tt_theme_loop()
 {
-    int effect = (iidx_cfg->tt_led.effect & 0x0f) % 4;
-    int context = (iidx_cfg->tt_led.effect >> 4) % 3;
+    int effect = (iidx_cfg->effect.tt_theme & 0x0f) % 4;
+    int context = (iidx_cfg->effect.tt_theme >> 4) % 3;
 
     for (int i = 0; i < 7; i++) {
         if (i == effect * 2) {
@@ -550,7 +586,7 @@ static struct {
 } mode_defs[] = {
     [MODE_NONE] = { nop, none_rotate, none_loop, nop, false, false },
     [MODE_TURNTABLE] = { tt_key_change, tt_rotate, tt_loop, tt_enter, true, true },
-    [MODE_LEVEL] = { level_key_change, level_rotate, level_loop, nop, true, true },
+    [MODE_LEVEL] = { level_key_change, level_rotate, level_loop, level_enter, true, true },
     [MODE_TT_THEME] = { tt_theme_key_change, nop, tt_theme_loop, nop, false, true },
     [MODE_KEY_THEME] = { key_theme_key_change, nop, key_theme_loop, nop, false, true },
     [MODE_KEY_OFF] = { key_change, key_rotate, key_loop, key_enter, true, true },
@@ -596,8 +632,9 @@ void setup_run(uint16_t keys, uint16_t angle)
         mode_defs[current_mode].key_change();
     }
 
-    RUN_EVERY_N_MS(blink_fast = ~blink_fast, 100);
-    RUN_EVERY_N_MS(blink_slow = ~blink_slow, 500);
+    RUN_EVERY_N_MS(blink_rapid ^= 0xffffffff, 75);
+    RUN_EVERY_N_MS(blink_fast ^= 0xffffffff, 100);
+    RUN_EVERY_N_MS(blink_slow ^= 0xffffffff, 500);
 
     mode_defs[current_mode].loop();
 

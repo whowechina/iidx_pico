@@ -11,47 +11,47 @@
 iidx_cfg_t *iidx_cfg;
 
 static iidx_cfg_t default_cfg = {
-    .key_off = { { 0, 255, 32 }, { 23, 255, 32 }, { 46, 255, 32 }, { 69, 255, 32 },
-                 { 92, 255, 32 }, { 115, 255, 32 }, { 138, 255, 32 },
-                 { 161, 255, 32 }, { 184, 255, 32 }, { 207, 255, 32 }, { 230, 255, 32 },
-    },
-    .key_on = { { 40, 0, 96 }, { 40, 0, 96 }, { 40, 0, 96 }, { 40, 0, 96 },
-                { 40, 0, 96 }, { 40, 0, 96 }, { 40, 0, 96 },
-                { 40, 0, 96 }, { 40, 0, 96 }, { 40, 0, 96 }, { 40, 0, 96 },
-    },
-    .tt_led = {
-        .start = 0,
-        .num = 24,
-        .effect = 0,
-        .param = 0,
-        .mode = 0,
-    },
-    .tt_sensor = {
-        .reversed = false,
+    .rgb.format = { 0, 0, 0 },
+    .rgb.level = { 128, 128 },
+    .rgb.tt = { .start = 0, .num = 24, .reversed = 0 },
+
+    .sensor = {
+        .reversed = 0,
         .ppr = 1,
     },
-    .level = 128,
-    .konami = false,
+
+    .hid = {
+        .konami = 0,
+    },
+
+    .effect = {
+        .keys[0] = {
+            .off = { { 0, 0, 255, 32 }, { 0, 23, 255, 32 }, { 0, 46, 255, 32 }, { 0, 69, 255, 32 },
+                     { 0, 92, 255, 32 }, { 0, 115, 255, 32 }, { 0, 138, 255, 32 },
+                     { 0, 161, 255, 32 }, { 0, 184, 255, 32 }, { 0, 207, 255, 32 }, { 0, 230, 255, 32 },
+            },
+            .on = { { 0, 40, 0, 96 }, { 0, 40, 0, 96 }, { 0, 40, 0, 96 }, { 0, 40, 0, 96 },
+                    { 0, 40, 0, 96 }, { 0, 40, 0, 96 }, { 0, 40, 0, 96 },
+                    { 0, 40, 0, 96 }, { 0, 40, 0, 96 }, { 0, 40, 0, 96 }, { 0, 40, 0, 96 },
+            },
+        },
+    }
 };
 
 static void config_loaded()
 {
-    if (iidx_cfg->tt_led.num == 0) {
-        iidx_cfg->tt_led.num = 24;
+    if (iidx_cfg->rgb.tt.num == 0) {
+        iidx_cfg->rgb.tt.num = 24;
         config_changed();
     }
-    if ((iidx_cfg->tt_led.start > 8) ||
-        (iidx_cfg->tt_led.start + iidx_cfg->tt_led.num > 128)) {
-        iidx_cfg->tt_led.start = 0;
-        iidx_cfg->tt_led.num = 24;
+    if ((iidx_cfg->rgb.tt.start > 8) ||
+        (iidx_cfg->rgb.tt.start + iidx_cfg->rgb.tt.num > 128)) {
+        iidx_cfg->rgb.tt.start = 0;
+        iidx_cfg->rgb.tt.num = 24;
         config_changed();
     }
-    if (iidx_cfg->tt_led.mode > 2) {
-        iidx_cfg->tt_led.mode = 0;
-        config_changed();
-    }
-    if (iidx_cfg->tt_sensor.ppr > 3) {
-        iidx_cfg->tt_sensor.ppr = 1;
+    if (iidx_cfg->sensor.ppr > 3) {
+        iidx_cfg->sensor.ppr = 1;
         config_changed();
     }
 }

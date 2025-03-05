@@ -61,14 +61,14 @@ void mode_check()
     uint16_t key2 = (1 << (button_num() - 2));
     uint16_t buttons = button_read();
     if (buttons & key1) {
-        iidx_cfg->konami = true;
+        iidx_cfg->hid.konami = true;
         save_request(false);
     } else if (buttons & key2) {
-        iidx_cfg->konami = false;
+        iidx_cfg->hid.konami = false;
         save_request(false);
     }
 
-    if (iidx_cfg->konami) {
+    if (iidx_cfg->hid.konami) {
         konami_mode();
     }
 }
@@ -157,7 +157,7 @@ void init()
     setup_init();
     config_init();
     mutex_init(&core1_io_lock);
-    save_init(0xca341234, &core1_io_lock);
+    save_init(0xca341124, &core1_io_lock);
 
     cli_init("iidx_pico>", "\n   << IIDX Pico|Teeny Controller >>\n"
                             " https://github.com/whowechina\n\n");

@@ -69,7 +69,7 @@ void turntable_update()
 
 uint16_t turntable_raw()
 {
-    return iidx_cfg->tt_sensor.reversed ? 4095 - raw_angle : raw_angle; // 12bit
+    return iidx_cfg->sensor.reversed ? 4095 - raw_angle : raw_angle; // 12bit
 }
 
 uint8_t turntable_read()
@@ -78,11 +78,11 @@ uint8_t turntable_read()
     static int16_t old_angle = 0;
 
     uint16_t step;
-    if (iidx_cfg->tt_sensor.ppr == 1) {
+    if (iidx_cfg->sensor.ppr == 1) {
         step = 4096 / 128;
-    } else if (iidx_cfg->tt_sensor.ppr == 2) {
+    } else if (iidx_cfg->sensor.ppr == 2) {
         step = 4096 / 96;
-    } else if (iidx_cfg->tt_sensor.ppr == 3) {
+    } else if (iidx_cfg->sensor.ppr == 3) {
         step = 4096 / 64;
     } else {
         return raw_angle >> 4;

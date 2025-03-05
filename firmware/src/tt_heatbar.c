@@ -44,10 +44,10 @@ static uint32_t spectrum_level = 0;
 
 static void prepare_spectrum()
 {
-    if (iidx_cfg->level == spectrum_level) {
+    if (iidx_cfg->rgb.level.tt == spectrum_level) {
         return;
     }
-    spectrum_level = iidx_cfg->level;
+    spectrum_level = iidx_cfg->rgb.level.tt;
     for (int i = 0; i < 256; i++) {
         spectrum[i] = tt_hsv((hsv_t){ i, 255, 255 });
     }

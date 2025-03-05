@@ -35,14 +35,23 @@ typedef struct {
     void (*update)(uint32_t context);
 } tt_effect_t;
 
+typedef enum {
+    RGB_MAIN,
+    RGB_TT,
+    RGB_EFFECT,
+} rgb_type;
+
 void rgb_reg_tt_effect(tt_effect_t effect);
 
 extern uint32_t tt_led_buf[];
-#define TT_LED_NUM (iidx_cfg->tt_led.num)
+#define TT_LED_NUM (iidx_cfg->rgb.tt.num)
 
 uint32_t button_rgb32(uint32_t r, uint32_t g, uint32_t b, bool gamma_fix);
 uint32_t tt_rgb32(uint32_t r, uint32_t g, uint32_t b, bool gamma_fix);
 uint32_t button_hsv(hsv_t hsv);
 uint32_t tt_hsv(hsv_t hsv);
+
+// TODO: unify the color_t and rgb_t, tt and button
+//uint32_t get_color(color_t color, rgb_type type);
 
 #endif

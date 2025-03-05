@@ -45,11 +45,11 @@ static unsigned current_effect_id = 0;
 static uint64_t hid_light_button_expire = 0;
 static uint64_t hid_light_tt_expire = 0;
 
-static inline uint32_t _rgb32(uint32_t c1, uint32_t c2, uint32_t c3, bool gamma_fix)
+static inline uint32_t _rgb32(uint32_t c1, uint32_t c2, uint32_t c3, uint8_t level, bool gamma_fix)
 {
-    c1 = c1 * iidx_cfg->level / 255;
-    c2 = c2 * iidx_cfg->level / 255;
-    c3 = c3 * iidx_cfg->level / 255;
+    c1 = c1 * level / 255;
+    c2 = c2 * level / 255;
+    c3 = c3 * level / 255;
 
     if (gamma_fix) {
         c1 = ((c1 + 1) * (c1 + 1) - 1) >> 8;
@@ -63,18 +63,18 @@ static inline uint32_t _rgb32(uint32_t c1, uint32_t c2, uint32_t c3, bool gamma_
 uint32_t button_rgb32(uint32_t r, uint32_t g, uint32_t b, bool gamma_fix)
 {
 #if BUTTON_RGB_ORDER == GRB
-    return _rgb32(g, r, b, gamma_fix);
+    return _rgb32(g, r, b, iidx_cfg->rgb.level.keys, gamma_fix);
 #else
-    return _rgb32(r, g, b, gamma_fix);
+    return _rgb32(r, g, b, iidx_cfg->rgb.level.keys, gamma_fix);
 #endif
 }
 
 uint32_t tt_rgb32(uint32_t r, uint32_t g, uint32_t b, bool gamma_fix)
 {
 #if TT_RGB_ORDER == GRB
-    return _rgb32(g, r, b, gamma_fix);
+    return _rgb32(g, r, b, iidx_cfg->rgb.level.tt, gamma_fix);
 #else
-    return _rgb32(r, g, b, gamma_fix);
+    return _rgb32(r, g, b, iidx_cfg->rgb.level.tt,gamma_fix);
 #endif
 }
 
@@ -127,22 +127,17 @@ static void drive_led()
         pio_sm_put_blocking(pio0, 0, button_led_buf[i] << 8);
     }
 
-    if (iidx_cfg->tt_led.mode == 2) {
-        return;
-    }
-
-    for (int i = 0; i < iidx_cfg->tt_led.start; i++) {
-        pio_sm_put_blocking(pio1, 0, 0);
+    for (int i = 0; i < iidx_cfg->rgb.tt.start; i++) {
+        pio_sm_put_blocking(pio0, 1, 0);
     }
 
     for (int i = 0; i < TT_LED_NUM; i++) {
-        bool reversed = iidx_cfg->tt_led.mode & 0x01;
-        uint8_t id = reversed ? TT_LED_NUM - i - 1 : i;
-        pio_sm_put_blocking(pio1, 0, tt_led_buf[id] << 8);
+        uint8_t id = iidx_cfg->rgb.tt.reversed ? TT_LED_NUM - i - 1 : i;
+        pio_sm_put_blocking(pio0, 1, tt_led_buf[id] << 8);
     }
 
     for (int i = 0; i < 8; i++) { // a few more to wipe out the last leds
-        pio_sm_put_blocking(pio1, 0, 0);
+        pio_sm_put_blocking(pio0, 1, 0);
     }
 }
 
@@ -183,11 +178,8 @@ uint32_t button_hsv(hsv_t hsv)
     uint32_t r = (rgb >> 16) & 0xff;
     uint32_t g = (rgb >> 8) & 0xff;
     uint32_t b = (rgb >> 0) & 0xff;
-#if BUTTON_RGB_ORDER == GRB
-    return _rgb32(g, r, b, false);
-#else
-    return _rgb32(r, g, b, false);
-#endif
+
+    return button_rgb32(r, g, b, false);
 }
 
 uint32_t tt_hsv(hsv_t hsv)
@@ -196,11 +188,8 @@ uint32_t tt_hsv(hsv_t hsv)
     uint32_t r = (rgb >> 16) & 0xff;
     uint32_t g = (rgb >> 8) & 0xff;
     uint32_t b = (rgb >> 0) & 0xff;
-#if TT_RGB_ORDER == GRB
-    return _rgb32(g, r, b, false);
-#else
-    return _rgb32(r, g, b, false);
-#endif
+
+    return tt_rgb32(r, g, b, false);
 }
 
 void rgb_set_angle(uint32_t angle)
@@ -269,7 +258,7 @@ static void tt_lights_update()
         return;
     }
 
-    set_effect(iidx_cfg->tt_led.effect);
+    set_effect(iidx_cfg->effect.tt_theme);
 
     /* Lower priority for the local effects */
     if (CURRENT_EFFECT.update) {
@@ -291,9 +280,9 @@ static void button_lights_update()
     for (int i = 0; i < BUTTON_RGB_NUM; i++) {
         int led = button_rgb_map[i];
         if (hid_lights[i] > 0) {
-            button_led_buf[led] = button_hsv(iidx_cfg->key_on[i]);
+            button_led_buf[led] = button_hsv(iidx_cfg->effect.keys[0].on[i].hsv);
         } else {
-            button_led_buf[led] = button_hsv(iidx_cfg->key_off[i]);
+            button_led_buf[led] = button_hsv(iidx_cfg->effect.keys[0].off[i].hsv);
         }
     }
 }
@@ -319,48 +308,17 @@ static void wipe_out_tt_led()
     sleep_ms(5);
 }
 
-static uint pio1_offset;
-static bool pio1_running = false;
-
-static void pio1_run()
-{
-    gpio_set_drive_strength(TT_RGB_PIN, GPIO_DRIVE_STRENGTH_8MA);
-    ws2812_program_init(pio1, 0, pio1_offset, TT_RGB_PIN, 800000, false);
-}
-
-static void pio1_stop()
-{
-    wipe_out_tt_led();
-    pio_sm_set_enabled(pio1, 0, false);
-
-    gpio_set_function(TT_RGB_PIN, GPIO_FUNC_SIO);
-    gpio_set_dir(TT_RGB_PIN, GPIO_IN);
-    gpio_disable_pulls(TT_RGB_PIN);
-}
-
 void rgb_init()
 {
     uint pio0_offset = pio_add_program(pio0, &ws2812_program);
-    pio1_offset = pio_add_program(pio1, &ws2812_program);
 
     gpio_set_drive_strength(BUTTON_RGB_PIN, GPIO_DRIVE_STRENGTH_2MA);
     ws2812_program_init(pio0, 0, pio0_offset, BUTTON_RGB_PIN, 800000, false);
 
-    effect_reset();
-}
+    gpio_set_drive_strength(TT_RGB_PIN, GPIO_DRIVE_STRENGTH_2MA);
+    ws2812_program_init(pio0, 1, pio0_offset, TT_RGB_PIN, 800000, false);
 
-static void follow_mode_change()
-{
-    bool pio1_should_run = (iidx_cfg->tt_led.mode != 2);
-    if (pio1_should_run == pio1_running) {
-        return;
-    }
-    pio1_running = pio1_should_run;
-    if (pio1_should_run) {
-        pio1_run();
-    } else {
-        pio1_stop();
-    }
+    effect_reset();
 }
 
 void rgb_update()
@@ -371,8 +329,6 @@ void rgb_update()
         return;
     }
     last = now;
-
-    follow_mode_change();
 
     tt_lights_update();
     button_lights_update();
