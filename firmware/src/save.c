@@ -59,22 +59,26 @@ static mutex_t *io_lock;
 static void save_program()
 {
     memcpy(&old_data, &new_data, savedata_pkt_size);
-
-    savedata_page += pages_per_savedata;
-    if (savedata_page >= SAVE_TOTAL_PAGE_NUM) {
+    
+    savedata_page++;
+    if ((savedata_page < 0) ||
+        ((savedata_page + 1) * pages_per_savedata >= SAVE_TOTAL_PAGE_NUM)) {
         savedata_page = 0;
     }
+
+    int target_page_addr = savedata_page * pages_per_savedata * FLASH_PAGE_SIZE;
+
     if (mutex_enter_timeout_us(io_lock, 200000)) {
         sleep_ms(20); /* wait for all io operations to finish */
         uint32_t ints = save_and_disable_interrupts();
         if (savedata_page == 0) {
             flash_range_erase(SAVE_SECTOR_OFFSET, FLASH_SECTOR_SIZE);
         }
-        flash_range_program(SAVE_SECTOR_OFFSET + savedata_page * FLASH_PAGE_SIZE,
+        flash_range_program(SAVE_SECTOR_OFFSET + target_page_addr,
                             (uint8_t *)&old_data, savedata_pkt_size);
         restore_interrupts(ints);
         mutex_exit(io_lock);
-        printf("\nProgram Flash %d %8lx done.\n", savedata_page, old_data.magic);
+        printf("\nProgram Flash page %d (%8lx) done.\n", savedata_page, old_data.magic);
     } else {
         printf("Program Flash failed.\n");
     }
@@ -186,7 +190,7 @@ void *save_alloc(size_t size, void *def, void (*after_load)())
 void save_request(bool immediately)
 {
     if (!requesting_save) {
-        printf("Save requested.\n");
+        printf("Save requested, page %d.\n", savedata_page);
         requesting_save = true;
         new_data.magic = my_magic;
         requesting_time = time_us_64();
