@@ -11,7 +11,7 @@
 #include "board_defs.h"
 
 void setup_init();
-void setup_run(uint16_t key_flag, uint16_t tt_angle);
+void setup_run(uint16_t keys, uint16_t angle);
 bool setup_needs_tt_led();
 bool setup_needs_button_led();
 

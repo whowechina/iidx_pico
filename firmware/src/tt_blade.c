@@ -90,7 +90,7 @@ static uint32_t apply_level(uint32_t color)
     uint32_t r = (color >> 16) & 0xff;
     uint32_t g = (color >> 8) & 0xff;
     uint32_t b = color  & 0xff;
-    return rgb32(RGB_TT, r, g, b, false);
+    return rgb_mix(RGB_TT, r, g, b, false);
 }
 
 static uint32_t led_angle = 0;

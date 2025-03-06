@@ -50,7 +50,12 @@ void turntable_init()
 static int read_angle()
 {
     if (use_as5600) {
-        return as5600_read_angle();
+        static int cache = 0;
+        int angle = as5600_read_angle();
+        if (angle >= 0) {
+            cache = angle;
+        }
+        return cache;
     }
 
     return tmag5273_read_angle() * 0x1000 / 360 / 16;
@@ -59,12 +64,18 @@ static int read_angle()
 static const int average_count = 4;
 void turntable_update()
 {
-    int sum = 0;
-    for (int i = 0; i < average_count; i++) {
-        sum += read_angle();
+    int sum = read_angle();
+    int count = 1;
+    for (int i = 0; i < average_count - 1; i++) {
+        int angle = read_angle();
+        int average = sum / count;
+        if (abs(angle - average) < 64) {
+            sum += angle;
+            count++;
+        }
     }
 
-    raw_angle = sum / average_count;
+    raw_angle = sum / count;
 }
 
 uint16_t turntable_raw()

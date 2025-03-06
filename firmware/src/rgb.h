@@ -27,6 +27,9 @@ void rgb_set_hid_light(uint8_t const *lights, uint8_t num);
 
 void rgb_override_tt(uint32_t *tt);
 void rgb_override_button(uint32_t *button);
+void rgb_force_light(int id, uint32_t color);
+
+void rgb_set_effect(int id, uint32_t color);
 
 typedef struct {
     void (*init)(uint32_t context);
@@ -35,20 +38,22 @@ typedef struct {
     void (*update)(uint32_t context);
 } tt_effect_t;
 
+void rgb_reg_tt_effect(tt_effect_t effect);
+
+extern uint32_t tt_led_buf[];
+#define TT_LED_NUM (iidx_cfg->rgb.tt.num)
+
 typedef enum {
     RGB_MAIN,
     RGB_TT,
     RGB_EFFECT,
 } rgb_type;
 
-void rgb_reg_tt_effect(tt_effect_t effect);
+uint32_t rgb_mix(rgb_type type, uint32_t r, uint32_t g, uint32_t b, bool gamma_fix);
+uint32_t rgb_from_hsv(rgb_type type, hsv_t hsv);
 
-extern uint32_t tt_led_buf[];
-#define TT_LED_NUM (iidx_cfg->rgb.tt.num)
-
-uint32_t rgb32(rgb_type type, uint32_t r, uint32_t g, uint32_t b, bool gamma_fix);
-uint32_t rgb32_from_hsv(rgb_type type, hsv_t hsv);
-
+uint32_t rgb_hsv_raw(hsv_t hsv);
+uint32_t rgb_fix_order(rgb_type type, uint32_t rgb);
 
 // TODO: unify the color_t and rgb_t, tt and button
 //uint32_t get_color(color_t color, rgb_type type);

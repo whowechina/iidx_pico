@@ -27,7 +27,7 @@ static void disp_rgb()
     printf("[RGB]\n");
     printf("  Order: %d %d %d\n", iidx_cfg->rgb.format.main, iidx_cfg->rgb.format.tt, iidx_cfg->rgb.format.effect);
     printf("  TT: start %d num %d reversed: %d\n", iidx_cfg->rgb.tt.start, iidx_cfg->rgb.tt.num, iidx_cfg->rgb.tt.reversed);
-    printf("  Level: tt %d keys %d\n", iidx_cfg->rgb.level.tt, iidx_cfg->rgb.level.keys);
+    printf("  Level: tt %d keys %d\n", PROFILE.level.tt, PROFILE.level.keys);
 }
 
 static void disp_sensor()

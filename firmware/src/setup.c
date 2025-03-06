@@ -19,6 +19,8 @@
 
 static iidx_cfg_t cfg_save;
 
+#define PROFILE_SAVE cfg_save.profiles[cfg_save.profile]
+
 static uint64_t setup_tick_ms = 0;
 #define CONCAT(a, b) a ## b
 #define TVAR(line) CONCAT(a, line)
@@ -85,12 +87,12 @@ static struct {
 #define JUST_PRESSED(k) (input.just_pressed & (k))
 #define JUST_RELEASED(k) (input.just_released & (k))
 
-#define RED(t) rgb32(RGB_##t, 99, 0, 0, false)
-#define BLUE(t) rgb32(RGB_##t, 0, 0, 128, false)
-#define GREEN(t) rgb32(RGB_##t, 0, 99, 0, false)
-#define CYAN(t) rgb32(RGB_##t, 0, 40, 99, false)
-#define YELLOW(t) rgb32(RGB_##t, 99, 99, 0, false)
-#define SILVER(t) rgb32(RGB_##t, 60, 60, 60, false)
+#define RED(t) rgb_mix(RGB_##t, 99, 0, 0, false)
+#define BLUE(t) rgb_mix(RGB_##t, 0, 0, 128, false)
+#define GREEN(t) rgb_mix(RGB_##t, 0, 99, 0, false)
+#define CYAN(t) rgb_mix(RGB_##t, 0, 40, 99, false)
+#define YELLOW(t) rgb_mix(RGB_##t, 99, 99, 0, false)
+#define SILVER(t) rgb_mix(RGB_##t, 60, 60, 60, false)
 
 typedef void (*mode_func)();
 
@@ -119,10 +121,11 @@ static int16_t input_delta(int16_t start_angle)
     if (delta < -128) {
         delta += 256;
     }
+
     return delta;
 }
 
-static setup_mode_t key_to_mode[11] = {
+static setup_mode_t key_to_mode[7] = {
     MODE_KEY_THEME, MODE_TT_THEME, MODE_KEY_ON, MODE_KEY_OFF,
     MODE_NONE, MODE_NONE, MODE_NONE,
 };
@@ -140,9 +143,19 @@ static void none_rotate()
     }
 
     int16_t delta = input_delta(none_ctx.start_angle);
-    if (abs(delta) > 20) {
+    if (abs(delta) > 50) {
         join_mode(MODE_LEVEL);
         none_ctx.escaped = false;
+    }
+}
+
+static void none_disp_profile()
+{
+    for (int i = 0; i < 4; i++) {
+        hsv_t hsv = { i * 64, 240, i == iidx_cfg->profile ? 100 : 30 };
+        uint32_t color = rgb_fix_order(RGB_EFFECT, rgb_hsv_raw(hsv));
+        color &= (i == iidx_cfg->profile) ? blink_rapid : 0xffffffff;
+        rgb_force_light(LED_E1 + i, color);
     }
 }
 
@@ -154,6 +167,7 @@ static void none_loop()
             none_ctx.escape_time = time_us_64();
             none_ctx.start_angle = input.angle;
         }
+        none_disp_profile();
     } else {
         none_ctx.escaped = false;
     }
@@ -162,10 +176,19 @@ static void none_loop()
         return;
     }
 
-    for (int i = 0; i < 11; i++) {
+    for (int i = 0; i < count_of(key_to_mode); i++) {
         if (PRESSED_ANY(KEY_1 << i)) {
             none_ctx.escaped = false;
             join_mode(key_to_mode[i]);
+            return;
+        }
+    }
+
+    for (int i = 0; i < 4; i++) {
+        if (JUST_PRESSED(E1 << i)) {
+            iidx_cfg->profile = i;
+            none_ctx.escaped = false;
+            config_changed();
             return;
         }
     }
@@ -217,7 +240,7 @@ static void tt_key_change()
     }
 
     if (JUST_PRESSED(AUX_YES | AUX_NO)) {
-        iidx_cfg->rgb.level = cfg_save.rgb.level;
+        PROFILE.level = PROFILE_SAVE.level;
     }
 
     check_exit();
@@ -255,14 +278,14 @@ static void tt_rotate()
 static void tt_loop()
 {
     for (int i = 1; i < iidx_cfg->rgb.tt.num - 1; i++) {
-        setup_led_tt[i] = rgb32(RGB_TT, 10, 10, 10, false);
+        setup_led_tt[i] = rgb_mix(RGB_TT, 10, 10, 10, false);
     }
 
     int head = iidx_cfg->rgb.tt.reversed ? TT_LED_NUM - 1 : 0;
     int tail = TT_LED_NUM - 1 - head;
 
-    setup_led_tt[head] = rgb32(RGB_TT, 0xc0, 0, 0, false);
-    setup_led_tt[tail] = rgb32(RGB_TT, 0, 0, 0xc0, false);
+    setup_led_tt[head] = rgb_mix(RGB_TT, 0xc0, 0, 0, false);
+    setup_led_tt[tail] = rgb_mix(RGB_TT, 0, 0, 0xc0, false);
     setup_led_button[LED_E1] = RED(EFFECT);
     setup_led_button[LED_E2] = BLUE(EFFECT);
 
@@ -295,8 +318,8 @@ static struct {
 
 static void level_update()
 {
-    iidx_cfg->rgb.level.tt = level_ctx.adjust_tt ? level_ctx.value : cfg_save.rgb.level.tt;
-    iidx_cfg->rgb.level.keys = level_ctx.adjust_keys ? level_ctx.value : cfg_save.rgb.level.keys;
+    PROFILE.level.tt = level_ctx.adjust_tt ? level_ctx.value : PROFILE_SAVE.level.tt;
+    PROFILE.level.keys = level_ctx.adjust_keys ? level_ctx.value : PROFILE_SAVE.level.keys;
 }
 
 static void level_rotate()
@@ -347,7 +370,7 @@ static void level_loop()
 {
     for (int i = 0; i < 7; i++) {
         hsv_t color = {i * 255 / 7, 255, 255};
-        setup_led_button[i] = rgb32_from_hsv(RGB_MAIN, color);
+        setup_led_button[i] = rgb_from_hsv(RGB_MAIN, color);
     }
 
     setup_led_button[LED_E1] = level_ctx.adjust_tt ? (0x404040 & blink_rapid) : 0;
@@ -355,7 +378,7 @@ static void level_loop()
 
     for (unsigned i = 0; i < iidx_cfg->rgb.tt.num; i++) {
         hsv_t color = { i * 255 / iidx_cfg->rgb.tt.num, 255, 255 };
-        setup_led_tt[i] = rgb32_from_hsv(RGB_TT, color);
+        setup_led_tt[i] = rgb_from_hsv(RGB_TT, color);
     }
 }
 
@@ -428,7 +451,7 @@ static void key_rotate()
 static void key_loop()
 {
     for (int i = 0; i < 11; i ++) {
-        uint32_t rgb = rgb32_from_hsv(i < 7 ? RGB_MAIN : RGB_EFFECT, key_ctx.hsv);
+        uint32_t rgb = rgb_from_hsv(i < 7 ? RGB_MAIN : RGB_EFFECT, key_ctx.hsv);
         if (key_ctx.keys == 0) {
             setup_led_button[i] = rgb & blink_slow;
         } else if (key_ctx.keys & (1 << i)) {
@@ -440,7 +463,7 @@ static void key_loop()
 
     uint16_t pos = *key_ctx.value * iidx_cfg->rgb.tt.num / 256;
     for (unsigned i = 0; i < iidx_cfg->rgb.tt.num; i++) {
-        setup_led_tt[i] = (i == pos) ? rgb32(RGB_TT, 90, 90, 90, false) : 0;
+        setup_led_tt[i] = (i == pos) ? rgb_mix(RGB_TT, 90, 90, 90, false) : 0;
     }
 }
 
@@ -545,7 +568,7 @@ static void key_theme_loop()
     for (int i = 0; i < 11; i++) {
         hsv_t hsv = blink_slow ? PROFILE.key_on[i].hsv
                                : PROFILE.key_off[i].hsv;
-        setup_led_button[i] = rgb32_from_hsv(i < 7 ? RGB_MAIN : RGB_EFFECT, hsv);
+        setup_led_button[i] = rgb_from_hsv(i < 7 ? RGB_MAIN : RGB_EFFECT, hsv);
     }
 }
 
@@ -592,7 +615,7 @@ static struct {
     bool button_led;
     bool auto_brightness;
 } mode_defs[] = {
-    [MODE_NONE] = { nop, none_rotate, none_loop, nop, false, false, true },
+    [MODE_NONE] = { nop, none_rotate, none_loop, nop, false, false, false },
     [MODE_TURNTABLE] = { tt_key_change, tt_rotate, tt_loop, tt_enter, true, true, true },
     [MODE_LEVEL] = { level_key_change, level_rotate, level_loop, level_enter, true, true, false },
     [MODE_TT_THEME] = { tt_theme_key_change, nop, tt_theme_loop, nop, false, true, true },
@@ -609,8 +632,8 @@ static void join_mode(setup_mode_t new_mode)
     current_mode = new_mode;
     mode_defs[current_mode].enter();
     if (mode_defs[current_mode].auto_brightness) {
-        iidx_cfg->rgb.level.tt = 100;
-        iidx_cfg->rgb.level.keys = 100;
+        PROFILE.level.tt = 100;
+        PROFILE.level.keys = 100;
     }
     printf("Entering setup mode %d\n", new_mode);
 }
@@ -621,7 +644,7 @@ static void quit_mode(bool apply)
 
     if (apply) {
         if (mode_defs[current_mode].auto_brightness) {
-            iidx_cfg->rgb.level = cfg_save.rgb.level;
+            PROFILE.level = PROFILE_SAVE.level;
         }
         config_changed();
     } else {
@@ -632,6 +655,8 @@ static void quit_mode(bool apply)
  
 void setup_run(uint16_t keys, uint16_t angle)
 {
+    int16_t rotate = input_delta(input.last_angle);
+
     setup_tick_ms = time_us_64() / 1000;
     input.keys = keys;
     input.angle = angle;

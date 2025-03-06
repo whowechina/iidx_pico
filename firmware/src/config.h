@@ -43,10 +43,6 @@ typedef struct __attribute ((packed)) {
             uint8_t not_used : 2;
         } format;
         struct {
-            uint8_t keys;
-            uint8_t tt;
-        } level;
-        struct {
             uint8_t reversed : 1;
             uint8_t start : 7;
             uint8_t num;
@@ -63,6 +59,10 @@ typedef struct __attribute ((packed)) {
     } hid;
     uint8_t profile;
     struct {
+        struct {
+            uint8_t keys;
+            uint8_t tt;
+        } level;
         uint8_t tt_theme;
         uint8_t tt_param;
         color_t key_on[11];
