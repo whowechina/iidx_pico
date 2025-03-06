@@ -157,7 +157,7 @@ void init()
     setup_init();
     config_init();
     mutex_init(&core1_io_lock);
-    save_init(0xca341124, &core1_io_lock);
+    save_init(0xca341125, &core1_io_lock);
 
     cli_init("iidx_pico>", "\n   << IIDX Pico|Teeny Controller >>\n"
                             " https://github.com/whowechina\n\n");

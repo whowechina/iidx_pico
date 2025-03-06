@@ -452,12 +452,12 @@ static void key_enter()
         .value = &key_ctx.hsv.h,
         .start_angle = input.angle,
         .keys = 0,
-        .leds = iidx_cfg->effect.keys[0].on,
+        .leds = PROFILE.key_on,
     };
 
     if (current_mode == MODE_KEY_OFF) {
         key_ctx.hsv = (hsv_t) { .h = 60, .s = 255, .v = 100 };
-        key_ctx.leds = iidx_cfg->effect.keys[0].off;
+        key_ctx.leds = PROFILE.key_off;
     }
 }
 
@@ -530,10 +530,10 @@ static void key_theme_key_change()
 
     if (theme >= 0) {
         for (int i = 0; i < 11; i++) {
-            iidx_cfg->effect.keys[0].on[i].mode = COLOR_MODE_HSV;
-            iidx_cfg->effect.keys[0].off[i].mode = COLOR_MODE_HSV;
-            iidx_cfg->effect.keys[0].on[i].hsv = themes[theme].key_on[i];
-            iidx_cfg->effect.keys[0].off[i].hsv = themes[theme].key_off[i];
+            PROFILE.key_on[i].mode = COLOR_MODE_HSV;
+            PROFILE.key_off[i].mode = COLOR_MODE_HSV;
+            PROFILE.key_on[i].hsv = themes[theme].key_on[i];
+            PROFILE.key_off[i].hsv = themes[theme].key_off[i];
         }
     }
 
@@ -543,8 +543,8 @@ static void key_theme_key_change()
 static void key_theme_loop()
 {
     for (int i = 0; i < 11; i++) {
-        hsv_t hsv = blink_slow ? iidx_cfg->effect.keys[0].on[i].hsv
-                               : iidx_cfg->effect.keys[0].off[i].hsv;
+        hsv_t hsv = blink_slow ? PROFILE.key_on[i].hsv
+                               : PROFILE.key_off[i].hsv;
         setup_led_button[i] = rgb32_from_hsv(i < 7 ? RGB_MAIN : RGB_EFFECT, hsv);
     }
 }
@@ -553,14 +553,14 @@ static void tt_theme_key_change()
 {
     for (int i = 0; i < 4; i++) {
         if (JUST_PRESSED(KEY_1 << (i * 2))) {
-            iidx_cfg->effect.tt_theme = iidx_cfg->effect.tt_theme & 0xf0 | i;
+            PROFILE.tt_theme = PROFILE.tt_theme & 0xf0 | i;
             break;
         }
     }
 
     for (int i = 0; i < 3; i++) {
         if (JUST_PRESSED(KEY_2 << (i * 2))) {
-            iidx_cfg->effect.tt_theme = iidx_cfg->effect.tt_theme & 0x0f | (i << 4);
+            PROFILE.tt_theme = PROFILE.tt_theme & 0x0f | (i << 4);
             break;
         }
     }
@@ -569,8 +569,8 @@ static void tt_theme_key_change()
 
 static void tt_theme_loop()
 {
-    int effect = (iidx_cfg->effect.tt_theme & 0x0f) % 4;
-    int context = (iidx_cfg->effect.tt_theme >> 4) % 3;
+    int effect = (PROFILE.tt_theme & 0x0f) % 4;
+    int context = (PROFILE.tt_theme >> 4) % 3;
 
     for (int i = 0; i < 7; i++) {
         if (i == effect * 2) {

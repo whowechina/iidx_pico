@@ -253,7 +253,7 @@ static void tt_lights_update()
         return;
     }
 
-    set_effect(iidx_cfg->effect.tt_theme);
+    set_effect(iidx_cfg->profiles[0].tt_theme);
 
     /* Lower priority for the local effects */
     if (CURRENT_EFFECT.update) {
@@ -274,8 +274,8 @@ static void button_lights_update()
 
     for (int i = 0; i < BUTTON_RGB_NUM; i++) {
         int led = button_rgb_map[i];
-        hsv_t hsv = hid_lights[i] ? iidx_cfg->effect.keys[0].on[i].hsv
-                                  : iidx_cfg->effect.keys[0].off[i].hsv;
+        hsv_t hsv = hid_lights[i] ? iidx_cfg->profiles[0].key_on[i].hsv
+                                  : iidx_cfg->profiles[0].key_off[i].hsv;
         button_led_buf[led] = rgb32_from_hsv(i < 7 ? RGB_MAIN : RGB_EFFECT, hsv);
     }
 }

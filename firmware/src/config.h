@@ -61,19 +61,18 @@ typedef struct __attribute ((packed)) {
         bool konami; /* konami spoof */
         uint8_t res;
     } hid;
+    uint8_t profile;
     struct {
         uint8_t tt_theme;
         uint8_t tt_param;
-        uint8_t key_theme;
-        uint8_t key_param;
-        struct {
-            color_t on[11];
-            color_t off[11];
-        } keys[4];
-    } effect;
+        color_t key_on[11];
+        color_t key_off[11];
+    } profiles[4];
 } iidx_cfg_t;
 
 extern iidx_cfg_t *iidx_cfg;
+
+#define PROFILE iidx_cfg->profiles[iidx_cfg->profile % 4]
 
 void config_init();
 void config_changed(); // Notify the config has changed
