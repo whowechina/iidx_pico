@@ -85,17 +85,12 @@ static struct {
 #define JUST_PRESSED(k) (input.just_pressed & (k))
 #define JUST_RELEASED(k) (input.just_released & (k))
 
-#define RED button_rgb32(99, 0, 0, false)
-#define GREEN button_rgb32(0, 99, 0, false)
-#define CYAN button_rgb32(0, 40, 99, false)
-#define YELLOW button_rgb32(99, 99, 0, false)
-#define SILVER button_rgb32(60, 60, 60, false)
-
-#define TT_RED tt_rgb32(99, 0, 0, false)
-#define TT_GREEN tt_rgb32(0, 99, 0, false)
-#define TT_CYAN tt_rgb32(0, 40, 99, false)
-#define TT_YELLOW tt_rgb32(99, 99, 0, false)
-#define TT_SILVER tt_rgb32(60, 60, 60, false)
+#define RED(t) rgb32(RGB_##t, 99, 0, 0, false)
+#define BLUE(t) rgb32(RGB_##t, 0, 0, 128, false)
+#define GREEN(t) rgb32(RGB_##t, 0, 99, 0, false)
+#define CYAN(t) rgb32(RGB_##t, 0, 40, 99, false)
+#define YELLOW(t) rgb32(RGB_##t, 99, 99, 0, false)
+#define SILVER(t) rgb32(RGB_##t, 60, 60, 60, false)
 
 typedef void (*mode_func)();
 
@@ -185,7 +180,6 @@ static void none_loop()
 static struct {
     uint8_t adjust_led; /* 0: nothing, 1: adjust start, 2: adjust stop */
     int16_t start_angle;
-    uint8_t value;
 } tt_ctx;
 
 static void tt_enter()
@@ -214,6 +208,16 @@ static void tt_key_change()
         iidx_cfg->sensor.ppr = 2;
     } else if (JUST_PRESSED(KEY_7)) {
         iidx_cfg->sensor.ppr = 3;
+    } else if (JUST_PRESSED(KEY_2)) {
+        iidx_cfg->rgb.format.main = (iidx_cfg->rgb.format.main + 1) % 2;
+    } else if (JUST_PRESSED(KEY_4)) {
+        iidx_cfg->rgb.format.tt = (iidx_cfg->rgb.format.tt + 1) % 2;
+    } else if (JUST_PRESSED(KEY_6)) {
+        iidx_cfg->rgb.format.effect = (iidx_cfg->rgb.format.effect + 1) % 2;
+    }
+
+    if (JUST_PRESSED(AUX_YES | AUX_NO)) {
+        iidx_cfg->rgb.level = cfg_save.rgb.level;
     }
 
     check_exit();
@@ -251,32 +255,36 @@ static void tt_rotate()
 static void tt_loop()
 {
     for (int i = 1; i < iidx_cfg->rgb.tt.num - 1; i++) {
-        setup_led_tt[i] = tt_rgb32(10, 10, 10, false);
+        setup_led_tt[i] = rgb32(RGB_TT, 10, 10, 10, false);
     }
 
     int head = iidx_cfg->rgb.tt.reversed ? TT_LED_NUM - 1 : 0;
     int tail = TT_LED_NUM - 1 - head;
 
-    setup_led_tt[head] = tt_rgb32(0xa0, 0, 0, false);
-    setup_led_tt[tail] = tt_rgb32(0, 0xa0, 0, false);
-    setup_led_button[LED_E2] = button_rgb32(0, 10, 0, false);
-    setup_led_button[LED_E1] = button_rgb32(10, 0, 0, false);
+    setup_led_tt[head] = rgb32(RGB_TT, 0xc0, 0, 0, false);
+    setup_led_tt[tail] = rgb32(RGB_TT, 0, 0, 0xc0, false);
+    setup_led_button[LED_E1] = RED(EFFECT);
+    setup_led_button[LED_E2] = BLUE(EFFECT);
 
     if (tt_ctx.adjust_led == 1) {
         setup_led_tt[head] &= blink_fast;
-        setup_led_button[LED_E1] = RED & blink_fast;
+        setup_led_button[LED_E1] &= blink_fast;
     } else if (tt_ctx.adjust_led == 2) {
         setup_led_tt[tail] &= blink_fast;
-        setup_led_button[LED_E2] = GREEN & blink_fast;
+        setup_led_button[LED_E2] &= blink_fast;
     }
 
-    setup_led_button[LED_E3] = iidx_cfg->rgb.tt.reversed ? GREEN : RED;
-    setup_led_button[LED_E4] = iidx_cfg->sensor.reversed ? CYAN : YELLOW;
+    setup_led_button[LED_E3] = iidx_cfg->rgb.tt.reversed ? CYAN(EFFECT) : YELLOW(EFFECT);
+    setup_led_button[LED_E4] = iidx_cfg->sensor.reversed ? CYAN(EFFECT) : YELLOW(EFFECT);
 
-    setup_led_button[LED_KEY_1] = iidx_cfg->sensor.ppr == 0 ? SILVER : 0;
-    setup_led_button[LED_KEY_3] = iidx_cfg->sensor.ppr == 1 ? SILVER : 0;
-    setup_led_button[LED_KEY_5] = iidx_cfg->sensor.ppr == 2 ? SILVER : 0;
-    setup_led_button[LED_KEY_7] = iidx_cfg->sensor.ppr == 3 ? SILVER : 0;
+    setup_led_button[LED_KEY_1] = iidx_cfg->sensor.ppr == 0 ? SILVER(MAIN) : 0;
+    setup_led_button[LED_KEY_3] = iidx_cfg->sensor.ppr == 1 ? SILVER(MAIN) : 0;
+    setup_led_button[LED_KEY_5] = iidx_cfg->sensor.ppr == 2 ? SILVER(MAIN) : 0;
+    setup_led_button[LED_KEY_7] = iidx_cfg->sensor.ppr == 3 ? SILVER(MAIN) : 0;
+
+    setup_led_button[LED_KEY_2] = (iidx_cfg->rgb.format.main & 1) ? RED(MAIN) : BLUE(MAIN);
+    setup_led_button[LED_KEY_4] = (iidx_cfg->rgb.format.tt & 1) ? RED(MAIN) : BLUE(MAIN);
+    setup_led_button[LED_KEY_6] = (iidx_cfg->rgb.format.effect & 1) ? RED(MAIN) : BLUE(MAIN);
 }
 
 static struct {
@@ -339,7 +347,7 @@ static void level_loop()
 {
     for (int i = 0; i < 7; i++) {
         hsv_t color = {i * 255 / 7, 255, 255};
-        setup_led_button[i] = button_hsv(color);
+        setup_led_button[i] = rgb32_from_hsv(RGB_MAIN, color);
     }
 
     setup_led_button[LED_E1] = level_ctx.adjust_tt ? (0x404040 & blink_rapid) : 0;
@@ -347,7 +355,7 @@ static void level_loop()
 
     for (unsigned i = 0; i < iidx_cfg->rgb.tt.num; i++) {
         hsv_t color = { i * 255 / iidx_cfg->rgb.tt.num, 255, 255 };
-        setup_led_tt[i] = tt_hsv(color);
+        setup_led_tt[i] = rgb32_from_hsv(RGB_TT, color);
     }
 }
 
@@ -420,10 +428,11 @@ static void key_rotate()
 static void key_loop()
 {
     for (int i = 0; i < 11; i ++) {
+        uint32_t rgb = rgb32_from_hsv(i < 7 ? RGB_MAIN : RGB_EFFECT, key_ctx.hsv);
         if (key_ctx.keys == 0) {
-            setup_led_button[i] = button_hsv(key_ctx.hsv) & blink_slow;
+            setup_led_button[i] = rgb & blink_slow;
         } else if (key_ctx.keys & (1 << i)) {
-            setup_led_button[i] = button_hsv(key_ctx.hsv);
+            setup_led_button[i] = rgb;
         } else {
             setup_led_button[i] = 0;
         }
@@ -431,7 +440,7 @@ static void key_loop()
 
     uint16_t pos = *key_ctx.value * iidx_cfg->rgb.tt.num / 256;
     for (unsigned i = 0; i < iidx_cfg->rgb.tt.num; i++) {
-        setup_led_tt[i] = (i == pos) ? tt_rgb32(90, 90, 90, false) : 0;
+        setup_led_tt[i] = (i == pos) ? rgb32(RGB_TT, 90, 90, 90, false) : 0;
     }
 }
 
@@ -447,7 +456,7 @@ static void key_enter()
     };
 
     if (current_mode == MODE_KEY_OFF) {
-        key_ctx.hsv = (hsv_t) { .h = 60, .s = 255, .v = 5 };
+        key_ctx.hsv = (hsv_t) { .h = 60, .s = 255, .v = 100 };
         key_ctx.leds = iidx_cfg->effect.keys[0].off;
     }
 }
@@ -534,11 +543,9 @@ static void key_theme_key_change()
 static void key_theme_loop()
 {
     for (int i = 0; i < 11; i++) {
-        if (blink_slow) {
-            setup_led_button[i] = button_hsv(iidx_cfg->effect.keys[0].on[i].hsv);
-         } else {
-            setup_led_button[i] = button_hsv(iidx_cfg->effect.keys[0].off[i].hsv);
-         }
+        hsv_t hsv = blink_slow ? iidx_cfg->effect.keys[0].on[i].hsv
+                               : iidx_cfg->effect.keys[0].off[i].hsv;
+        setup_led_button[i] = rgb32_from_hsv(i < 7 ? RGB_MAIN : RGB_EFFECT, hsv);
     }
 }
 
@@ -567,9 +574,9 @@ static void tt_theme_loop()
 
     for (int i = 0; i < 7; i++) {
         if (i == effect * 2) {
-            setup_led_button[i] = SILVER;
+            setup_led_button[i] = SILVER(MAIN);
         } else if (i == context * 2 + 1) {
-            setup_led_button[i] = CYAN;
+            setup_led_button[i] = CYAN(MAIN);
         } else {
             setup_led_button[i] = 0;
         }
@@ -583,14 +590,15 @@ static struct {
     mode_func enter;
     bool tt_led;
     bool button_led;
+    bool auto_brightness;
 } mode_defs[] = {
-    [MODE_NONE] = { nop, none_rotate, none_loop, nop, false, false },
-    [MODE_TURNTABLE] = { tt_key_change, tt_rotate, tt_loop, tt_enter, true, true },
-    [MODE_LEVEL] = { level_key_change, level_rotate, level_loop, level_enter, true, true },
-    [MODE_TT_THEME] = { tt_theme_key_change, nop, tt_theme_loop, nop, false, true },
-    [MODE_KEY_THEME] = { key_theme_key_change, nop, key_theme_loop, nop, false, true },
-    [MODE_KEY_OFF] = { key_change, key_rotate, key_loop, key_enter, true, true },
-    [MODE_KEY_ON] = { key_change, key_rotate, key_loop, key_enter, true, true },
+    [MODE_NONE] = { nop, none_rotate, none_loop, nop, false, false, true },
+    [MODE_TURNTABLE] = { tt_key_change, tt_rotate, tt_loop, tt_enter, true, true, true },
+    [MODE_LEVEL] = { level_key_change, level_rotate, level_loop, level_enter, true, true, false },
+    [MODE_TT_THEME] = { tt_theme_key_change, nop, tt_theme_loop, nop, false, true, true },
+    [MODE_KEY_THEME] = { key_theme_key_change, nop, key_theme_loop, nop, false, true, true },
+    [MODE_KEY_OFF] = { key_change, key_rotate, key_loop, key_enter, true, true, true },
+    [MODE_KEY_ON] = { key_change, key_rotate, key_loop, key_enter, true, true, true },
 };
 
 static void join_mode(setup_mode_t new_mode)
@@ -600,6 +608,10 @@ static void join_mode(setup_mode_t new_mode)
     memset(&setup_led_button, 0, sizeof(setup_led_button));
     current_mode = new_mode;
     mode_defs[current_mode].enter();
+    if (mode_defs[current_mode].auto_brightness) {
+        iidx_cfg->rgb.level.tt = 100;
+        iidx_cfg->rgb.level.keys = 100;
+    }
     printf("Entering setup mode %d\n", new_mode);
 }
 
@@ -608,6 +620,9 @@ static void quit_mode(bool apply)
     printf("Setup %s\n", apply ? "accepted." : "discarded.");
 
     if (apply) {
+        if (mode_defs[current_mode].auto_brightness) {
+            iidx_cfg->rgb.level = cfg_save.rgb.level;
+        }
         config_changed();
     } else {
         *iidx_cfg = cfg_save;

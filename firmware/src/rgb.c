@@ -60,22 +60,28 @@ static inline uint32_t _rgb32(uint32_t c1, uint32_t c2, uint32_t c3, uint8_t lev
     return (c1 << 16) | (c2 << 8) | (c3 << 0);    
 }
 
-uint32_t button_rgb32(uint32_t r, uint32_t g, uint32_t b, bool gamma_fix)
+uint32_t rgb32(rgb_type type, uint32_t r, uint32_t g, uint32_t b, bool gamma_fix)
 {
-#if BUTTON_RGB_ORDER == GRB
-    return _rgb32(g, r, b, iidx_cfg->rgb.level.keys, gamma_fix);
-#else
-    return _rgb32(r, g, b, iidx_cfg->rgb.level.keys, gamma_fix);
-#endif
-}
-
-uint32_t tt_rgb32(uint32_t r, uint32_t g, uint32_t b, bool gamma_fix)
-{
-#if TT_RGB_ORDER == GRB
-    return _rgb32(g, r, b, iidx_cfg->rgb.level.tt, gamma_fix);
-#else
-    return _rgb32(r, g, b, iidx_cfg->rgb.level.tt,gamma_fix);
-#endif
+    if (type == RGB_MAIN) {
+        if (iidx_cfg->rgb.format.main == 0) {
+            return _rgb32(g, r, b, iidx_cfg->rgb.level.keys, gamma_fix);
+        } else {
+            return _rgb32(r, g, b, iidx_cfg->rgb.level.keys, gamma_fix);
+        }
+    } else if (type == RGB_EFFECT) {
+        if (iidx_cfg->rgb.format.effect == 0) {
+            return _rgb32(g, r, b, iidx_cfg->rgb.level.keys, gamma_fix);
+        } else {
+            return _rgb32(r, g, b, iidx_cfg->rgb.level.keys, gamma_fix);
+        }
+    } else if (type == RGB_TT) {
+        if (iidx_cfg->rgb.format.tt == 0) {
+            return _rgb32(g, r, b, iidx_cfg->rgb.level.tt, gamma_fix);
+        } else {
+            return _rgb32(r, g, b, iidx_cfg->rgb.level.tt, gamma_fix);
+        }
+    }
+    return 0;
 }
 
 uint8_t rgb_button_num()
@@ -141,7 +147,7 @@ static void drive_led()
     }
 }
 
-static uint32_t rgb32_from_hsv(hsv_t hsv)
+static uint32_t from_hsv(hsv_t hsv)
 {
     uint32_t region, remainder, p, q, t;
 
@@ -172,24 +178,13 @@ static uint32_t rgb32_from_hsv(hsv_t hsv)
     }
 }
 
-uint32_t button_hsv(hsv_t hsv)
+uint32_t rgb32_from_hsv(rgb_type type, hsv_t hsv)
 {
-    uint32_t rgb = rgb32_from_hsv(hsv);
-    uint32_t r = (rgb >> 16) & 0xff;
-    uint32_t g = (rgb >> 8) & 0xff;
-    uint32_t b = (rgb >> 0) & 0xff;
-
-    return button_rgb32(r, g, b, false);
-}
-
-uint32_t tt_hsv(hsv_t hsv)
-{
-    uint32_t rgb = rgb32_from_hsv(hsv);
-    uint32_t r = (rgb >> 16) & 0xff;
-    uint32_t g = (rgb >> 8) & 0xff;
-    uint32_t b = (rgb >> 0) & 0xff;
-
-    return tt_rgb32(r, g, b, false);
+    uint32_t rgb = from_hsv(hsv);
+    uint8_t r = (rgb >> 16) & 0xff;
+    uint8_t g = (rgb >> 8) & 0xff;
+    uint8_t b = (rgb >> 0) & 0xff;
+    return rgb32(type, r, g, b, false);
 }
 
 void rgb_set_angle(uint32_t angle)
@@ -251,7 +246,7 @@ static void tt_lights_update()
 
     if (now < hid_light_tt_expire) {
         /* Higher priority for the HID lights */
-        uint32_t color = tt_rgb32(tt_hid[0], tt_hid[1], tt_hid[2], false);
+        uint32_t color = rgb32(RGB_TT, tt_hid[0], tt_hid[1], tt_hid[2], false);
         for (int i = 0; i < TT_LED_NUM; i++) {
             tt_led_buf[i] = color;
         }
@@ -279,11 +274,9 @@ static void button_lights_update()
 
     for (int i = 0; i < BUTTON_RGB_NUM; i++) {
         int led = button_rgb_map[i];
-        if (hid_lights[i] > 0) {
-            button_led_buf[led] = button_hsv(iidx_cfg->effect.keys[0].on[i].hsv);
-        } else {
-            button_led_buf[led] = button_hsv(iidx_cfg->effect.keys[0].off[i].hsv);
-        }
+        hsv_t hsv = hid_lights[i] ? iidx_cfg->effect.keys[0].on[i].hsv
+                                  : iidx_cfg->effect.keys[0].off[i].hsv;
+        button_led_buf[led] = rgb32_from_hsv(i < 7 ? RGB_MAIN : RGB_EFFECT, hsv);
     }
 }
 

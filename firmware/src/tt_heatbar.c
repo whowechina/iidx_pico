@@ -49,7 +49,7 @@ static void prepare_spectrum()
     }
     spectrum_level = iidx_cfg->rgb.level.tt;
     for (int i = 0; i < 256; i++) {
-        spectrum[i] = tt_hsv((hsv_t){ i, 255, 255 });
+        spectrum[i] = rgb32_from_hsv(RGB_TT, (hsv_t){ i, 255, 255 });
     }
 }
 

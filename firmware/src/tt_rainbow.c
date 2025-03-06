@@ -29,17 +29,17 @@ static void generate_color_wheel()
         uint8_t incr = i % 256;
         uint8_t decr = 255 - incr;
         if (sector == 0) {
-            color_wheel[i] = tt_rgb32(incr, 0, 255, true);
+            color_wheel[i] = rgb32(RGB_TT, incr, 0, 255, true);
         } else if (sector == 1) {
-            color_wheel[i] = tt_rgb32(255, 0, decr, true);
+            color_wheel[i] = rgb32(RGB_TT, 255, 0, decr, true);
         } else if (sector == 2) {
-            color_wheel[i] = tt_rgb32(255, incr, 0, true);
+            color_wheel[i] = rgb32(RGB_TT, 255, incr, 0, true);
         } else if (sector == 3) {
-            color_wheel[i] = tt_rgb32(decr, 255, 0, true);
+            color_wheel[i] = rgb32(RGB_TT, decr, 255, 0, true);
         } else if (sector == 4) {
-            color_wheel[i] = tt_rgb32(0, 255, incr, true);
+            color_wheel[i] = rgb32(RGB_TT, 0, 255, incr, true);
         } else {
-            color_wheel[i] = tt_rgb32(0, decr, 255, true);
+            color_wheel[i] = rgb32(RGB_TT, 0, decr, 255, true);
         }
     }
 }
