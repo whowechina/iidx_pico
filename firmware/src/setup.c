@@ -36,9 +36,9 @@ uint32_t setup_led_button[BUTTON_RGB_NUM];
 
 typedef enum {
     MODE_NONE,
-    MODE_TURNTABLE,
+    MODE_HWSET,
     MODE_LEVEL,
-    MODE_TT_THEME,
+    MODE_TT_STYLE,
     MODE_KEY_THEME,
     MODE_KEY_OFF,
     MODE_KEY_ON,
@@ -119,7 +119,7 @@ static int16_t input_delta(int16_t start_angle)
 }
 
 static setup_mode_t key_to_mode[7] = {
-    MODE_KEY_THEME, MODE_TT_THEME, MODE_KEY_ON, MODE_KEY_OFF,
+    MODE_KEY_THEME, MODE_TT_STYLE, MODE_KEY_ON, MODE_KEY_OFF,
     MODE_NONE, MODE_NONE, MODE_NONE,
 };
 
@@ -188,7 +188,7 @@ static void none_loop()
 
     if (time_us_64() - none_ctx.escape_time > 5000000) {
         none_ctx.escaped = false;
-        join_mode(MODE_TURNTABLE);
+        join_mode(MODE_HWSET);
         return;
     }
 }
@@ -198,13 +198,13 @@ static struct {
     int16_t start_angle;
 } tt_ctx;
 
-static void tt_enter()
+static void hwset_enter()
 {
     tt_ctx.adjust_led = 0;
     tt_ctx.start_angle = input.angle;
 }
 
-static void tt_key_change()
+static void hwset_key_change()
 {
     if (JUST_PRESSED(E1)) {
         tt_ctx.adjust_led = (tt_ctx.adjust_led == 1) ? 0 : 1;
@@ -239,7 +239,7 @@ static void tt_key_change()
     check_exit();
 }
 
-static void tt_rotate()
+static void hwset_rotate()
 {
     int16_t delta = input_delta(tt_ctx.start_angle);
     if (abs(delta) > 8) {
@@ -268,7 +268,7 @@ static void tt_rotate()
     }
 }
 
-static void tt_loop()
+static void hwset_loop()
 {
     int total_led = iidx_cfg->rgb.tt.num;
     for (int i = 1; i < total_led - 1; i++) {
@@ -566,31 +566,31 @@ static void key_theme_loop()
     }
 }
 
-static void tt_theme_key_change()
+static void tt_style_key_change()
 {
     for (int i = 0; i < 4; i++) {
         if (JUST_PRESSED(KEY_1 << (i * 2))) {
-            PROFILE.tt_theme = PROFILE.tt_theme & 0xf0 | i;
+            PROFILE.tt_style = PROFILE.tt_style & 0xf0 | i;
             break;
         }
     }
 
     for (int i = 0; i < 3; i++) {
         if (JUST_PRESSED(KEY_2 << (i * 2))) {
-            PROFILE.tt_theme = PROFILE.tt_theme & 0x0f | (i << 4);
+            PROFILE.tt_style = PROFILE.tt_style & 0x0f | (i << 4);
             break;
         }
     }
     check_exit();
 }
 
-static void tt_theme_loop()
+static void tt_style_loop()
 {
-    int effect = (PROFILE.tt_theme & 0x0f) % 4;
-    int context = (PROFILE.tt_theme >> 4) % 3;
+    int style = (PROFILE.tt_style & 0x0f) % 4;
+    int context = (PROFILE.tt_style >> 4) % 3;
 
     for (int i = 0; i < 7; i++) {
-        if (i == effect * 2) {
+        if (i == style * 2) {
             setup_led_button[i] = SILVER;
         } else if (i == context * 2 + 1) {
             setup_led_button[i] = CYAN;
@@ -610,9 +610,9 @@ static struct {
     bool auto_brightness;
 } mode_defs[] = {
     [MODE_NONE] = { nop, none_rotate, none_loop, nop, false, false, false },
-    [MODE_TURNTABLE] = { tt_key_change, tt_rotate, tt_loop, tt_enter, true, true, true },
+    [MODE_HWSET] = { hwset_key_change, hwset_rotate, hwset_loop, hwset_enter, true, true, true },
     [MODE_LEVEL] = { level_key_change, level_rotate, level_loop, level_enter, true, true, false },
-    [MODE_TT_THEME] = { tt_theme_key_change, nop, tt_theme_loop, nop, false, true, true },
+    [MODE_TT_STYLE] = { tt_style_key_change, nop, tt_style_loop, nop, false, true, true },
     [MODE_KEY_THEME] = { key_theme_key_change, nop, key_theme_loop, nop, false, true, true },
     [MODE_KEY_OFF] = { key_change, key_rotate, key_loop, key_enter, true, true, true },
     [MODE_KEY_ON] = { key_change, key_rotate, key_loop, key_enter, true, true, true },

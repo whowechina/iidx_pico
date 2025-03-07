@@ -49,9 +49,9 @@ typedef struct {
     void (*set_angle)(uint32_t context, uint32_t angle);
     void (*set_button)(uint32_t context, uint16_t buttons);
     void (*update)(uint32_t context);
-} tt_effect_t;
+} tt_style_t;
 
-void rgb_reg_tt_effect(tt_effect_t effect);
+void rgb_reg_tt_style(tt_style_t style);
 uint8_t rgb_tt_led_num();
 
 extern uint32_t tt_led_buf[];

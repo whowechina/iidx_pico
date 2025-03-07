@@ -25,13 +25,13 @@
 
 static const uint8_t button_rgb_map[BUTTON_RGB_NUM] = BUTTON_RGB_MAP;
 
-static tt_effect_t effects[4] = { };
-static size_t effect_num = 0;
-#define EFFECT_MAX count_of(effects)
+static tt_style_t styles[4] = { };
+static size_t style_num = 0;
+#define STYLE_MAX count_of(styles)
 
-static unsigned current_effect_id = 0;
-#define CURRENT_EFFECT (effects[(current_effect_id & 0x0f) % 4])
-#define CURRENT_CONTEXT ((current_effect_id >> 4) % 3)
+static unsigned current_style_id = 0;
+#define CURRENT_STYLE (styles[(current_style_id & 0x0f) % 4])
+#define CURRENT_CONTEXT ((current_style_id >> 4) % 3)
 
 #define HID_EXPIRE_DURATION 1000000ULL
 static uint64_t hid_light_button_expire = 0;
@@ -69,20 +69,20 @@ static void fn_tt_led_off()
     memset(tt_led_buf, 0, sizeof(tt_led_buf));
 }
 
-static void effect_reset()
+static void style_reset()
 {
-    for (int i = 0; i < EFFECT_MAX; i++) {
-        effects[i].init = fn_nop;
-        effects[i].set_angle = fn_nop;
-        effects[i].update = fn_tt_led_off;
+    for (int i = 0; i < STYLE_MAX; i++) {
+        styles[i].init = fn_nop;
+        styles[i].set_angle = fn_nop;
+        styles[i].update = fn_tt_led_off;
     }
 }
 
-static void set_effect(uint32_t effect_id)
+static void set_style(uint32_t style_id)
 {
-    current_effect_id = effect_id;
-    if (CURRENT_EFFECT.init) {
-        CURRENT_EFFECT.init(CURRENT_CONTEXT);
+    current_style_id = style_id;
+    if (CURRENT_STYLE.init) {
+        CURRENT_STYLE.init(CURRENT_CONTEXT);
     }
 }
 
@@ -182,15 +182,15 @@ uint32_t rgb_from_hsv(hsv_t hsv)
 
 static void set_angle(uint32_t angle)
 {
-    if (CURRENT_EFFECT.set_angle) {
-        CURRENT_EFFECT.set_angle(CURRENT_CONTEXT, angle);
+    if (CURRENT_STYLE.set_angle) {
+        CURRENT_STYLE.set_angle(CURRENT_CONTEXT, angle);
     }
 }
 
 static void set_button(uint16_t buttons)
 {
-    if (CURRENT_EFFECT.set_button) {
-        CURRENT_EFFECT.set_button(CURRENT_CONTEXT, buttons);
+    if (CURRENT_STYLE.set_button) {
+        CURRENT_STYLE.set_button(CURRENT_CONTEXT, buttons);
     }
 }
 
@@ -246,11 +246,11 @@ static void tt_lights_update()
         return;
     }
 
-    set_effect(PROFILE.tt_theme);
+    set_style(PROFILE.tt_style);
 
-    /* Lower priority for the local effects */
-    if (CURRENT_EFFECT.update) {
-        CURRENT_EFFECT.update(CURRENT_CONTEXT);
+    /* Lower priority for the local styles */
+    if (CURRENT_STYLE.update) {
+        CURRENT_STYLE.update(CURRENT_CONTEXT);
     }
 }
 
@@ -304,7 +304,7 @@ void rgb_init()
     gpio_set_drive_strength(TT_RGB_PIN, GPIO_DRIVE_STRENGTH_2MA);
     ws2812_program_init(pio0, 1, pio0_offset, TT_RGB_PIN, 800000, false);
 
-    effect_reset();
+    style_reset();
 }
 
 static bool forced[11];
@@ -356,13 +356,13 @@ static void trap()
     return;
 }
 
-void rgb_reg_tt_effect(tt_effect_t effect)
+void rgb_reg_tt_style(tt_style_t style)
 {
-    if (effect_num >= EFFECT_MAX) {
+    if (style_num >= STYLE_MAX) {
         return;
     }
-    effects[effect_num] = effect;
-    effect_num++;
+    styles[style_num] = style;
+    style_num++;
 }
 
 uint8_t rgb_tt_led_num()

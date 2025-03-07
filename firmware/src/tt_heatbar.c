@@ -1,5 +1,5 @@
 /*
- * Turntable Heatbar Effect
+ * Turntable Heatbar Style
  * WHowe <github.com/whowechina>
  * 
  */
@@ -85,12 +85,12 @@ static void update(uint32_t context)
 
 void tt_heatbar_init()
 {
-    tt_effect_t heatbar = {
+    tt_style_t heatbar = {
         .init = NULL,
         .set_angle = set_angle,
         .set_button = set_button,
         .update = update,
     };
 
-    rgb_reg_tt_effect(heatbar);
+    rgb_reg_tt_style(heatbar);
 }

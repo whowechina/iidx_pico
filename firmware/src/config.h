@@ -40,7 +40,7 @@ typedef struct __attribute ((packed)) {
             uint8_t keys;
             uint8_t tt;
         } level;
-        uint8_t tt_theme;
+        uint8_t tt_style;
         uint8_t tt_param;
         color_t key_on[11];
         color_t key_off[11];

@@ -1,5 +1,5 @@
 /*
- * Turntable Blade Effect
+ * Turntable Blade Style
  * WHowe <github.com/whowechina>
  * 
  */
@@ -126,12 +126,12 @@ static void update(uint32_t context)
 
 void tt_blade_init()
 {
-    tt_effect_t blade = {
+    tt_style_t blade = {
         .init = NULL,
         .set_angle = set_angle,
         .set_button = NULL,
         .update = update,
     };
 
-    rgb_reg_tt_effect(blade);
+    rgb_reg_tt_style(blade);
 }
