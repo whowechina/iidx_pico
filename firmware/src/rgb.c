@@ -80,11 +80,9 @@ static void effect_reset()
 
 static void set_effect(uint32_t effect_id)
 {
-    if (current_effect_id != effect_id) {
-        current_effect_id = effect_id;
-        if (CURRENT_EFFECT.init) {
-            CURRENT_EFFECT.init(CURRENT_CONTEXT);
-        }
+    current_effect_id = effect_id;
+    if (CURRENT_EFFECT.init) {
+        CURRENT_EFFECT.init(CURRENT_CONTEXT);
     }
 }
 
@@ -94,7 +92,7 @@ static uint32_t fix_order(uint8_t order, uint32_t rgb)
     uint8_t c2 = (rgb >> 8) & 0xff;
     uint8_t b = (rgb >> 0) & 0xff;
 
-    return order ? RGB32(c1, c2, b) : rgb;
+    return order ? rgb : RGB32(c2, c1, b);
 }
 
 static inline uint32_t mix_level(uint32_t rgb, uint8_t level)
@@ -365,4 +363,9 @@ void rgb_reg_tt_effect(tt_effect_t effect)
     }
     effects[effect_num] = effect;
     effect_num++;
+}
+
+uint8_t rgb_tt_led_num()
+{
+    return iidx_cfg->rgb.tt.num;
 }

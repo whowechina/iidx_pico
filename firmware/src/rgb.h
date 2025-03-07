@@ -52,6 +52,7 @@ typedef struct {
 } tt_effect_t;
 
 void rgb_reg_tt_effect(tt_effect_t effect);
+uint8_t rgb_tt_led_num();
 
 extern uint32_t tt_led_buf[];
 

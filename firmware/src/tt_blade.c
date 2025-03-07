@@ -13,7 +13,6 @@
 
 #include "hardware/timer.h"
 
-#include "config.h"
 #include "rgb.h"
 
 static uint32_t blade_buf[128];
@@ -44,7 +43,7 @@ static inline void blade_color_mix(int index, uint32_t color, uint32_t distance,
 /* pos: 0..4095 */
 static void blade_put_pixel(uint32_t pos, uint32_t color, uint32_t level)
 {
-    int total_led = iidx_cfg->rgb.tt.num;
+    int total_led = rgb_tt_led_num();
     pos = (pos % 4096) * total_led / 16; // *256/4096, zoom in by 256x
 
     // calc brightness share between left and right LEDs
@@ -88,14 +87,6 @@ static uint32_t spectrum[3][24] = {
 static uint32_t snake[SNAKE_SIZE] = {0};
 static uint32_t life[SNAKE_SIZE] = {0};
 
-static uint32_t apply_level(uint32_t color)
-{
-    uint32_t r = (color >> 16) & 0xff;
-    uint32_t g = (color >> 8) & 0xff;
-    uint32_t b = color  & 0xff;
-    return RGB32(r, g, b);
-}
-
 static uint32_t led_angle = 0;
 static void set_angle(uint32_t context, uint32_t angle)
 {
@@ -128,8 +119,8 @@ static void update(uint32_t context)
             life[i]--;
         }
     }
-    for (int i = 0; i < iidx_cfg->rgb.tt.num; i++) {
-        tt_led_buf[i] = apply_level(blade_buf[i]);
+    for (int i = 0; i < rgb_tt_led_num(); i++) {
+        tt_led_buf[i] = blade_buf[i];
     }
 }
 

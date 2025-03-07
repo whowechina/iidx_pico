@@ -13,7 +13,6 @@
 
 #include "hardware/timer.h"
 
-#include "config.h"
 #include "rgb.h"
 
 static uint32_t gauge = 0; // indicates the heat level
@@ -42,14 +41,9 @@ static void set_button(uint32_t context, uint16_t buttons)
 }
 
 static uint32_t spectrum[256];
-static uint32_t spectrum_level = 0;
 
 static void prepare_spectrum()
 {
-    if (PROFILE.level.tt == spectrum_level) {
-        return;
-    }
-    spectrum_level = PROFILE.level.tt;
     for (int i = 0; i < 256; i++) {
         spectrum[i] = rgb_from_hsv((hsv_t){ i, 255, 255 });
     }
@@ -60,7 +54,7 @@ static void render(uint32_t context)
     prepare_spectrum();
 
     context = context % 3 + 1;
-    int total_led = iidx_cfg->rgb.tt.num;
+    int total_led = rgb_tt_led_num();
     int led_num = total_led / context; 
     uint32_t gauge_pos = gauge * led_num / context;
 

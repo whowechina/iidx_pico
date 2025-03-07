@@ -10,9 +10,6 @@
 #include <stdbool.h>
 
 #include "hardware/timer.h"
-
-#include "config.h"
-
 #include "rgb.h"
 
 #define RGB_RING_CYCLE 2
@@ -46,12 +43,9 @@ static void generate_color_wheel()
     }
 }
 
-static uint8_t old_tt_level = 0;
-
 static void init(uint32_t context)
 {
     generate_color_wheel();
-    old_tt_level = PROFILE.level.tt;
 }
 
 static uint32_t phase = 0;
@@ -65,13 +59,7 @@ static void set_angle(uint32_t context, uint32_t angle)
 
 static void update(uint32_t context)
 {
-    if (old_tt_level != PROFILE.level.tt) {
-        old_tt_level = PROFILE.level.tt;
-        generate_color_wheel();
-        return;
-    }
-
-    int total_led = iidx_cfg->rgb.tt.num;
+    int total_led = rgb_tt_led_num();
     unsigned cycle = 1 << (context % 3);
     for (int i = 0; i < total_led; i++) {
         uint32_t pitch = COLOR_WHEEL_SIZE * cycle * i;
