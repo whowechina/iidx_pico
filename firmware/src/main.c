@@ -25,7 +25,7 @@
 #include "tt_rainbow.h"
 #include "tt_heatbar.h"
 
-#include "save.h"
+#include "savedata.h"
 #include "config.h"
 #include "cli.h"
 #include "commands.h"
@@ -62,10 +62,10 @@ void mode_check()
     uint16_t buttons = button_read();
     if (buttons & key1) {
         iidx_cfg->hid.konami = true;
-        save_request(false);
+        savedata_save(false);
     } else if (buttons & key2) {
         iidx_cfg->hid.konami = false;
-        save_request(false);
+        savedata_save(false);
     }
 
     if (iidx_cfg->hid.konami) {
@@ -124,7 +124,7 @@ static void core0_loop()
             hid_joy.buttons = latest_buttons;
             hid_joy.axis[0] = latest_angle;
             hid_joy.axis[1] = 255 - latest_angle;
-            save_loop();
+            savedata_loop();
         }
 
         report_usb_hid();
@@ -154,7 +154,7 @@ void init()
     setup_init();
     config_init();
     mutex_init(&core1_io_lock);
-    save_init(0xca341125, &core1_io_lock);
+    savedata_init(0xca341125, &core1_io_lock);
 
     cli_init("iidx_pico>", "\n   << IIDX Pico|Teeny Controller >>\n"
                             " https://github.com/whowechina\n\n");

@@ -8,12 +8,12 @@
 #include "pico/stdlib.h"
 
 #include "config.h"
-#include "save.h"
+#include "savedata.h"
 #include "cli.h"
 
 static void handle_save()
 {
-    save_request(true);
+    savedata_save(true);
 }
 
 static void handle_factory_reset()

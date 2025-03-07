@@ -6,7 +6,7 @@
  */
 
 #include "config.h"
-#include "save.h"
+#include "savedata.h"
 
 iidx_cfg_t *iidx_cfg;
 
@@ -96,16 +96,16 @@ static void config_loaded()
 
 void config_changed()
 {
-    save_request(false);
+    savedata_save(false);
 }
 
 void config_factory_reset()
 {
     *iidx_cfg = default_cfg;
-    save_request(true);
+    savedata_save(true);
 }
 
 void config_init()
 {
-    iidx_cfg = (iidx_cfg_t *)save_alloc(sizeof(*iidx_cfg), &default_cfg, config_loaded);
+    iidx_cfg = (iidx_cfg_t *)savedata_alloc(sizeof(*iidx_cfg), &default_cfg, config_loaded);
 }

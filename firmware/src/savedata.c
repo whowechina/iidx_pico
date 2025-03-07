@@ -1,11 +1,11 @@
 /*
- * Controller Config Save and Load
+ * Controller Savedata
  * WHowe <github.com/whowechina>
  * 
  * Config is stored in last sector of flash
  */
 
-#include "save.h"
+#include "savedata.h"
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -99,13 +99,13 @@ static const savedata_t *get_savedata(int id)
     return (savedata_t *)(addr + FLASH_PAGE_SIZE * pages_per_savedata * id);
 }
 
-static void save_prepare()
+static void prepare_data()
 {
     savedata_pkt_size = 4 + savedata_size;
     pages_per_savedata = (savedata_pkt_size + FLASH_PAGE_SIZE - 1) / FLASH_PAGE_SIZE;
 }
 
-static void save_load()
+static void load_data()
 {
     for (int i = 0; i < SAVE_TOTAL_PAGE_NUM / pages_per_savedata; i++) {
         if (get_savedata(i)->magic != my_magic) {
@@ -116,7 +116,7 @@ static void save_load()
 
     if (savedata_page < 0) {
         load_default();
-        save_request(false);
+        savedata_save(false);
         return;
     }
 
@@ -125,7 +125,7 @@ static void save_load()
     printf("Page Loaded %d %8lx\n", savedata_page, new_data.magic);
 }
 
-static void save_loaded()
+static void after_load()
 {
     for (int i = 0; i < module_num; i++) {
         modules[i].after_load();
@@ -141,29 +141,29 @@ static union __attribute__((packed)) {
     uint64_t id64;
 } board_id;
 
-uint32_t board_id_32()
+uint32_t savedata_id_32()
 {
     pico_get_unique_board_id(&board_id.id);
     return board_id.id32h ^ board_id.id32l;
 }
 
-uint64_t board_id_64()
+uint64_t savedata_id_64()
 {
     pico_get_unique_board_id(&board_id.id);
     return board_id.id64;
 }
 
-void save_init(uint32_t magic, mutex_t *locker)
+void savedata_init(uint32_t magic, mutex_t *locker)
 {
     my_magic = magic;
     io_lock = locker;
-    save_prepare();
-    save_load();
-    save_loop();
-    save_loaded();
+    prepare_data();
+    load_data();
+    savedata_loop();
+    after_load();
 }
 
-void save_loop()
+void savedata_loop()
 {
     if (requesting_save && (time_us_64() - requesting_time > SAVE_TIMEOUT_US)) {
         requesting_save = false;
@@ -175,7 +175,7 @@ void save_loop()
     }
 }
 
-void *save_alloc(size_t size, void *def, void (*after_load)())
+void *savedata_alloc(size_t size, void *def, void (*after_load)())
 {
     modules[module_num].size = size;
     size_t offset = savedata_size;
@@ -187,7 +187,7 @@ void *save_alloc(size_t size, void *def, void (*after_load)())
     return new_data.data + offset;
 }
 
-void save_request(bool immediately)
+void savedata_save(bool immediately)
 {
     if (!requesting_save) {
         printf("Save requested, page %d.\n", savedata_page);
@@ -197,6 +197,6 @@ void save_request(bool immediately)
     }
     if (immediately) {
         requesting_time = 0;
-        save_loop();
+        savedata_loop();
     }
 }

@@ -4,8 +4,8 @@ set(LWIP_ROOT ${PICO_SDK_PATH}/lib/lwip)
 function(make_firmware board board_def)
     pico_sdk_init()
     add_executable(${board}
-                   main.c cli.c commands.c buttons.c rgb.c save.c config.c setup.c
-                   turntable.c as5600.c tmag5273.c
+                   main.c cli.c commands.c buttons.c rgb.c savedata.c
+                   config.c setup.c turntable.c as5600.c tmag5273.c
                    tt_rainbow.c tt_blade.c tt_heatbar.c
                    usb_descriptors.c)
     target_compile_definitions(${board} PUBLIC ${board_def})
