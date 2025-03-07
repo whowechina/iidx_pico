@@ -45,28 +45,6 @@ static unsigned current_effect_id = 0;
 static uint64_t hid_light_button_expire = 0;
 static uint64_t hid_light_tt_expire = 0;
 
-uint32_t rgb_fix_order(rgb_type type, uint32_t rgb)
-{
-    uint8_t c1 = (rgb >> 16) & 0xff;
-    uint8_t c2 = (rgb >> 8) & 0xff;
-    uint8_t c3 = (rgb >> 0) & 0xff;
-    uint8_t r = 0;
-    uint8_t g = 0;
-
-    if (type == RGB_MAIN) {
-        r = iidx_cfg->rgb.format.main ? c1 : c2;
-        g = iidx_cfg->rgb.format.main ? c2 : c1;
-    } else if (type == RGB_EFFECT) {
-        r = iidx_cfg->rgb.format.effect ? c1 : c2;
-        g = iidx_cfg->rgb.format.effect ? c2 : c1;
-    } else if (type == RGB_TT) {
-        r = iidx_cfg->rgb.format.tt ? c1 : c2;
-        g = iidx_cfg->rgb.format.tt ? c2 : c1;
-    }
-
-    return (r << 16) | (g << 8) | (c3 << 0);
-}
-
 static inline uint32_t mix_level(uint32_t c1, uint32_t c2, uint32_t c3, uint8_t level, bool gamma_fix)
 {
     c1 = c1 * level / 255;
@@ -93,7 +71,7 @@ uint32_t rgb_mix(rgb_type type, uint32_t r, uint32_t g, uint32_t b, bool gamma_f
         level = PROFILE.level.tt;
     }
     
-    return rgb_fix_order(type, mix_level(r, g, b, level, gamma_fix));
+    return mix_level(r, g, b, level, gamma_fix);
 }
 
 static uint8_t hid_lights[BUTTON_RGB_NUM + 3];
@@ -134,10 +112,51 @@ static void set_effect(uint32_t effect_id)
     }
 }
 
+
+static uint32_t fix_order(rgb_type type, uint32_t rgb)
+{
+    uint8_t c1 = (rgb >> 16) & 0xff;
+    uint8_t c2 = (rgb >> 8) & 0xff;
+    uint8_t c3 = (rgb >> 0) & 0xff;
+    uint8_t r = 0;
+    uint8_t g = 0;
+
+    if (type == RGB_MAIN) {
+        r = iidx_cfg->rgb.format.main ? c1 : c2;
+        g = iidx_cfg->rgb.format.main ? c2 : c1;
+    } else if (type == RGB_EFFECT) {
+        r = iidx_cfg->rgb.format.effect ? c1 : c2;
+        g = iidx_cfg->rgb.format.effect ? c2 : c1;
+    } else if (type == RGB_TT) {
+        r = iidx_cfg->rgb.format.tt ? c1 : c2;
+        g = iidx_cfg->rgb.format.tt ? c2 : c1;
+    }
+
+    return (r << 16) | (g << 8) | (c3 << 0);
+}
+
+static uint32_t final_key_buf[BUTTON_RGB_NUM];
+static uint32_t final_tt_buf[128];
+
+static void prepare_buf()
+{
+    for (int i = 0; i < 7; i++) {
+        final_key_buf[i] = fix_order(RGB_MAIN, button_led_buf[i]) << 8;
+    }
+    for (int i = 7; i < 11; i++) {
+        final_key_buf[i] = fix_order(RGB_EFFECT, button_led_buf[i]) << 8;
+    }
+
+    for (int i = 0; i < iidx_cfg->rgb.tt.num; i++) {
+        uint8_t id = iidx_cfg->rgb.tt.reversed ? iidx_cfg->rgb.tt.num - i - 1 : i;
+        final_tt_buf[i] = fix_order(RGB_TT, tt_led_buf[id]) << 8;
+    }
+}
+
 static void drive_led()
 {
-    for (int i = 0; i < ARRAY_SIZE(button_led_buf); i++) {
-        pio_sm_put_blocking(pio0, 0, button_led_buf[i] << 8);
+    for (int i = 0; i < count_of(final_key_buf); i++) {
+        pio_sm_put_blocking(pio0, 0, final_key_buf[i]);
     }
 
     for (int i = 0; i < iidx_cfg->rgb.tt.start; i++) {
@@ -145,11 +164,11 @@ static void drive_led()
     }
 
     for (int i = 0; i < iidx_cfg->rgb.tt.num; i++) {
-        uint8_t id = iidx_cfg->rgb.tt.reversed ? iidx_cfg->rgb.tt.num - i - 1 : i;
-        pio_sm_put_blocking(pio0, 1, tt_led_buf[id] << 8);
+        pio_sm_put_blocking(pio0, 1, final_tt_buf[i]);
     }
 
-    for (int i = 0; i < 8; i++) { // a few more to wipe out the last leds
+    for (int i = 0; i < 8; i++) {
+        // a few more to wipe out the last leds
         pio_sm_put_blocking(pio0, 1, 0);
     }
 }
@@ -299,11 +318,6 @@ void rgb_override_button(uint32_t *button)
     override_button_expire_time = time_us_64() + OVERRIDE_EXPIRE;
 }
 
-void rgb_set_effect(int id, uint32_t color)
-{
-
-}
-
 static void wipe_out_tt_led()
 {
     sleep_ms(5);
@@ -366,6 +380,7 @@ void rgb_update(uint32_t angle, uint16_t buttons)
 
     forced_lights();
 
+    prepare_buf();
     drive_led();
 }
 

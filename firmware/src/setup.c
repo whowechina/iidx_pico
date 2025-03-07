@@ -153,7 +153,7 @@ static void none_disp_profile()
 {
     for (int i = 0; i < 4; i++) {
         hsv_t hsv = { i * 64, 240, i == iidx_cfg->profile ? 100 : 30 };
-        uint32_t color = rgb_fix_order(RGB_EFFECT, rgb_hsv_raw(hsv));
+        uint32_t color = rgb_hsv_raw(hsv);
         color &= (i == iidx_cfg->profile) ? blink_rapid : 0xffffffff;
         rgb_force_light(LED_E1 + i, color);
     }

@@ -44,8 +44,6 @@ void rgb_override_tt(uint32_t *tt);
 void rgb_override_button(uint32_t *button);
 void rgb_force_light(int id, uint32_t color);
 
-void rgb_set_effect(int id, uint32_t color);
-
 typedef struct {
     void (*init)(uint32_t context);
     void (*set_angle)(uint32_t context, uint32_t angle);
@@ -67,6 +65,5 @@ uint32_t rgb_mix(rgb_type type, uint32_t r, uint32_t g, uint32_t b, bool gamma_f
 uint32_t rgb_from_hsv(rgb_type type, hsv_t hsv);
 
 uint32_t rgb_hsv_raw(hsv_t hsv);
-uint32_t rgb_fix_order(rgb_type type, uint32_t rgb);
 
 #endif
