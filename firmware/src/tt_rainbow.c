@@ -4,14 +4,15 @@
  * 
  */
 
-#include "buttons.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
 
 #include "hardware/timer.h"
+
+#include "config.h"
+
 #include "rgb.h"
 
 #define RGB_RING_CYCLE 2
@@ -69,10 +70,11 @@ static void update(uint32_t context)
         return;
     }
 
+    int total_led = iidx_cfg->rgb.tt.num;
     unsigned cycle = 1 << (context % 3);
-    for (int i = 0; i < TT_LED_NUM; i++) {
+    for (int i = 0; i < total_led; i++) {
         uint32_t pitch = COLOR_WHEEL_SIZE * cycle * i;
-        uint32_t index = (phase + pitch / TT_LED_NUM) % COLOR_WHEEL_SIZE;
+        uint32_t index = (phase + pitch / total_led) % COLOR_WHEEL_SIZE;
         tt_led_buf[i] = color_wheel[index];
     }
 }

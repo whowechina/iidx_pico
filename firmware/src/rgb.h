@@ -9,18 +9,33 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "config.h"
+typedef struct {
+    uint8_t h;
+    uint8_t s;
+    uint8_t v;
+} hsv_t;
+
+typedef struct {
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+} rgb_t;
+
+typedef enum {
+    COLOR_MODE_HSV = 0,
+    COLOR_MODE_RGB,
+} color_mode_t;
+
+typedef struct __attribute ((packed)) {
+    color_mode_t mode;
+    union {
+        rgb_t rgb;
+        hsv_t hsv;
+    };
+} color_t;
 
 void rgb_init();
-void rgb_set_hardware(uint16_t tt_start, uint16_t tt_num, bool tt_reversed);
-
-uint8_t rgb_button_num();
-uint8_t rgb_hid_light_num();
-
-void rgb_update();
-
-void rgb_set_angle(uint32_t angle);
-void rgb_set_button(uint16_t buttons);
+void rgb_update(uint32_t angle, uint16_t buttons);
 
 void rgb_set_button_light(uint16_t buttons);
 void rgb_set_hid_light(uint8_t const *lights, uint8_t num);
@@ -41,7 +56,6 @@ typedef struct {
 void rgb_reg_tt_effect(tt_effect_t effect);
 
 extern uint32_t tt_led_buf[];
-#define TT_LED_NUM (iidx_cfg->rgb.tt.num)
 
 typedef enum {
     RGB_MAIN,
@@ -54,8 +68,5 @@ uint32_t rgb_from_hsv(rgb_type type, hsv_t hsv);
 
 uint32_t rgb_hsv_raw(hsv_t hsv);
 uint32_t rgb_fix_order(rgb_type type, uint32_t rgb);
-
-// TODO: unify the color_t and rgb_t, tt and button
-//uint32_t get_color(color_t color, rgb_type type);
 
 #endif

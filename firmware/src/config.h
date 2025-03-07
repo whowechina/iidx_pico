@@ -9,30 +9,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-typedef struct {
-    uint8_t h;
-    uint8_t s;
-    uint8_t v;
-} hsv_t;
-
-typedef struct {
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
-} rgb_t;
-
-typedef enum {
-    COLOR_MODE_HSV = 0,
-    COLOR_MODE_RGB,
-} color_mode_t;
-
-typedef struct __attribute ((packed)) {
-    color_mode_t mode;
-    union {
-        rgb_t rgb;
-        hsv_t hsv;
-    };
-} color_t;
+#include "rgb.h"
 
 typedef struct __attribute ((packed)) {
     struct {

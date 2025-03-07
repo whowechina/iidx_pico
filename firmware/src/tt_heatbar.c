@@ -12,6 +12,8 @@
 #include <stdbool.h>
 
 #include "hardware/timer.h"
+
+#include "config.h"
 #include "rgb.h"
 
 static uint32_t gauge = 0; // indicates the heat level
@@ -58,14 +60,15 @@ static void render(uint32_t context)
     prepare_spectrum();
 
     context = context % 3 + 1;
-    int led_num = TT_LED_NUM / context; 
+    int total_led = iidx_cfg->rgb.tt.num;
+    int led_num = total_led / context; 
     uint32_t gauge_pos = gauge * led_num / context;
 
-    memset(tt_led_buf, 0, TT_LED_NUM * sizeof(uint32_t));
+    memset(tt_led_buf, 0, total_led * sizeof(uint32_t));
     for (int i = 0; i < led_num ; i++) {
         for (int ctx = 0; ctx < context; ctx++) {
-            int offset = TT_LED_NUM * ctx / context;
-            int pos = (offset + tt_angle * TT_LED_NUM / 256) % TT_LED_NUM;
+            int offset = total_led * ctx / context;
+            int pos = (offset + tt_angle * total_led / 256) % total_led;
             if (i <= gauge_pos) {
                 tt_led_buf[pos] = spectrum[i * 255 / led_num];
             }

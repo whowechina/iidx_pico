@@ -12,6 +12,8 @@
 #include <stdbool.h>
 
 #include "hardware/timer.h"
+
+#include "config.h"
 #include "rgb.h"
 
 static uint32_t blade_buf[128];
@@ -42,11 +44,12 @@ static inline void blade_color_mix(int index, uint32_t color, uint32_t distance,
 /* pos: 0..4095 */
 static void blade_put_pixel(uint32_t pos, uint32_t color, uint32_t level)
 {
-    pos = (pos % 4096) * TT_LED_NUM / 16; // *256/4096, zoom in by 256x
+    int total_led = iidx_cfg->rgb.tt.num;
+    pos = (pos % 4096) * total_led / 16; // *256/4096, zoom in by 256x
 
     // calc brightness share between left and right LEDs
     uint32_t index_left = pos >> 8;
-    uint32_t index_right = (index_left + 1) % TT_LED_NUM;
+    uint32_t index_right = (index_left + 1) % total_led;
     uint32_t dis_left = pos & 0xff;
     uint32_t dis_right = 255 - dis_left;
 
@@ -125,7 +128,7 @@ static void update(uint32_t context)
             life[i]--;
         }
     }
-    for (int i = 0; i < TT_LED_NUM; i++) {
+    for (int i = 0; i < iidx_cfg->rgb.tt.num; i++) {
         tt_led_buf[i] = apply_level(blade_buf[i]);
     }
 }

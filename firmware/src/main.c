@@ -80,13 +80,10 @@ static void core1_loop()
 {
     while (true) {
         uint32_t raw_angle = turntable_raw();
-        rgb_set_angle(raw_angle);
-        rgb_set_button(latest_buttons);
-
         latest_angle = turntable_read();
 
         if (mutex_try_enter(&core1_io_lock, NULL)) {
-            rgb_update();
+            rgb_update(raw_angle, latest_buttons);
             mutex_exit(&core1_io_lock);
         }
 
@@ -190,8 +187,6 @@ void tud_hid_set_report_cb(uint8_t itf, uint8_t report_id,
 {
     if ((report_id == REPORT_ID_LIGHTS) &&
         (report_type == HID_REPORT_TYPE_OUTPUT)) {
-        if (bufsize >= rgb_hid_light_num()) {
-           rgb_set_hid_light(buffer, bufsize);
-        }
+        rgb_set_hid_light(buffer, bufsize);
     }
 }

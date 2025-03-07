@@ -96,11 +96,6 @@ uint32_t rgb_mix(rgb_type type, uint32_t r, uint32_t g, uint32_t b, bool gamma_f
     return rgb_fix_order(type, mix_level(r, g, b, level, gamma_fix));
 }
 
-uint8_t rgb_button_num()
-{
-    return BUTTON_RGB_NUM;
-}
-
 static uint8_t hid_lights[BUTTON_RGB_NUM + 3];
 static uint8_t *tt_hid = hid_lights + BUTTON_RGB_NUM;
 
@@ -149,8 +144,8 @@ static void drive_led()
         pio_sm_put_blocking(pio0, 1, 0);
     }
 
-    for (int i = 0; i < TT_LED_NUM; i++) {
-        uint8_t id = iidx_cfg->rgb.tt.reversed ? TT_LED_NUM - i - 1 : i;
+    for (int i = 0; i < iidx_cfg->rgb.tt.num; i++) {
+        uint8_t id = iidx_cfg->rgb.tt.reversed ? iidx_cfg->rgb.tt.num - i - 1 : i;
         pio_sm_put_blocking(pio0, 1, tt_led_buf[id] << 8);
     }
 
@@ -199,14 +194,14 @@ uint32_t rgb_from_hsv(rgb_type type, hsv_t hsv)
     return rgb_mix(type, r, g, b, false);
 }
 
-void rgb_set_angle(uint32_t angle)
+static void set_angle(uint32_t angle)
 {
     if (CURRENT_EFFECT.set_angle) {
         CURRENT_EFFECT.set_angle(CURRENT_CONTEXT, angle);
     }
 }
 
-void rgb_set_button(uint16_t buttons)
+static void set_button(uint16_t buttons)
 {
     if (CURRENT_EFFECT.set_button) {
         CURRENT_EFFECT.set_button(CURRENT_CONTEXT, buttons);
@@ -226,11 +221,11 @@ void rgb_set_button_light(uint16_t buttons)
 
 void rgb_set_hid_light(uint8_t const *lights, uint8_t num)
 {
-    if (num < sizeof(hid_lights)) {
+    if (num > sizeof(hid_lights)) {
         return;
     }
 
-    memcpy(hid_lights, lights, sizeof(hid_lights));
+    memcpy(hid_lights, lights, num);
 
     uint64_t now = time_us_64();
     
@@ -252,14 +247,14 @@ static void tt_lights_update()
     uint64_t now = time_us_64();
 
     if (now < override_tt_expire_time) {
-        memcpy(tt_led_buf, override_tt_buf, TT_LED_NUM * sizeof(uint32_t));
+        memcpy(tt_led_buf, override_tt_buf, iidx_cfg->rgb.tt.num * sizeof(uint32_t));
         return;
     }
 
     if (now < hid_light_tt_expire) {
         /* Higher priority for the HID lights */
         uint32_t color = rgb_mix(RGB_TT, tt_hid[0], tt_hid[1], tt_hid[2], false);
-        for (int i = 0; i < TT_LED_NUM; i++) {
+        for (int i = 0; i < iidx_cfg->rgb.tt.num; i++) {
             tt_led_buf[i] = color;
         }
         return;
@@ -354,7 +349,7 @@ static void forced_lights()
     }
 }
 
-void rgb_update()
+void rgb_update(uint32_t angle, uint16_t buttons)
 {
     static uint64_t last = 0;
     uint64_t now = time_us_64();
@@ -362,6 +357,9 @@ void rgb_update()
         return;
     }
     last = now;
+
+    set_angle(angle);
+    set_button(buttons);
 
     tt_lights_update();
     button_lights_update();

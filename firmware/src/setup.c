@@ -277,12 +277,13 @@ static void tt_rotate()
 
 static void tt_loop()
 {
-    for (int i = 1; i < iidx_cfg->rgb.tt.num - 1; i++) {
+    int total_led = iidx_cfg->rgb.tt.num;
+    for (int i = 1; i < total_led - 1; i++) {
         setup_led_tt[i] = rgb_mix(RGB_TT, 10, 10, 10, false);
     }
 
-    int head = iidx_cfg->rgb.tt.reversed ? TT_LED_NUM - 1 : 0;
-    int tail = TT_LED_NUM - 1 - head;
+    int head = iidx_cfg->rgb.tt.reversed ? total_led - 1 : 0;
+    int tail = total_led - 1 - head;
 
     setup_led_tt[head] = rgb_mix(RGB_TT, 0xc0, 0, 0, false);
     setup_led_tt[tail] = rgb_mix(RGB_TT, 0, 0, 0xc0, false);
