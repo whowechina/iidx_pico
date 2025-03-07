@@ -87,13 +87,6 @@ static struct {
 #define JUST_PRESSED(k) (input.just_pressed & (k))
 #define JUST_RELEASED(k) (input.just_released & (k))
 
-#define RED(t) rgb_mix(RGB_##t, 99, 0, 0, false)
-#define BLUE(t) rgb_mix(RGB_##t, 0, 0, 128, false)
-#define GREEN(t) rgb_mix(RGB_##t, 0, 99, 0, false)
-#define CYAN(t) rgb_mix(RGB_##t, 0, 40, 99, false)
-#define YELLOW(t) rgb_mix(RGB_##t, 99, 99, 0, false)
-#define SILVER(t) rgb_mix(RGB_##t, 60, 60, 60, false)
-
 typedef void (*mode_func)();
 
 static void join_mode(setup_mode_t new_mode);
@@ -153,7 +146,7 @@ static void none_disp_profile()
 {
     for (int i = 0; i < 4; i++) {
         hsv_t hsv = { i * 64, 240, i == iidx_cfg->profile ? 100 : 30 };
-        uint32_t color = rgb_hsv_raw(hsv);
+        uint32_t color = rgb_from_hsv(hsv);
         color &= (i == iidx_cfg->profile) ? blink_rapid : 0xffffffff;
         rgb_force_light(LED_E1 + i, color);
     }
@@ -279,16 +272,16 @@ static void tt_loop()
 {
     int total_led = iidx_cfg->rgb.tt.num;
     for (int i = 1; i < total_led - 1; i++) {
-        setup_led_tt[i] = rgb_mix(RGB_TT, 10, 10, 10, false);
+        setup_led_tt[i] = RGB32(10, 10, 10);
     }
 
     int head = iidx_cfg->rgb.tt.reversed ? total_led - 1 : 0;
     int tail = total_led - 1 - head;
 
-    setup_led_tt[head] = rgb_mix(RGB_TT, 0xc0, 0, 0, false);
-    setup_led_tt[tail] = rgb_mix(RGB_TT, 0, 0, 0xc0, false);
-    setup_led_button[LED_E1] = RED(EFFECT);
-    setup_led_button[LED_E2] = BLUE(EFFECT);
+    setup_led_tt[head] = RGB32(0xc0, 0, 0);
+    setup_led_tt[tail] = RGB32(0, 0, 0xc0);
+    setup_led_button[LED_E1] = RED;
+    setup_led_button[LED_E2] = BLUE;
 
     if (tt_ctx.adjust_led == 1) {
         setup_led_tt[head] &= blink_fast;
@@ -298,17 +291,17 @@ static void tt_loop()
         setup_led_button[LED_E2] &= blink_fast;
     }
 
-    setup_led_button[LED_E3] = iidx_cfg->rgb.tt.reversed ? CYAN(EFFECT) : YELLOW(EFFECT);
-    setup_led_button[LED_E4] = iidx_cfg->sensor.reversed ? CYAN(EFFECT) : YELLOW(EFFECT);
+    setup_led_button[LED_E3] = iidx_cfg->rgb.tt.reversed ? CYAN : YELLOW;
+    setup_led_button[LED_E4] = iidx_cfg->sensor.reversed ? CYAN : YELLOW;
 
-    setup_led_button[LED_KEY_1] = iidx_cfg->sensor.ppr == 0 ? SILVER(MAIN) : 0;
-    setup_led_button[LED_KEY_3] = iidx_cfg->sensor.ppr == 1 ? SILVER(MAIN) : 0;
-    setup_led_button[LED_KEY_5] = iidx_cfg->sensor.ppr == 2 ? SILVER(MAIN) : 0;
-    setup_led_button[LED_KEY_7] = iidx_cfg->sensor.ppr == 3 ? SILVER(MAIN) : 0;
+    setup_led_button[LED_KEY_1] = iidx_cfg->sensor.ppr == 0 ? SILVER : 0;
+    setup_led_button[LED_KEY_3] = iidx_cfg->sensor.ppr == 1 ? SILVER : 0;
+    setup_led_button[LED_KEY_5] = iidx_cfg->sensor.ppr == 2 ? SILVER : 0;
+    setup_led_button[LED_KEY_7] = iidx_cfg->sensor.ppr == 3 ? SILVER : 0;
 
-    setup_led_button[LED_KEY_2] = (iidx_cfg->rgb.format.main & 1) ? RED(MAIN) : BLUE(MAIN);
-    setup_led_button[LED_KEY_4] = (iidx_cfg->rgb.format.tt & 1) ? RED(MAIN) : BLUE(MAIN);
-    setup_led_button[LED_KEY_6] = (iidx_cfg->rgb.format.effect & 1) ? RED(MAIN) : BLUE(MAIN);
+    setup_led_button[LED_KEY_2] = (iidx_cfg->rgb.format.main & 1) ? RED : BLUE;
+    setup_led_button[LED_KEY_4] = (iidx_cfg->rgb.format.tt & 1) ? RED : BLUE;
+    setup_led_button[LED_KEY_6] = (iidx_cfg->rgb.format.effect & 1) ? RED : BLUE;
 }
 
 static struct {
@@ -371,7 +364,7 @@ static void level_loop()
 {
     for (int i = 0; i < 7; i++) {
         hsv_t color = {i * 255 / 7, 255, 255};
-        setup_led_button[i] = rgb_from_hsv(RGB_MAIN, color);
+        setup_led_button[i] = rgb_from_hsv(color);
     }
 
     setup_led_button[LED_E1] = level_ctx.adjust_tt ? (0x404040 & blink_rapid) : 0;
@@ -379,7 +372,7 @@ static void level_loop()
 
     for (unsigned i = 0; i < iidx_cfg->rgb.tt.num; i++) {
         hsv_t color = { i * 255 / iidx_cfg->rgb.tt.num, 255, 255 };
-        setup_led_tt[i] = rgb_from_hsv(RGB_TT, color);
+        setup_led_tt[i] = rgb_from_hsv(color);
     }
 }
 
@@ -452,7 +445,7 @@ static void key_rotate()
 static void key_loop()
 {
     for (int i = 0; i < 11; i ++) {
-        uint32_t rgb = rgb_from_hsv(i < 7 ? RGB_MAIN : RGB_EFFECT, key_ctx.hsv);
+        uint32_t rgb = rgb_from_hsv(key_ctx.hsv);
         if (key_ctx.keys == 0) {
             setup_led_button[i] = rgb & blink_slow;
         } else if (key_ctx.keys & (1 << i)) {
@@ -464,7 +457,7 @@ static void key_loop()
 
     uint16_t pos = *key_ctx.value * iidx_cfg->rgb.tt.num / 256;
     for (unsigned i = 0; i < iidx_cfg->rgb.tt.num; i++) {
-        setup_led_tt[i] = (i == pos) ? rgb_mix(RGB_TT, 90, 90, 90, false) : 0;
+        setup_led_tt[i] = (i == pos) ? RGB32(90, 90, 90) : 0;
     }
 }
 
@@ -569,7 +562,7 @@ static void key_theme_loop()
     for (int i = 0; i < 11; i++) {
         hsv_t hsv = blink_slow ? PROFILE.key_on[i].hsv
                                : PROFILE.key_off[i].hsv;
-        setup_led_button[i] = rgb_from_hsv(i < 7 ? RGB_MAIN : RGB_EFFECT, hsv);
+        setup_led_button[i] = rgb_from_hsv(hsv);
     }
 }
 
@@ -598,9 +591,9 @@ static void tt_theme_loop()
 
     for (int i = 0; i < 7; i++) {
         if (i == effect * 2) {
-            setup_led_button[i] = SILVER(MAIN);
+            setup_led_button[i] = SILVER;
         } else if (i == context * 2 + 1) {
-            setup_led_button[i] = CYAN(MAIN);
+            setup_led_button[i] = CYAN;
         } else {
             setup_led_button[i] = 0;
         }

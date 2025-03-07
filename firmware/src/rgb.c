@@ -33,45 +33,21 @@ static unsigned current_effect_id = 0;
 #define CURRENT_EFFECT (effects[(current_effect_id & 0x0f) % 4])
 #define CURRENT_CONTEXT ((current_effect_id >> 4) % 3)
 
-#define _MAP_LED(x) _MAKE_MAPPER(x)
-#define _MAKE_MAPPER(x) MAP_LED_##x
-#define MAP_LED_RGB { c1 = r; c2 = g; c3 = b; }
-#define MAP_LED_GRB { c1 = g; c2 = r; c3 = b; }
-
-#define REMAP_BUTTON_RGB _MAP_LED(BUTTON_RGB_ORDER)
-#define REMAP_TT_RGB _MAP_LED(TT_RGB_ORDER)
-
 #define HID_EXPIRE_DURATION 1000000ULL
 static uint64_t hid_light_button_expire = 0;
 static uint64_t hid_light_tt_expire = 0;
 
-static inline uint32_t mix_level(uint32_t c1, uint32_t c2, uint32_t c3, uint8_t level, bool gamma_fix)
+uint32_t rgb_gamma_fix(uint32_t rgb)
 {
-    c1 = c1 * level / 255;
-    c2 = c2 * level / 255;
-    c3 = c3 * level / 255;
+    int r = (rgb >> 16) & 0xff;
+    int g = (rgb >> 8) & 0xff;
+    int b = (rgb >> 0) & 0xff;
 
-    if (gamma_fix) {
-        c1 = ((c1 + 1) * (c1 + 1) - 1) >> 8;
-        c2 = ((c2 + 1) * (c2 + 1) - 1) >> 8;
-        c3 = ((c3 + 1) * (c3 + 1) - 1) >> 8;
-    }
-    
-    return (c1 << 16) | (c2 << 8) | (c3 << 0);    
-}
+    r = ((r + 1) * (r + 1) - 1) >> 8;
+    g = ((g + 1) * (g + 1) - 1) >> 8;
+    b = ((b + 1) * (b + 1) - 1) >> 8;
 
-uint32_t rgb_mix(rgb_type type, uint32_t r, uint32_t g, uint32_t b, bool gamma_fix)
-{
-    uint8_t level = 0;
-    if (type == RGB_MAIN) {
-        level = PROFILE.level.keys;
-    } else if (type == RGB_EFFECT) {
-        level = PROFILE.level.keys;
-    } else if (type == RGB_TT) {
-        level = PROFILE.level.tt;
-    }
-    
-    return mix_level(r, g, b, level, gamma_fix);
+    return RGB32(r, g, b);
 }
 
 static uint8_t hid_lights[BUTTON_RGB_NUM + 3];
@@ -112,27 +88,26 @@ static void set_effect(uint32_t effect_id)
     }
 }
 
-
-static uint32_t fix_order(rgb_type type, uint32_t rgb)
+static uint32_t fix_order(uint8_t order, uint32_t rgb)
 {
     uint8_t c1 = (rgb >> 16) & 0xff;
     uint8_t c2 = (rgb >> 8) & 0xff;
-    uint8_t c3 = (rgb >> 0) & 0xff;
-    uint8_t r = 0;
-    uint8_t g = 0;
+    uint8_t b = (rgb >> 0) & 0xff;
 
-    if (type == RGB_MAIN) {
-        r = iidx_cfg->rgb.format.main ? c1 : c2;
-        g = iidx_cfg->rgb.format.main ? c2 : c1;
-    } else if (type == RGB_EFFECT) {
-        r = iidx_cfg->rgb.format.effect ? c1 : c2;
-        g = iidx_cfg->rgb.format.effect ? c2 : c1;
-    } else if (type == RGB_TT) {
-        r = iidx_cfg->rgb.format.tt ? c1 : c2;
-        g = iidx_cfg->rgb.format.tt ? c2 : c1;
-    }
+    return order ? RGB32(c1, c2, b) : rgb;
+}
 
-    return (r << 16) | (g << 8) | (c3 << 0);
+static inline uint32_t mix_level(uint32_t rgb, uint8_t level)
+{
+    unsigned r = (rgb >> 16) & 0xff;
+    unsigned g = (rgb >> 8) & 0xff;
+    unsigned b = (rgb >> 0) & 0xff;
+
+    r = r * level / 255;
+    g = g * level / 255;
+    b = b * level / 255;
+
+    return RGB32(r, g, b);  
 }
 
 static uint32_t final_key_buf[BUTTON_RGB_NUM];
@@ -141,15 +116,18 @@ static uint32_t final_tt_buf[128];
 static void prepare_buf()
 {
     for (int i = 0; i < 7; i++) {
-        final_key_buf[i] = fix_order(RGB_MAIN, button_led_buf[i]) << 8;
+        uint32_t c = mix_level(button_led_buf[i], PROFILE.level.keys);
+        final_key_buf[i] =  fix_order(iidx_cfg->rgb.format.main, c) << 8;
     }
     for (int i = 7; i < 11; i++) {
-        final_key_buf[i] = fix_order(RGB_EFFECT, button_led_buf[i]) << 8;
+        uint32_t c = mix_level(button_led_buf[i], PROFILE.level.keys);
+        final_key_buf[i] = fix_order(iidx_cfg->rgb.format.effect, c) << 8;
     }
 
     for (int i = 0; i < iidx_cfg->rgb.tt.num; i++) {
         uint8_t id = iidx_cfg->rgb.tt.reversed ? iidx_cfg->rgb.tt.num - i - 1 : i;
-        final_tt_buf[i] = fix_order(RGB_TT, tt_led_buf[id]) << 8;
+        uint32_t c = mix_level(tt_led_buf[id], PROFILE.level.tt);
+        final_tt_buf[i] = fix_order(iidx_cfg->rgb.format.tt, c) << 8;
     }
 }
 
@@ -173,7 +151,7 @@ static void drive_led()
     }
 }
 
-uint32_t rgb_hsv_raw(hsv_t hsv)
+uint32_t rgb_from_hsv(hsv_t hsv)
 {
     uint32_t region, remainder, p, q, t;
 
@@ -202,15 +180,6 @@ uint32_t rgb_hsv_raw(hsv_t hsv)
         default:
             return hsv.v << 16 | p << 8 | q;
     }
-}
-
-uint32_t rgb_from_hsv(rgb_type type, hsv_t hsv)
-{
-    uint32_t rgb = rgb_hsv_raw(hsv);
-    uint8_t r = (rgb >> 16) & 0xff;
-    uint8_t g = (rgb >> 8) & 0xff;
-    uint8_t b = (rgb >> 0) & 0xff;
-    return rgb_mix(type, r, g, b, false);
 }
 
 static void set_angle(uint32_t angle)
@@ -272,7 +241,7 @@ static void tt_lights_update()
 
     if (now < hid_light_tt_expire) {
         /* Higher priority for the HID lights */
-        uint32_t color = rgb_mix(RGB_TT, tt_hid[0], tt_hid[1], tt_hid[2], false);
+        uint32_t color = RGB32(tt_hid[0], tt_hid[1], tt_hid[2]);
         for (int i = 0; i < iidx_cfg->rgb.tt.num; i++) {
             tt_led_buf[i] = color;
         }
@@ -302,7 +271,7 @@ static void button_lights_update()
         int led = button_rgb_map[i];
         hsv_t hsv = hid_lights[i] ? PROFILE.key_on[i].hsv
                                   : PROFILE.key_off[i].hsv;
-        button_led_buf[led] = rgb_from_hsv(i < 7 ? RGB_MAIN : RGB_EFFECT, hsv);
+        button_led_buf[led] = rgb_from_hsv(hsv);
     }
 }
 

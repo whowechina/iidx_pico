@@ -55,15 +55,15 @@ void rgb_reg_tt_effect(tt_effect_t effect);
 
 extern uint32_t tt_led_buf[];
 
-typedef enum {
-    RGB_MAIN,
-    RGB_TT,
-    RGB_EFFECT,
-} rgb_type;
+#define RGB32(r, g, b) (((r) << 16) | ((g) << 8) | (b))
+uint32_t rgb_from_hsv(hsv_t hsv);
+uint32_t rgb_gamma_fix(uint32_t rgb);
 
-uint32_t rgb_mix(rgb_type type, uint32_t r, uint32_t g, uint32_t b, bool gamma_fix);
-uint32_t rgb_from_hsv(rgb_type type, hsv_t hsv);
-
-uint32_t rgb_hsv_raw(hsv_t hsv);
+#define RED RGB32(99, 0, 0)
+#define BLUE RGB32(0, 0, 128)
+#define GREEN RGB32(0, 99, 0)
+#define CYAN RGB32(0, 40, 99)
+#define YELLOW RGB32(99, 99, 0)
+#define SILVER RGB32(60, 60, 60)
 
 #endif

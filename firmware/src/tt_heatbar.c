@@ -51,7 +51,7 @@ static void prepare_spectrum()
     }
     spectrum_level = PROFILE.level.tt;
     for (int i = 0; i < 256; i++) {
-        spectrum[i] = rgb_from_hsv(RGB_TT, (hsv_t){ i, 255, 255 });
+        spectrum[i] = rgb_from_hsv((hsv_t){ i, 255, 255 });
     }
 }
 
