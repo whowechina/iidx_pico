@@ -37,8 +37,14 @@ struct __attribute__((packed)) {
 
 void report_usb_hid()
 {
-    if (tud_hid_ready() &&
-        (memcmp(&hid_joy, &hid_joy_sent, sizeof(hid_joy)) != 0)) {
+    static uint64_t last_report_time = 0;
+    if (tud_hid_ready()) {
+        uint64_t now = time_us_64();
+        if ((memcmp(&hid_joy, &hid_joy_sent, sizeof(hid_joy)) == 0) &&
+            (now - last_report_time < 10000)) {
+            return;
+        }
+        last_report_time = now;
         if (tud_hid_report(REPORT_ID_JOYSTICK, &hid_joy, sizeof(hid_joy))) {
             hid_joy_sent = hid_joy;
         }
