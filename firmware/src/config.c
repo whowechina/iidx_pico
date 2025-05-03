@@ -88,7 +88,7 @@ static void config_loaded()
         iidx_cfg->rgb.tt.num = 24;
         config_changed();
     }
-    if (iidx_cfg->sensor.ppr > 3) {
+    if (iidx_cfg->sensor.ppr > 7) {
         iidx_cfg->sensor.ppr = 1;
         config_changed();
     }

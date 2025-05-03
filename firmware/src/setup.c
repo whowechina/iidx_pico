@@ -204,6 +204,7 @@ static void hwset_enter()
     tt_ctx.start_angle = input.angle;
 }
 
+#define TOGGLE_PPR(ppr, n) ppr = (ppr != n) ? n : n + 4;
 static void hwset_key_change()
 {
     if (JUST_PRESSED(E1)) {
@@ -217,13 +218,13 @@ static void hwset_key_change()
     } else if (JUST_PRESSED(E4)) {
         iidx_cfg->sensor.reversed ^= 1;
     } else if (JUST_PRESSED(KEY_1)) {
-        iidx_cfg->sensor.ppr = 0;
+        TOGGLE_PPR(iidx_cfg->sensor.ppr, 0);
     } else if (JUST_PRESSED(KEY_3)) {
-        iidx_cfg->sensor.ppr = 1;
+        TOGGLE_PPR(iidx_cfg->sensor.ppr, 1);
     } else if (JUST_PRESSED(KEY_5)) {
-        iidx_cfg->sensor.ppr = 2;
+        TOGGLE_PPR(iidx_cfg->sensor.ppr, 2);
     } else if (JUST_PRESSED(KEY_7)) {
-        iidx_cfg->sensor.ppr = 3;
+        TOGGLE_PPR(iidx_cfg->sensor.ppr, 3);
     } else if (JUST_PRESSED(KEY_2)) {
         iidx_cfg->rgb.format.main = (iidx_cfg->rgb.format.main + 1) % 2;
     } else if (JUST_PRESSED(KEY_4)) {
@@ -294,10 +295,12 @@ static void hwset_loop()
     setup_led_button[LED_E3] = iidx_cfg->rgb.tt.reversed ? CYAN : YELLOW;
     setup_led_button[LED_E4] = iidx_cfg->sensor.reversed ? CYAN : YELLOW;
 
-    setup_led_button[LED_KEY_1] = iidx_cfg->sensor.ppr == 0 ? SILVER : 0;
-    setup_led_button[LED_KEY_3] = iidx_cfg->sensor.ppr == 1 ? SILVER : 0;
-    setup_led_button[LED_KEY_5] = iidx_cfg->sensor.ppr == 2 ? SILVER : 0;
-    setup_led_button[LED_KEY_7] = iidx_cfg->sensor.ppr == 3 ? SILVER : 0;
+    uint32_t ppr_color = (iidx_cfg->sensor.ppr > 3) ? BLUE : SILVER;
+    int ppr = iidx_cfg->sensor.ppr & 3;
+    setup_led_button[LED_KEY_1] = ppr == 0 ? ppr_color : 0;
+    setup_led_button[LED_KEY_3] = ppr == 1 ? ppr_color : 0;
+    setup_led_button[LED_KEY_5] = ppr == 2 ? ppr_color : 0;
+    setup_led_button[LED_KEY_7] = ppr == 3 ? ppr_color : 0;
 
     setup_led_button[LED_KEY_2] = (iidx_cfg->rgb.format.main & 1) ? RED : BLUE;
     setup_led_button[LED_KEY_4] = (iidx_cfg->rgb.format.tt & 1) ? RED : BLUE;

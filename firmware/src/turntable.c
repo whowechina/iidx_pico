@@ -88,25 +88,15 @@ uint8_t turntable_read()
     static uint8_t counter = 0;
     static int16_t old_angle = 0;
 
-    uint16_t step;
-    if (iidx_cfg->sensor.ppr == 1) {
-        step = 4096 / 128;
-    } else if (iidx_cfg->sensor.ppr == 2) {
-        step = 4096 / 96;
-    } else if (iidx_cfg->sensor.ppr == 3) {
-        step = 4096 / 64;
-    } else {
-        return raw_angle >> 4;
-    }
-
     int16_t delta = raw_angle - old_angle;
-    if (delta == 0) {
-        return counter;
-    } else if (delta > 2048) {
+    if (delta > 2048) {
         delta -= 4096;
     } else if (delta < -2048) {
         delta += 4096;
     }
+
+    const uint16_t divs[8] = { 200, 128, 64, 32, 256, 160, 96, 48};
+    uint16_t step = 4096 / divs[iidx_cfg->sensor.ppr & 7];
 
     if (abs(delta) >= step) {
         if (delta > 0) {
