@@ -148,7 +148,7 @@ For following prints, FDM, PLA, 0.4 nozzle, 0.2mm layer, 3 to 4 walls.
 * If it is already running my IIDX firmware, hold two small AUX buttons together will do the same as the BOOTSEL button.
 * You need to setup your turntable LED strip first, check the manual for the SETUP mode.
 * You can set the brightness, turntable LED theme, button LED theme.
-* [Nice Looking Manual Here](doc/Firmware_manual.pdf)  
+* [Nice Looking Manual Here](doc/IIDX_Pico_Manual.pdf)  
   <img src="doc/manual.gif" width="80%">
 
 ## CAD Source File

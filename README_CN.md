@@ -151,7 +151,7 @@ https://discord.gg/M8f2PPQFEA
   https://googlechromelabs.github.io/serial-terminal/
 * 刚装好的时候，需要设置一下转盘的 LED 灯数量，具体参考手册中的 SETUP 模式。
 * 你可以设置灯光亮度，转盘灯效主题，按键灯效主题。
-* [Nice Looking Manual Here]（doc/Firmware_manual.pdf）  
+* [Nice Looking Manual Here]（doc/IIDX_Pico_Manual.pdf）  
   <img src="doc/manual.gif" width="80%">
 
 ## CAD 源文件
