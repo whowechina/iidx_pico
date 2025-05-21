@@ -216,7 +216,16 @@ static void hwset_key_change()
     } else if (JUST_PRESSED(E3)) {
         iidx_cfg->rgb.tt.reversed ^= 1;
     } else if (JUST_PRESSED(E4)) {
-        iidx_cfg->sensor.reversed ^= 1;
+        if (iidx_cfg->sensor.binary) {
+            iidx_cfg->sensor.binary = false;
+            iidx_cfg->sensor.reversed = false;
+        } else if (iidx_cfg->sensor.reversed) {
+            iidx_cfg->sensor.reversed = false;
+            iidx_cfg->sensor.binary = true;
+        } else {
+            iidx_cfg->sensor.reversed = true;
+            iidx_cfg->sensor.binary = false;
+        }
     } else if (JUST_PRESSED(KEY_1)) {
         TOGGLE_PPR(iidx_cfg->sensor.ppr, 0);
     } else if (JUST_PRESSED(KEY_3)) {
@@ -293,7 +302,8 @@ static void hwset_loop()
     }
 
     setup_led_button[LED_E3] = iidx_cfg->rgb.tt.reversed ? CYAN : YELLOW;
-    setup_led_button[LED_E4] = iidx_cfg->sensor.reversed ? CYAN : YELLOW;
+    setup_led_button[LED_E4] = iidx_cfg->sensor.binary ?
+                               RED : (iidx_cfg->sensor.reversed ? CYAN : YELLOW);
 
     uint32_t ppr_color = (iidx_cfg->sensor.ppr > 3) ? BLUE : SILVER;
     int ppr = iidx_cfg->sensor.ppr & 3;

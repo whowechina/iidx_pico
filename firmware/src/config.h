@@ -27,7 +27,9 @@ typedef struct __attribute ((packed)) {
     } rgb;
     struct {
         uint8_t reversed : 1;
-        uint8_t ppr : 7; /* 0: 256, 1: 128, 2: 96, 3: 64, other: 256 */
+        uint8_t ppr : 4;
+        uint8_t binary: 1;
+        uint8_t not_used : 2;
         uint8_t res;
     } sensor;
     struct {

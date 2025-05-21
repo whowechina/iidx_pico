@@ -51,10 +51,13 @@ void report_usb_hid()
     }
 }
 
+#define AUX_1_BIT 12
+#define AUX_2_BIT 11
+
 void boot_check()
 {
-    uint16_t key1 = (1 << (button_num() - 1));
-    uint16_t key2 = (1 << (button_num() - 2));
+    uint16_t key1 = (1 << AUX_1_BIT);
+    uint16_t key2 = (1 << AUX_2_BIT);
     uint16_t buttons = button_read();
     if (!watchdog_caused_reboot() && (buttons & key1) && (buttons & key2)) {
         reset_usb_boot(0, 2);
@@ -63,8 +66,8 @@ void boot_check()
  
 void mode_check()
 {
-    uint16_t key1 = (1 << (button_num() - 1));
-    uint16_t key2 = (1 << (button_num() - 2));
+    uint16_t key1 = (1 << AUX_1_BIT);
+    uint16_t key2 = (1 << AUX_2_BIT);
     uint16_t buttons = button_read();
     if (buttons & key1) {
         iidx_cfg->hid.konami = true;
@@ -79,9 +82,48 @@ void mode_check()
     }
 }
 
-static mutex_t core1_io_lock;
 static uint8_t latest_angle;
 static uint16_t latest_buttons;
+
+#define TT_HOLD_TIME_MS 200
+
+static void gen_binary_tt()
+{
+    static uint8_t last_angle = 0;
+    static bool tt_active = false;
+    static bool tt_dir_cw = false;
+    static uint32_t tt_timeout = 0;
+
+    int8_t delta = latest_angle - last_angle;
+    last_angle = latest_angle;
+
+    uint64_t now = time_us_32();
+
+    if (delta != 0) {
+        tt_active = true;
+        tt_dir_cw = (delta > 0);
+        tt_timeout = now + TT_HOLD_TIME_MS * 1000;
+    } else if (tt_active && (now > tt_timeout)) {
+        tt_active = false;
+    }
+
+    hid_joy.axis[0] = tt_active ? (tt_dir_cw ? 0xff : 0x00) : 0x80;
+    hid_joy.axis[1] = 0x80;
+}
+
+static void gen_hid_report()
+{
+    hid_joy.buttons = latest_buttons;
+
+    if (iidx_cfg->sensor.binary) {
+        gen_binary_tt();
+    } else {
+        hid_joy.axis[0] = latest_angle;
+        hid_joy.axis[1] = 255 - latest_angle;
+    }
+}
+
+static mutex_t core1_io_lock;
 static void core1_loop()
 {
     while (true) {
@@ -127,9 +169,7 @@ static void core0_loop()
 
         hid_joy.buttons = 0;
         if (!ov_tt && !ov_btn) {
-            hid_joy.buttons = latest_buttons;
-            hid_joy.axis[0] = latest_angle;
-            hid_joy.axis[1] = 255 - latest_angle;
+            gen_hid_report();
             savedata_loop();
         }
 
