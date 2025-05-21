@@ -72,8 +72,8 @@ uint8_t const* tud_descriptor_device_cb(void) {
 //--------------------------------------------------------------------+
 
 uint8_t const desc_hid_report_joy[] = {
-    GAMECON_REPORT_DESC_JOYSTICK(HID_REPORT_ID(REPORT_ID_JOYSTICK)),
-    GAMECON_REPORT_DESC_LIGHTS(HID_REPORT_ID(REPORT_ID_LIGHTS))
+    GAMECON_REPORT_DESC_JOYSTICK,
+    GAMECON_REPORT_DESC_LIGHTS
 };
 
 // Invoked when received GET HID REPORT DESCRIPTOR
