@@ -33,8 +33,9 @@ static void disp_rgb()
 
 static void disp_sensor()
 {
+    const uint16_t ppr[8] = { 200, 128, 64, 32, 256, 160, 96, 48};
     printf("[SENSOR]\n");
-    printf("  PPR: %d reversed: %d\n", iidx_cfg->sensor.ppr, iidx_cfg->sensor.reversed);
+    printf("  PPR: %d reversed: %d\n", ppr[iidx_cfg->sensor.ppr & 7], iidx_cfg->sensor.reversed);
 }
 
 static void handle_display()
