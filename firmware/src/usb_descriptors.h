@@ -18,11 +18,11 @@ enum {
     HID_COLLECTION(HID_COLLECTION_APPLICATION),                \
         HID_REPORT_ID(REPORT_ID_JOYSTICK)                      \
         HID_USAGE_PAGE(HID_USAGE_PAGE_BUTTON),                 \
-        HID_USAGE_MIN(1), HID_USAGE_MAX(13),                   \
+        HID_USAGE_MIN(1), HID_USAGE_MAX(14),                   \
         HID_LOGICAL_MIN(0), HID_LOGICAL_MAX(1),                \
-        HID_REPORT_COUNT(13), HID_REPORT_SIZE(1),              \
+        HID_REPORT_COUNT(14), HID_REPORT_SIZE(1),              \
         HID_INPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE),     \
-        HID_REPORT_COUNT(1), HID_REPORT_SIZE(16 - 13),         \
+        HID_REPORT_COUNT(1), HID_REPORT_SIZE(16 - 14),         \
         HID_INPUT(HID_CONSTANT | HID_VARIABLE | HID_ABSOLUTE), \
                                                                \
         HID_USAGE_PAGE(HID_USAGE_PAGE_DESKTOP),                \

@@ -113,7 +113,12 @@ static void gen_binary_tt()
 
 static void gen_hid_report()
 {
-    hid_joy.buttons = latest_buttons;
+    uint16_t buttons = latest_buttons;
+    if (iidx_cfg->hid.konami) {
+        uint16_t aux_buttons = buttons & 0xff80;
+        buttons = (buttons & 0x7f) | (aux_buttons << 1); // skips button 8
+    }
+    hid_joy.buttons = buttons;
 
     if (iidx_cfg->sensor.binary) {
         gen_binary_tt();
