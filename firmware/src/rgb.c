@@ -294,15 +294,23 @@ static void wipe_out_tt_led()
     sleep_ms(5);
 }
 
-void rgb_init()
+void rgb_init(bool alternative_gpio)
 {
     uint pio0_offset = pio_add_program(pio0, &ws2812_program);
 
-    gpio_set_drive_strength(BUTTON_RGB_PIN, GPIO_DRIVE_STRENGTH_2MA);
-    ws2812_program_init(pio0, 0, pio0_offset, BUTTON_RGB_PIN, 800000, false);
+    uint button_led_pin = BUTTON_RGB_PIN;
+    gpio_set_drive_strength(button_led_pin, GPIO_DRIVE_STRENGTH_2MA);
+    ws2812_program_init(pio0, 0, pio0_offset, button_led_pin, 800000, false);
 
-    gpio_set_drive_strength(TT_RGB_PIN, GPIO_DRIVE_STRENGTH_2MA);
-    ws2812_program_init(pio0, 1, pio0_offset, TT_RGB_PIN, 800000, false);
+    uint tt_led_pin = alternative_gpio ? TT_RGB_PIN_2 : TT_RGB_PIN;
+    gpio_set_drive_strength(tt_led_pin, GPIO_DRIVE_STRENGTH_2MA);
+    ws2812_program_init(pio0, 1, pio0_offset, tt_led_pin, 800000, false);
+
+    if (alternative_gpio) {
+        gpio_set_function(TT_RGB_PIN, GPIO_FUNC_NULL);
+        gpio_set_dir(TT_RGB_PIN, GPIO_IN);
+        gpio_disable_pulls(TT_RGB_PIN);
+    }
 
     style_reset();
 }

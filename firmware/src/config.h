@@ -47,11 +47,32 @@ typedef struct __attribute ((packed)) {
         color_t key_on[11];
         color_t key_off[11];
     } profiles[4];
+    struct {
+        struct {
+            uint16_t up[7];
+            uint16_t down[7];
+        } calibrated;
+        uint8_t not_used[4];
+    } hall;
+    struct {
+        struct {
+            uint8_t on[7];
+            uint8_t off[7];
+        } trigger;
+    } profile_ex[4];
 } iidx_cfg_t;
 
+typedef struct {
+    struct {
+        bool sensor;
+    } debug;
+} iidx_runtime_t;
+
 extern iidx_cfg_t *iidx_cfg;
+extern iidx_runtime_t iidx_runtime;
 
 #define PROFILE iidx_cfg->profiles[iidx_cfg->profile % 4]
+#define PROFILE_EX iidx_cfg->profile_ex[iidx_cfg->profile % 4]
 
 void config_init();
 void config_changed(); // Notify the config has changed

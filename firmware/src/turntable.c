@@ -44,6 +44,18 @@ static void init_port(bool use_primary)
     i2c_init(sensor_i2c, TT_SENSOR_I2C_FREQ);
 }
 
+static void deinit_port(bool use_primary)
+{
+    if (use_primary) {
+        gpio_deinit(TT_SENSOR_SCL);
+        gpio_deinit(TT_SENSOR_SDA);
+    } else {
+        gpio_deinit(TT_SENSOR_SCL_2);
+        gpio_deinit(TT_SENSOR_SDA_2);
+    }
+    i2c_deinit(sensor_i2c);
+}
+
 static bool identify_sensor()
 {
     tmag5273_init(0, sensor_i2c);
@@ -63,14 +75,21 @@ static bool identify_sensor()
 
 bool turntable_init()
 {
+    sensor_i2c = TT_SENSOR_I2C_2;
+    init_port(false);
+    if (identify_sensor()) {
+        return true;
+    }
+    deinit_port(false);
+
     sensor_i2c = TT_SENSOR_I2C;
     init_port(true);
     if (identify_sensor()) {
         return true;
     }
-    sensor_i2c = TT_SENSOR_I2C_2;
-    init_port(false);
-    return identify_sensor();
+    deinit_port(true);
+
+    return false;
 }
 
 bool turntable_is_alternative()

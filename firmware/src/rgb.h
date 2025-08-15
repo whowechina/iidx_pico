@@ -34,7 +34,7 @@ typedef struct __attribute ((packed)) {
     };
 } color_t;
 
-void rgb_init();
+void rgb_init(bool alternative_gpio);
 void rgb_update(uint32_t angle, uint16_t buttons);
 
 void rgb_set_button_light(uint16_t buttons);

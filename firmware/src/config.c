@@ -76,6 +76,12 @@ static iidx_cfg_t default_cfg = {
     },
 };
 
+iidx_runtime_t iidx_runtime = {
+    .debug = {
+        .sensor = false,
+    },
+};
+
 static void config_loaded()
 {
     if (iidx_cfg->rgb.tt.num == 0) {

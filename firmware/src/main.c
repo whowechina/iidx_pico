@@ -18,6 +18,7 @@
 #include "setup.h"
 
 #include "buttons.h"
+#include "hebtn.h"
 #include "rgb.h"
 #include "turntable.h"
 
@@ -145,6 +146,19 @@ static void core1_loop()
     }
 }
 
+static uint16_t hybrid_button_read()
+{
+    uint16_t buttons = button_read();
+    for (int i = 0; i < hebtn_keynum(); i++) {
+        if (hebtn_present(i)) {
+            buttons |= (hebtn_actuated(i) << i);
+        }
+    }
+    return buttons;
+}
+
+static bool hall_version = false;
+
 static void core0_loop()
 {
     absolute_time_t next_frame = {0};
@@ -156,7 +170,11 @@ static void core0_loop()
 
         turntable_update();
 
-        latest_buttons = button_read();
+        if (hall_version) {
+            hebtn_update();
+        }
+
+        latest_buttons = hybrid_button_read();
         uint16_t angle = turntable_raw() >> 4;
         setup_run(latest_buttons, angle);
 
@@ -190,11 +208,25 @@ void init()
 {
     board_init();
     tusb_init();
-
+    
     button_init();
-    turntable_init();
 
-    rgb_init();
+    bool tt_present = turntable_init();
+
+    if ((tt_present) && (turntable_is_alternative())) {
+        // identify hall version by sensor's i2c port
+        hall_version = true;
+        hebtn_init();
+    }
+
+    if (!tt_present) {
+        // even if tt not available, we still try to detect hall sensor
+        hebtn_init();
+        hall_version = (hebtn_presence_map() > 0);
+    }
+
+    rgb_init(hall_version);
+
     tt_rainbow_init();
     tt_blade_init();
     tt_heatbar_init();
