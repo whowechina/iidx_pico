@@ -21,35 +21,68 @@
 #include "board_defs.h"
 #include "config.h"
 
-static uint16_t raw_angle = 0;
-static bool use_as5600 = true;
+static i2c_inst_t *sensor_i2c = TT_SENSOR_I2C;
+static bool sensor_is_as5600 = true;
 
-void turntable_init()
+static void init_port(bool use_primary)
 {
-    i2c_init(TT_SENSOR_I2C, 333 * 1000);
-    gpio_init(TT_SENSOR_SCL);
-    gpio_init(TT_SENSOR_SDA);
-    gpio_set_function(TT_SENSOR_SCL, GPIO_FUNC_I2C);
-    gpio_set_function(TT_SENSOR_SDA, GPIO_FUNC_I2C);
-    gpio_pull_up(TT_SENSOR_SCL);
-    gpio_pull_up(TT_SENSOR_SDA);
+    if (use_primary) {
+        gpio_init(TT_SENSOR_SCL);
+        gpio_init(TT_SENSOR_SDA);
+        gpio_set_function(TT_SENSOR_SCL, GPIO_FUNC_I2C);
+        gpio_set_function(TT_SENSOR_SDA, GPIO_FUNC_I2C);
+        gpio_pull_up(TT_SENSOR_SCL);
+        gpio_pull_up(TT_SENSOR_SDA);
+    } else {
+        gpio_init(TT_SENSOR_SCL_2);
+        gpio_init(TT_SENSOR_SDA_2);
+        gpio_set_function(TT_SENSOR_SCL_2, GPIO_FUNC_I2C);
+        gpio_set_function(TT_SENSOR_SDA_2, GPIO_FUNC_I2C);
+        gpio_pull_up(TT_SENSOR_SCL_2);
+        gpio_pull_up(TT_SENSOR_SDA_2);
+    }
+    i2c_init(sensor_i2c, TT_SENSOR_I2C_FREQ);
+}
 
-    tmag5273_init(0, TT_SENSOR_I2C);
+static bool identify_sensor()
+{
+    tmag5273_init(0, sensor_i2c);
     if (tmag5273_is_present(0)) {
         tmag5273_use(0);
         tmag5273_init_sensor();
-        use_as5600 = false;
-        return;
+        sensor_is_as5600 = false;
+        return true;
     }
-
-    as5600_init(TT_SENSOR_I2C);
-    as5600_init_sensor();
-    use_as5600 = true;
+    as5600_init(sensor_i2c);
+    if (as5600_is_present(sensor_i2c)) {
+        sensor_is_as5600 = true;
+        return true;
+    }
+    return false;
 }
+
+bool turntable_init()
+{
+    sensor_i2c = TT_SENSOR_I2C;
+    init_port(true);
+    if (identify_sensor()) {
+        return true;
+    }
+    sensor_i2c = TT_SENSOR_I2C_2;
+    init_port(false);
+    return identify_sensor();
+}
+
+bool turntable_is_alternative()
+{
+    return sensor_i2c == TT_SENSOR_I2C_2;
+}
+
+static uint16_t raw_angle = 0;
 
 static int read_angle()
 {
-    if (use_as5600) {
+    if (sensor_is_as5600) {
         static int cache = 0;
         int angle = as5600_read_angle();
         if (angle >= 0) {

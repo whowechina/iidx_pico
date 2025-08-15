@@ -20,10 +20,11 @@
 #define TT_SENSOR_SDA 26
 #define TT_SENSOR_I2C i2c1
 
-// Alternative I2C pins
-//#define TT_AS5600_SCL 21
-//#define TT_AS5600_SDA 20
-//#define TT_AS5600_I2C i2c0
+#define TT_SENSOR_SCL_2 17
+#define TT_SENSOR_SDA_2 16
+#define TT_SENSOR_I2C_2 i2c0
+
+#define TT_SENSOR_I2C_FREQ 377 * 1000
 
 #else
 

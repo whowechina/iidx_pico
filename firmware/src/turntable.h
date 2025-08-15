@@ -9,9 +9,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-void turntable_init();
+bool turntable_init();
 uint16_t turntable_read();
 uint16_t turntable_raw();
 void turntable_update();
+bool turntable_is_alternative();
 
 #endif

@@ -33,7 +33,7 @@ bool as5600_init_sensor()
     return true;
 }
 
-static bool as5600_is_present()
+bool as5600_is_present()
 {
     uint8_t buf[1] = {0x0c};
     int ret = i2c_write_blocking_until(as5600_i2c, AS5600_ADDR, buf, 1, true,
