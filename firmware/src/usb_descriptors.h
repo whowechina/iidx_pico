@@ -26,10 +26,10 @@ enum {
         HID_INPUT(HID_CONSTANT | HID_VARIABLE | HID_ABSOLUTE), \
                                                                \
         HID_USAGE_PAGE(HID_USAGE_PAGE_DESKTOP),                \
-        HID_LOGICAL_MIN(0x00), HID_LOGICAL_MAX_N(4095, 2),     \
+        HID_LOGICAL_MIN(0x00), HID_LOGICAL_MAX_N(0xff, 2),     \
         HID_USAGE(HID_USAGE_DESKTOP_X),                        \
         HID_USAGE(HID_USAGE_DESKTOP_Y),                        \
-        HID_REPORT_COUNT(2), HID_REPORT_SIZE(16),              \
+        HID_REPORT_COUNT(2), HID_REPORT_SIZE(8),               \
         HID_INPUT(HID_CONSTANT | HID_VARIABLE | HID_ABSOLUTE), \
     HID_COLLECTION_END
 

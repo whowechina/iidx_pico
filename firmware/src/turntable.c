@@ -135,8 +135,9 @@ uint16_t turntable_raw()
     return iidx_cfg->sensor.reversed ? 4095 - raw_angle : raw_angle; // 12bit
 }
 
-uint16_t turntable_read()
+uint8_t turntable_read()
 {
+    static uint8_t counter = 0;
     static int16_t old_angle = 0;
 
     int16_t delta = raw_angle - old_angle;
@@ -151,8 +152,10 @@ uint16_t turntable_read()
 
     if (abs(delta) >= step) {
         if (delta > 0) {
+            counter++;
             old_angle += step;
         } else {
+            counter--;
             old_angle -= step;
         }
         if (old_angle > 4096) {
@@ -162,5 +165,5 @@ uint16_t turntable_read()
         }
     }
 
-    return old_angle;
+    return counter;
 }

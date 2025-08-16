@@ -33,7 +33,7 @@
 
 struct __attribute__((packed)) {
     uint16_t buttons;
-    uint16_t axis[2];
+    uint8_t axis[2];
 } hid_joy, hid_joy_sent;
 
 void report_usb_hid()
@@ -83,19 +83,19 @@ void mode_check()
     }
 }
 
-static uint16_t latest_angle;
+static uint8_t latest_angle;
 static uint16_t latest_buttons;
 
 #define TT_HOLD_TIME_MS 200
 
 static void gen_binary_tt()
 {
-    static uint16_t previous_angle = 0;
+    static uint8_t previous_angle = 0;
     static bool tt_active = false;
     static bool tt_dir_cw = false;
     static uint32_t tt_timeout = 0;
 
-    int16_t delta = latest_angle - previous_angle;
+    int8_t delta = latest_angle - previous_angle;
     previous_angle = latest_angle;
 
     uint64_t now = time_us_32();
@@ -108,8 +108,8 @@ static void gen_binary_tt()
         tt_active = false;
     }
 
-    hid_joy.axis[0] = tt_active ? (tt_dir_cw ? 0x7ff : 0x00) : 0x400;
-    hid_joy.axis[1] = 0;
+    hid_joy.axis[0] = tt_active ? (tt_dir_cw ? 0xff : 0x00) : 0x80;
+    hid_joy.axis[1] = 0x80;
 }
 
 static void gen_hid_report()
@@ -125,7 +125,7 @@ static void gen_hid_report()
         gen_binary_tt();
     } else {
         hid_joy.axis[0] = latest_angle;
-        hid_joy.axis[1] = 4095 - hid_joy.axis[0];
+        hid_joy.axis[1] = 255 - hid_joy.axis[0];
     }
 }
 
