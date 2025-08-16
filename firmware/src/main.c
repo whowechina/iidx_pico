@@ -79,7 +79,7 @@ void mode_check()
     }
 
     if (iidx_cfg->hid.konami) {
-        konami_mode();
+        switch_to_konami_mode();
     }
 }
 

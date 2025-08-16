@@ -49,6 +49,6 @@ enum {
     HID_COLLECTION_END
 
 /* Enable Konami spoof mode */
-void konami_mode();
+void switch_to_konami_mode();
 
 #endif /* USB_DESCRIPTORS_H_ */
