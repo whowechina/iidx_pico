@@ -59,6 +59,7 @@ typedef struct __attribute ((packed)) {
             uint8_t on[7];
             uint8_t off[7];
         } trigger;
+        uint8_t not_used[18];
     } profile_ex[4];
 } iidx_cfg_t;
 
