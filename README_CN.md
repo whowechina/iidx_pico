@@ -4,10 +4,18 @@
 <img src="doc/main.jpg" width="90%">
 
 ## 敬请期待
-* IIDX Pico 经过重构，现在更加易于制作。
-* IIDX Pico, IIDX Teeny 和 IIDX Jumbo 三个变种都会整合到本仓库，以便更好地管理。原先的 IIDX Teeny 仓库则会封存，不再更新。
+* 炫酷超薄设计
+* 三个变种：IIDX Pico、IIDX Teeny 和 IIDX Jumbo。
+* 可折叠，带有柔性铰链。
+* 现在支持霍尔效应开关和机械开关。
+* 可自定义灯光和效果。
+* HID 灯光。
+* 所有源文件开放。
+
+## 变更说明
+* IIDX Pico, IIDX Teeny 和 IIDX Jumbo 三个变种都已经整合到本仓库，以便更好地管理。
+* 原先的 IIDX Teeny 仓库则已经封存，不再更新。
 * 老的文件已经转移到 Gen1Archive 目录，当然也可以在历史版本中找到。
-* 新的文档还在撰写中，所以请耐心等待。
 
 ## 感谢
 感谢许多尊敬的爱好者和公司将他们的工具或材料免费或开源（KiCad，OnShape，InkScape，Raspberry 相关工具, 嘉立创，等）。
@@ -19,7 +27,7 @@
 ## 其他项目
 你也可以查看我其他的酷炫项目。
 
-<img src="https://github.com/whowechina/popn_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/iidx_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/iidx_teeny/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/chu_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/mai_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/diva_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/aic_pico/raw/main/doc/main.gif" height="100px"> <img src="https://github.com/whowechina/groove_pico/raw/main/doc/main.gif" height="100px">  <img src="https://github.com/whowechina/geki_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/musec_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/ju_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/bishi_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/nos_pico/raw/main/doc/main.jpg" height="100px">
+<img src="https://github.com/whowechina/popn_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/iidx_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/iidx_teeny/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/chu_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/mai_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/diva_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/aic_pico/raw/main/doc/main.gif" height="100px"> <img src="https://github.com/whowechina/groove_pico/raw/main/doc/main.gif" height="100px">  <img src="https://github.com/whowechina/geki_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/musec_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/ju_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/bishi_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/nos_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/voltex_pico/raw/main/doc/main.jpg" height="100px">
 
 * Popn Pico: https://github.com/whowechina/popn_pico
 * IIDX Pico: https://github.com/whowechina/iidx_pico
@@ -33,7 +41,8 @@
 * Musec Pico: https://github.com/whowechina/musec_pico
 * Ju Pico: https://github.com/whowechina/ju_pico
 * Bishi Pico: https://github.com/whowechina/bishi_pico
-* Bishi Pico: https://github.com/whowechina/nos_pico
+* Nos Pico: https://github.com/whowechina/nos_pico
+* Voltex Pico: https://github.com/whowechina/voltex_pico
 
 ## **声明** ##
 我在个人时间内制作了这个项目，没有任何经济利益或赞助。我将继续改进这个项目。我已尽我所能确保所有内容的准确性和功能性，但总有可能出现错误。如果你因使用这个开源项目而造成时间或金钱的损失，我不能负责。感谢你的理解。
@@ -41,11 +50,10 @@
 ## 关于许可证
 它是 CC-NC 授权。所以你只能给自己和你的朋友 DIY，不能利用这个项目赚钱，比如收费的代做，出售整机等，连源作者都不敢提的抄袭或者稍微改改换个名字来打擦边球就更不可以了。注意团购和拼单订购原始元器件是合理的，非盈利的方式卖掉剩余的元器件也是可以接受的。
 
-如果希望找我购买成品或者获取商用授权，请联系我（Discord，QQ 群，闲鱼，微信群或者在 issue 区留下你的联系方式）。
-
-## 我的 Discord 服务器邀请
-https://discord.gg/M8f2PPQFEA
-
+如果希望找我购买成品或者获取商用授权，请联系我（Discord，QQ 群，闲鱼）。
+* Discord 服务器邀请：https://discord.gg/M8f2PPQFEA
+* QQ 群：854535476
+* 闲鱼：whowe12345
 
 ## 如何制作
 ### 转盘需要的材料
@@ -91,6 +99,19 @@ https://discord.gg/M8f2PPQFEA
 * 6x 0603 0.1uF 电容，用于 IIDX Pico 和 IIDX Jumbo；IIDX Teeny 只需要 4 颗。
 * 4x 凯华矮轴 1U 键帽，仅适用于 IIDX Pico 和 IIDX Jumbo。
 * 4x M3*8mm 螺丝和六角螺母，用于固定外壳。
+
+### 如果你想做霍尔效应（磁轴）版本
+* 每个按钮下面一颗 WS2812B-3528 LED 灯珠这个选项就不可行了，因为它和磁轴脚位冲突；
+* 1x ADG708BRUZ，8 选 1 模拟开关，TSSOP-16 封装 (U4)。
+* 1x LM4040 并联电压基准，请选用 2.0V 或 2.1V 基准电压的型号，SOT23-3 封装 (U5)。
+* 1x LP5907MFX-4.5 或 TPS7A2042PDBVR LDO（低压差稳压器），SOT23-5 封装 (U6)。
+* 7x SS49E 或兼容的线性霍尔效应传感器，SOT23-3 封装 (H1-H7)。
+* 1x 10ohm 电阻，0603 封装 (R5)，R6 留空即可。
+* 1x 3.3V 稳压二极管（齐纳管），SOD-123 或 SOD-123F 封装，如 BZT52H-C3V3 (Z1)。
+* 7x 矮磁轴，佳达隆/NuPhy 的磁玉 Mini 或者磁玉 Pro Mini，或凯华的星磁 Mini 都可以。(SW1-SW7)。
+* 一些 0.1uF 0603 贴片电容 (所有剩余电容位置)。
+* 下图展示了霍尔效应版本的焊接。  
+  <img src="doc/he_pcb.png" width="60%">
 
 ### 第一步 - 购买
 * 主 PCB  
@@ -142,6 +163,11 @@ https://discord.gg/M8f2PPQFEA
   * 7 线的排线，其中 3 线用于 RGB 灯带，另外 4 线用于传感器板。  
     <img src="doc/turntable_3.jpg" width="400px">
   * 硅胶管用来作为铰链连接转盘和键盘，排线会从管子穿过。你需要一个 7mm 或者 8mm 的打孔器在硅胶管上打孔，以匹配转盘底座和键盘两侧的挂钩。
+
+### 霍尔效应版本的注意事项
+* 你需要使用 704 RTV 硅胶粘合剂将磁轴固定在 PCB 上，以防止其晃动。
+* 磁轴的校准需要在命令行下进行。
+* 触发和复位的行程距离也只能在命令行界面中配置。它们存储在配置文件中，这意味着你可以在不同的配置文件之间切换，并为每个配置文件设置不同的触发行程。
 
 ### 固件
 * UF2 文件在 `Production\Firmware` 文件夹中，IIDX Pico/Teeny/Jumbo 共享同一个 IIDX Pico 固件。
