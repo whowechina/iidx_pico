@@ -18,13 +18,13 @@
     "ratsnest_display_mode": 0,
     "selection_filter": {
       "dimensions": false,
-      "footprints": true,
+      "footprints": false,
       "graphics": false,
       "keepouts": false,
       "lockedItems": true,
       "otherItems": false,
-      "pads": true,
-      "text": true,
+      "pads": false,
+      "text": false,
       "tracks": true,
       "vias": true,
       "zones": false
@@ -48,7 +48,7 @@
       "drc_warnings",
       "shapes"
     ],
-    "visible_layers": "00000000_00000000_0ffc10f5_ffffffff",
+    "visible_layers": "00000000_00000000_0ffc10f5_5757ffff",
     "zone_display_mode": 0
   },
   "git": {
