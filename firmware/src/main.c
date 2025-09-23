@@ -157,7 +157,7 @@ static uint16_t hybrid_button_read()
     return buttons;
 }
 
-static bool hall_version = false;
+static bool new_board = false;
 
 static void core0_loop()
 {
@@ -170,7 +170,7 @@ static void core0_loop()
 
         turntable_update();
 
-        if (hall_version) {
+        if (new_board) {
             hebtn_update();
         }
 
@@ -215,17 +215,17 @@ void init()
 
     if ((tt_present) && (turntable_is_alternative())) {
         // identify hall version by sensor's i2c port
-        hall_version = true;
+        new_board = true;
         hebtn_init();
     }
 
     if (!tt_present) {
         // even if tt not available, we still try to detect hall sensor
         hebtn_init();
-        hall_version = (hebtn_presence_map() > 0);
+        new_board = (hebtn_presence_map() > 0);
     }
 
-    rgb_init(hall_version);
+    rgb_init(new_board);
 
     tt_rainbow_init();
     tt_blade_init();
