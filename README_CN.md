@@ -18,7 +18,7 @@
 * 老的文件已经转移到 Gen1Archive 目录，当然也可以在历史版本中找到。
 
 ## 感谢
-感谢许多尊敬的爱好者和公司将他们的工具或材料免费或开源（KiCad，OnShape，InkScape，Raspberry 相关工具, 嘉立创，等）。
+感谢许多尊敬的爱好者和公司将他们的工具或材料免费或开源（KiCad，OnShape，InkScape，Raspberry 相关工具, 嘉立创等）。
 
 特别感谢社区项目和开发者的帮助，还有如下项目：
 * RP_Silicon_KiCad: https://github.com/HeadBoffin/RP_Silicon_KiCad
@@ -27,7 +27,7 @@
 ## 其他项目
 你也可以查看我其他的酷炫项目。
 
-<img src="https://github.com/whowechina/popn_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/iidx_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/iidx_teeny/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/chu_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/mai_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/diva_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/aic_pico/raw/main/doc/main.gif" height="100px"> <img src="https://github.com/whowechina/groove_pico/raw/main/doc/main.gif" height="100px">  <img src="https://github.com/whowechina/geki_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/musec_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/ju_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/bishi_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/nos_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/voltex_pico/raw/main/doc/main.jpg" height="100px">
+<img src="https://github.com/whowechina/popn_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/iidx_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/iidx_teeny/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/chu_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/mai_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/diva_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/aic_pico/raw/main/doc/main.gif" height="100px"> <img src="https://github.com/whowechina/groove_pico/raw/main/doc/main.gif" height="100px">  <img src="https://github.com/whowechina/geki_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/musec_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/ju_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/bishi_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/nos_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/voltex_pico/raw/main/doc/main.jpg" height="100px"> <img src="https://github.com/whowechina/chord_pico/raw/main/doc/main.jpg" height="100px">
 
 * Popn Pico: https://github.com/whowechina/popn_pico
 * IIDX Pico: https://github.com/whowechina/iidx_pico
@@ -43,12 +43,13 @@
 * Bishi Pico: https://github.com/whowechina/bishi_pico
 * Nos Pico: https://github.com/whowechina/nos_pico
 * Voltex Pico: https://github.com/whowechina/voltex_pico
+* Chord Pico: https://github.com/whowechina/chord_pico
 
 ## **声明** ##
 我在个人时间内制作了这个项目，没有任何经济利益或赞助。我将继续改进这个项目。我已尽我所能确保所有内容的准确性和功能性，但总有可能出现错误。如果你因使用这个开源项目而造成时间或金钱的损失，我不能负责。感谢你的理解。
 
 ## 关于许可证
-它是 CC-NC 授权。所以你只能给自己和你的朋友 DIY，不能利用这个项目赚钱，比如收费的代做，出售整机等，连源作者都不敢提的抄袭或者稍微改改换个名字来打擦边球就更不可以了。注意团购和拼单订购原始元器件是合理的，非盈利的方式卖掉剩余的元器件也是可以接受的。
+它是 CC-NC 授权。所以你只能给自己和你的朋友 DIY，不能利用这个项目赚钱，比如收费的代做，出售整机等，连源作者都不敢提的抄袭，或者稍微改改换个名字来打擦边球，这些都是不允许的。注意团购和拼单订购原始元器件是合理的，非盈利的方式卖掉剩余的元器件也是可以接受的。
 
 如果希望找我购买成品或者获取商用授权，请联系我（Discord，QQ 群，闲鱼）。
 * Discord 服务器邀请：https://discord.gg/M8f2PPQFEA
@@ -59,7 +60,7 @@
 ### 转盘需要的材料
 * 1x 5mm\*2mm 圆形磁铁，必须是径向充磁的。
 * 1x 61804-2RS 深沟球轴承 （20x32x7mm），选便宜的即可。
-* 2x 6705-2RS（替换方案）深沟球轴承（25x32x4mm），仅适用于 IIDX Jumbo，摆动更小.
+* 2x 6705-2RS（替换方案）深沟球轴承（25x32x4mm），仅适用于 IIDX Jumbo，摆动更小。
 * 1x WS2812B LED RGB 灯带。请选择灯珠密集的型号。对于 IIDX Pico 和 IIDX Jumbo，我推荐每米 80 个以上灯珠；对于 IIDX Teeny，我推荐每米 120 个以上灯珠。
 * 1x M2.5*6 螺丝和六角螺母，用来把转盘座，磁铁座和轴承固定在一起。
 * 4x M3*8mm 螺丝，用于把轴承座固定到底座。
@@ -142,10 +143,10 @@
 
 ### 第三步 - 焊接和组装的提示
 * 键盘部分
-  * 树莓派 Pico 的两个 USB 引脚很容易被忽略，它们在另一侧，比较很难焊接，且容易在焊接孔中留下气泡。一个小技巧是使用最尖的焊铁头，缓慢的上锡。  
+  * 树莓派 Pico 的两个 USB 引脚很容易被忽略，它们在另一侧，很难焊接，且容易在焊接孔中留下气泡。一个小技巧是使用最尖的焊铁头，缓慢的上锡。  
     <img src="doc/solder_usb_txrx.jpg" width="400px">
   * 一旦你焊接好了 Pi Pico，你就可以上传固件并测试键盘了。请在焊接和组装过程中频繁测试。
-  * 主 PCB 上有两个小的传感器板，一个是给 AS5600 用的，另一个是给 TMAG5273 用的。你只需要其中一个。测试成功后，你可以把它割下来，后面要装到转盘上。
+  * 主 PCB 上有两个小的传感器板，一个是给 AS5600 用的，另一个是给 TMAG5273 用的。你只需要其中一个。测试成功后，你可以把它掰下来，后面要装到转盘上。
   * 这个游戏手柄测试页面可以用于测试。你可以在 AS5600 或 TMAG5273 上移动螺丝刀头来看看轴的移动。  
     https://greggman.github.io/html5-gamepad-test/
   * 参考这个文档来安装矮轴卫星轴。  
