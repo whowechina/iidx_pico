@@ -59,6 +59,7 @@ extern uint32_t tt_led_buf[];
 #define RGB32(r, g, b) (((r) << 16) | ((g) << 8) | (b))
 uint32_t rgb_from_hsv(hsv_t hsv);
 uint32_t rgb_gamma_fix(uint32_t rgb);
+uint32_t rgb_apply_level(uint32_t rgb, uint8_t level);
 
 #define RED RGB32(99, 0, 0)
 #define BLUE RGB32(0, 0, 128)

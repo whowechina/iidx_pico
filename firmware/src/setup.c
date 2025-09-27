@@ -163,12 +163,13 @@ static void none_disp_escaped()
     }
 }
 
-static void use_safe_trigger_setting()
+static void use_safe_trigger()
 {
-    for (int i = 0; i < 7; i++) {
-        PROFILE_EX.trigger.on[i] = 20;
-        PROFILE_EX.trigger.off[i] = 20;
-    }
+    const typeof(PROFILE_EX.trigger) safe_trigger = {
+        .on = { 20, 20, 20, 20, 20, 20, 20 },
+        .off = { 20, 20, 20, 20, 20, 20, 20 },
+    };
+    PROFILE_EX.trigger = safe_trigger;
 
     // might be false triggered, so clear them
     input.keys &= ~(KEY_1 | KEY_2 | KEY_3 | KEY_4 | KEY_5 | KEY_6 | KEY_7);
@@ -184,7 +185,7 @@ static void enter_escape()
         none_ctx.start_angle = input.angle;
 
         old_trig = PROFILE_EX.trigger;
-        use_safe_trigger_setting();
+        use_safe_trigger();
     }
 }
 
@@ -531,21 +532,18 @@ static void color_enter()
     }
 }
 
-
 static struct {
     uint8_t value;
     uint16_t keys;
     uint8_t *target;
-    const uint8_t *saved;
 } trig_ctx;
 
 static void trig_apply()
 {
+    PROFILE_EX.trigger = PROFILE_EX_SAVE.trigger;
     for (int i = 0; i < 7; i++) {
         if (trig_ctx.keys & (1 << i)) {
             trig_ctx.target[i] = trig_ctx.value * 35 / 255;
-        } else {
-            trig_ctx.target[i] = trig_ctx.saved[i];
         }
     }
 }
@@ -578,11 +576,29 @@ static void trig_rotate()
     trig_ctx.value = (uint8_t)new_value;
 }
 
+static void disp_trig_value(uint32_t rgb)
+{
+    // with halftone support
+    uint16_t pos = trig_ctx.value * iidx_cfg->rgb.tt.num;
+    uint16_t base = pos / 255;
+    uint16_t frac = pos % 255;
+
+    for (unsigned i = 0; i < iidx_cfg->rgb.tt.num; i++) {
+        if (i < base) {
+            setup_led_tt[i] = rgb;
+        } else if (i == base) {
+            setup_led_tt[i] = rgb_apply_level(rgb, frac);
+        } else {
+            setup_led_tt[i] = 0;
+        }
+    }
+}
+
 static void trig_loop()
 {
     uint32_t rgb = current_mode == MODE_TRIG_ON ? RGB32(0x20, 0xa0, 0x20)
                                                 : RGB32(0xa0, 0x20, 0x20);
-    for (int i = 0; i < 7; i ++) {
+    for (int i = 0; i < 7; i ++) {           
         if (trig_ctx.keys == 0) {
             setup_led_button[i] = rgb & blink_slow;
         } else if (trig_ctx.keys & (1 << i)) {
@@ -592,27 +608,21 @@ static void trig_loop()
         }
     }
 
-    uint16_t pos = trig_ctx.value * iidx_cfg->rgb.tt.num / 255;
-    for (unsigned i = 0; i < iidx_cfg->rgb.tt.num; i++) {
-        setup_led_tt[i] = (i <= pos) ? rgb : 0;
-    }
+    disp_trig_value(rgb);
 }
 
 static void trig_enter()
 {
-    trig_ctx = (typeof(trig_ctx)) {
-        .value = 140,
-        .keys = 0,
-        .target = PROFILE_EX.trigger.on,
-        .saved = PROFILE_EX_SAVE.trigger.on,
-    };
+    trig_ctx.value = 140;
+    trig_ctx.keys = 0;
 
-    if (current_mode == MODE_TRIG_OFF) {
+    if (current_mode == MODE_TRIG_ON) {
+        trig_ctx.target = PROFILE_EX.trigger.on;
+    } else {
         trig_ctx.target = PROFILE_EX.trigger.off;
-        trig_ctx.saved = PROFILE_EX_SAVE.trigger.off;
     }
 
-    use_safe_trigger_setting();
+    use_safe_trigger();
 }
 
 #define K0_WHITE {.v = 5}

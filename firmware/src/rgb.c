@@ -50,6 +50,19 @@ uint32_t rgb_gamma_fix(uint32_t rgb)
     return RGB32(r, g, b);
 }
 
+uint32_t rgb_apply_level(uint32_t rgb, uint8_t level)
+{
+    int r = (rgb >> 16) & 0xff;
+    int g = (rgb >> 8) & 0xff;
+    int b = (rgb >> 0) & 0xff;
+
+    r = r * level / 255;
+    g = g * level / 255;
+    b = b * level / 255;
+
+    return RGB32(r, g, b);
+}
+
 static uint8_t hid_lights[BUTTON_RGB_NUM + 3];
 static uint8_t *tt_hid = hid_lights + BUTTON_RGB_NUM;
 
