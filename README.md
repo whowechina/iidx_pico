@@ -110,7 +110,7 @@ If you're interested in buying from me, or for commercial use, please contact me
 * 7x SS49E or compatible linear Hall Effect sensors, in SOT23-3 (H1-H7).
 * 1x 10ohm resistor, 0603 (R5) and leave R6 absent.
 * 1x 3.3V Zener diode, in SOD-123 or SOD-123F, such as BZT52H-C3V3 (Z1).
-* 7x low profile magnetic switches, Gateron/NuPhy Jade Mini or Jade Pro Mini, or Kailh Star Magnetic Mini. (SW1-SW7).
+* 7x low profile magnetic switches, Gateron/NuPhy Jade Mini or Jade Pro Mini, Kailh Star Magnetic Mini, or compatible ones. (SW1-SW7).
 * Some more 0.1uF capacitors. (All remaining capacitor positions).
 * This shows the soldering for Hall Effect version.  
   <img src="doc/he_pcb.png" width="60%">
@@ -139,7 +139,7 @@ For following prints, FDM, PLA, 0.4 nozzle, 0.2mm layer, 3 to 4 walls.
 * NOTE: IIDX Jumbo with 2 bearings is abbreviated as "Jumbo 2B" in the file name.
 
 #### Button keycaps
-* Keycap ("Keycap *.stl"), resin printing is recommended, but FDM also works.
+* Keycap ("Keycap *.stl", choose the one matches your build), resin printing is recommended, but FDM can work in a pinch.
 
 ### Step 3 - Soldering and Assembly Tips
 * Keyboard
@@ -166,7 +166,7 @@ For following prints, FDM, PLA, 0.4 nozzle, 0.2mm layer, 3 to 4 walls.
   * Silicone tube is to connect the turntable and the keyboard. Ribbon cable needs to go through the tube. You need a 7mm or 8mm hole punch to make holes on the silicone tube, to match the hooks at both turntable base and the keyboard sides.
 
 ### Notes on Hall Effect version
-* You need to use 704 RTV silicone adhesive to secure the magnetic switch to the PCB, to prevent it wobbling.
+* For Kailh Star Mini, you need to use 704 RTV silicone adhesive to secure the magnetic switch to the PCB, to prevent it wobbling.
 * Calibration must be done in the command line interface.
 * Travel distance for triggering and reset can be configured only in the command line interface. They're stored in profile, which means, you can switch between different profiles and have different triggering settings for each profile.
 
