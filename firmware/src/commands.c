@@ -39,7 +39,6 @@ static void disp_sensor()
     printf("  PPR: %d\n", ppr[iidx_cfg->sensor.ppr & 7]);
     printf("  Reversed: %d\n", iidx_cfg->sensor.reversed);
     printf("  Binary/LR Mode: %s\n", iidx_cfg->sensor.binary ? "Yes" : "No");
-
 }
 
 static void disp_hall()

@@ -20,6 +20,7 @@
 static iidx_cfg_t cfg_save;
 
 #define PROFILE_SAVE cfg_save.profiles[cfg_save.profile]
+#define PROFILE_EX_SAVE cfg_save.profile_ex[cfg_save.profile]
 
 static uint64_t setup_tick_ms = 0;
 #define CONCAT(a, b) a ## b
@@ -40,8 +41,10 @@ typedef enum {
     MODE_LEVEL,
     MODE_TT_STYLE,
     MODE_KEY_THEME,
-    MODE_KEY_OFF,
-    MODE_KEY_ON,
+    MODE_COLOR_OFF,
+    MODE_COLOR_ON,
+    MODE_TRIG_OFF,
+    MODE_TRIG_ON,
 } setup_mode_t;
 static setup_mode_t current_mode = MODE_NONE;
 
@@ -119,8 +122,8 @@ static int16_t input_delta(int16_t start_angle)
 }
 
 static setup_mode_t key_to_mode[7] = {
-    MODE_KEY_THEME, MODE_TT_STYLE, MODE_KEY_ON, MODE_KEY_OFF,
-    MODE_NONE, MODE_NONE, MODE_NONE,
+    MODE_KEY_THEME, MODE_TT_STYLE, MODE_COLOR_ON, MODE_COLOR_OFF,
+    MODE_TRIG_ON, MODE_TRIG_OFF, MODE_NONE,
 };
 
 static struct {
@@ -142,27 +145,64 @@ static void none_rotate()
     }
 }
 
-static void none_disp_profile()
+static void none_disp_escaped()
 {
+    // profiles
     for (int i = 0; i < 4; i++) {
         hsv_t hsv = { i * 64, 240, i == iidx_cfg->profile ? 100 : 30 };
         uint32_t color = rgb_from_hsv(hsv);
         color &= (i == iidx_cfg->profile) ? blink_rapid : 0xffffffff;
         rgb_force_light(LED_E1 + i, color);
     }
+    // options
+    for (int i = 0; i < 7; i++) {
+        hsv_t hsv = { i * 35, 240, 64 };
+        uint32_t color = rgb_from_hsv(hsv);
+        color &= (key_to_mode[i] == MODE_NONE) ? 0 : blink_slow;
+        rgb_force_light(LED_KEY_1 + i, color);
+    }
+}
+
+static void use_safe_trigger_setting()
+{
+    for (int i = 0; i < 7; i++) {
+        PROFILE_EX.trigger.on[i] = 20;
+        PROFILE_EX.trigger.off[i] = 20;
+    }
+
+    // might be false triggered, so clear them
+    input.keys &= ~(KEY_1 | KEY_2 | KEY_3 | KEY_4 | KEY_5 | KEY_6 | KEY_7);
+}
+
+static typeof(PROFILE_EX.trigger) old_trig = {0};
+
+static void enter_escape()
+{
+    if (!none_ctx.escaped) {
+        none_ctx.escaped = true;
+        none_ctx.escape_time = time_us_64();
+        none_ctx.start_angle = input.angle;
+
+        old_trig = PROFILE_EX.trigger;
+        use_safe_trigger_setting();
+    }
+}
+
+static void quit_escape()
+{
+    if (none_ctx.escaped) {
+        none_ctx.escaped = false;
+        PROFILE_EX.trigger = old_trig;
+    }
 }
 
 static void none_loop()
 {
     if (PRESSED_ALL(AUX_YES | AUX_NO)) {
-        if (!none_ctx.escaped) {
-            none_ctx.escaped = true;
-            none_ctx.escape_time = time_us_64();
-            none_ctx.start_angle = input.angle;
-        }
-        none_disp_profile();
+        enter_escape();
+        none_disp_escaped();
     } else {
-        none_ctx.escaped = false;
+        quit_escape();
     }
 
     if (!none_ctx.escaped) {
@@ -171,7 +211,7 @@ static void none_loop()
 
     for (int i = 0; i < count_of(key_to_mode); i++) {
         if (PRESSED_ANY(KEY_1 << i)) {
-            none_ctx.escaped = false;
+            quit_escape();
             join_mode(key_to_mode[i]);
             return;
         }
@@ -179,15 +219,15 @@ static void none_loop()
 
     for (int i = 0; i < 4; i++) {
         if (JUST_PRESSED(E1 << i)) {
+            quit_escape();
             iidx_cfg->profile = i;
-            none_ctx.escaped = false;
             config_changed();
             return;
         }
     }
 
     if (time_us_64() - none_ctx.escape_time > 5000000) {
-        none_ctx.escaped = false;
+        quit_escape();
         join_mode(MODE_HWSET);
         return;
     }
@@ -403,19 +443,19 @@ static struct {
     int16_t start_angle;
     uint16_t keys;
     color_t *leds;
-} key_ctx;
+} color_ctx;
 
-static void key_apply()
+static void color_apply()
 {
     for (int i = 0; i < 11; i++) {
-        if (key_ctx.keys & (1 << i)) {
-            key_ctx.leds[i].mode = 0;
-            key_ctx.leds[i].hsv = key_ctx.hsv;
+        if (color_ctx.keys & (1 << i)) {
+            color_ctx.leds[i].mode = 0;
+            color_ctx.leds[i].hsv = color_ctx.hsv;
         }
     }
 }
 
-static void key_change()
+static void color_key_change()
 {
     if (JUST_PRESSED(AUX_NO)) {
         quit_mode(false);
@@ -423,72 +463,156 @@ static void key_change()
     }
 
     if (JUST_PRESSED(AUX_YES)) {
-        key_ctx.phase++;
-        if (key_ctx.phase == 3) {
-            key_apply();
+        color_ctx.phase++;
+        if (color_ctx.phase == 3) {
+            color_apply();
             quit_mode(true);
             return;
         }
 
-        if (key_ctx.phase == 1) {
-            key_ctx.value = &key_ctx.hsv.s;
+        if (color_ctx.phase == 1) {
+            color_ctx.value = &color_ctx.hsv.s;
         } else {
-            key_ctx.value = &key_ctx.hsv.v;
+            color_ctx.value = &color_ctx.hsv.v;
         }
         return;
     }
 
-    key_ctx.keys ^= input.just_pressed;
+    color_ctx.keys ^= input.just_pressed;
 }
 
-static void key_rotate()
+static void color_rotate()
 {
-    int16_t new_value = *key_ctx.value;
+    int16_t new_value = *color_ctx.value;
     new_value += input.rotate;
-    if (key_ctx.phase > 0) {
+    if (color_ctx.phase > 0) {
         if (new_value < 0) {
             new_value = 0;
         } else if (new_value > 255) {
             new_value = 255;
         }
     }
-    *key_ctx.value = (uint8_t)new_value;
+    *color_ctx.value = (uint8_t)new_value;
 }
 
-static void key_loop()
+static void color_loop()
 {
     for (int i = 0; i < 11; i ++) {
-        uint32_t rgb = rgb_from_hsv(key_ctx.hsv);
-        if (key_ctx.keys == 0) {
+        uint32_t rgb = rgb_from_hsv(color_ctx.hsv);
+        if (color_ctx.keys == 0) {
             setup_led_button[i] = rgb & blink_slow;
-        } else if (key_ctx.keys & (1 << i)) {
+        } else if (color_ctx.keys & (1 << i)) {
             setup_led_button[i] = rgb;
         } else {
             setup_led_button[i] = 0;
         }
     }
 
-    uint16_t pos = *key_ctx.value * iidx_cfg->rgb.tt.num / 256;
+    uint16_t pos = *color_ctx.value * iidx_cfg->rgb.tt.num / 256;
     for (unsigned i = 0; i < iidx_cfg->rgb.tt.num; i++) {
         setup_led_tt[i] = (i == pos) ? RGB32(90, 90, 90) : 0;
     }
 }
 
-static void key_enter()
+static void color_enter()
 {
-    key_ctx = (typeof(key_ctx)) {
+    color_ctx = (typeof(color_ctx)) {
         .phase = 0,
         .hsv = { .h = 200, .s = 255, .v = 128 },
-        .value = &key_ctx.hsv.h,
+        .value = &color_ctx.hsv.h,
         .start_angle = input.angle,
         .keys = 0,
         .leds = PROFILE.key_on,
     };
 
-    if (current_mode == MODE_KEY_OFF) {
-        key_ctx.hsv = (hsv_t) { .h = 60, .s = 255, .v = 100 };
-        key_ctx.leds = PROFILE.key_off;
+    if (current_mode == MODE_COLOR_OFF) {
+        color_ctx.hsv = (hsv_t) { .h = 60, .s = 255, .v = 100 };
+        color_ctx.leds = PROFILE.key_off;
     }
+}
+
+
+static struct {
+    uint8_t value;
+    uint16_t keys;
+    uint8_t *target;
+    const uint8_t *saved;
+} trig_ctx;
+
+static void trig_apply()
+{
+    for (int i = 0; i < 7; i++) {
+        if (trig_ctx.keys & (1 << i)) {
+            trig_ctx.target[i] = trig_ctx.value * 35 / 255;
+        } else {
+            trig_ctx.target[i] = trig_ctx.saved[i];
+        }
+    }
+}
+
+static void trig_key_change()
+{
+    if (JUST_PRESSED(AUX_NO)) {
+        quit_mode(false);
+        return;
+    }
+
+    if (JUST_PRESSED(AUX_YES)) {
+        trig_apply();
+        quit_mode(true);
+        return;
+    }
+
+    trig_ctx.keys ^= input.just_pressed;
+}
+
+static void trig_rotate()
+{
+    int16_t new_value = trig_ctx.value;
+    new_value += input.rotate;
+    if (new_value < 1) {
+        new_value = 1;
+    } else if (new_value > 255) {
+        new_value = 255;
+    }
+    trig_ctx.value = (uint8_t)new_value;
+}
+
+static void trig_loop()
+{
+    uint32_t rgb = current_mode == MODE_TRIG_ON ? RGB32(0x20, 0xa0, 0x20)
+                                                : RGB32(0xa0, 0x20, 0x20);
+    for (int i = 0; i < 7; i ++) {
+        if (trig_ctx.keys == 0) {
+            setup_led_button[i] = rgb & blink_slow;
+        } else if (trig_ctx.keys & (1 << i)) {
+            setup_led_button[i] = rgb;
+        } else {
+            setup_led_button[i] = 0;
+        }
+    }
+
+    uint16_t pos = trig_ctx.value * iidx_cfg->rgb.tt.num / 255;
+    for (unsigned i = 0; i < iidx_cfg->rgb.tt.num; i++) {
+        setup_led_tt[i] = (i <= pos) ? rgb : 0;
+    }
+}
+
+static void trig_enter()
+{
+    trig_ctx = (typeof(trig_ctx)) {
+        .value = 140,
+        .keys = 0,
+        .target = PROFILE_EX.trigger.on,
+        .saved = PROFILE_EX_SAVE.trigger.on,
+    };
+
+    if (current_mode == MODE_TRIG_OFF) {
+        trig_ctx.target = PROFILE_EX.trigger.off;
+        trig_ctx.saved = PROFILE_EX_SAVE.trigger.off;
+    }
+
+    use_safe_trigger_setting();
 }
 
 #define K0_WHITE {.v = 5}
@@ -614,7 +738,7 @@ static void tt_style_loop()
 }
 
 static struct {
-    mode_func key_change;
+    mode_func key_update;
     mode_func rotate;
     mode_func loop;
     mode_func enter;
@@ -627,8 +751,10 @@ static struct {
     [MODE_LEVEL] = { level_key_change, level_rotate, level_loop, level_enter, true, true, false },
     [MODE_TT_STYLE] = { tt_style_key_change, nop, tt_style_loop, nop, false, true, true },
     [MODE_KEY_THEME] = { key_theme_key_change, nop, key_theme_loop, nop, false, true, true },
-    [MODE_KEY_OFF] = { key_change, key_rotate, key_loop, key_enter, true, true, true },
-    [MODE_KEY_ON] = { key_change, key_rotate, key_loop, key_enter, true, true, true },
+    [MODE_COLOR_OFF] = { color_key_change, color_rotate, color_loop, color_enter, true, true, true },
+    [MODE_COLOR_ON] = { color_key_change, color_rotate, color_loop, color_enter, true, true, true },
+    [MODE_TRIG_OFF] = { trig_key_change, trig_rotate, trig_loop, trig_enter, true, true, true },
+    [MODE_TRIG_ON] = { trig_key_change, trig_rotate, trig_loop, trig_enter, true, true, true }
 };
 
 static void join_mode(setup_mode_t new_mode)
@@ -676,7 +802,7 @@ void setup_run(uint16_t keys, uint16_t angle)
     }
 
     if (input.just_pressed || input.just_released) {
-        mode_defs[current_mode].key_change();
+        mode_defs[current_mode].key_update();
     }
 
     RUN_EVERY_N_MS(blink_rapid ^= 0xffffffff, 75);
