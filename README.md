@@ -105,8 +105,8 @@ If you're interested in buying from me, or for commercial use, please contact me
 ### If you want to build Hall Effect version
 * WS2812B-3528 per switch is no longer an option. Because it conflicts with the pinout.
 * 1x ADG708BRUZ, 8 to 1 analog switch, in TSSOP-16 (U4).
-* 1x LM4040 Shunt Voltage Reference, get one with 2.0V or 2.1V reference voltage, in SOT23-3 (U5).
-* 1x LP5907MFX-4.5 or TPS7A2042PDBVR LDO, in SOT23-5 (U6).
+* 1x LP5907MFX-4.5 or TPS7A2042PDBVR LDO, in SOT23-5 (U6), see next line.
+* 1x LM4040 shunt voltage reference, get one with 2.0~2.1V (for 4.2V LDO) or 2.2~2.5V (for 4.5V LDO) reference voltage, in SOT23-3 (U5).
 * 7x SS49E or compatible linear Hall Effect sensors, in SOT23-3 (H1-H7).
 * 1x 10ohm resistor, 0603 (R5) and leave R6 absent.
 * 1x 3.3V Zener diode, in SOD-123 or SOD-123F, such as BZT52H-C3V3 (Z1).
