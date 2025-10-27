@@ -30,7 +30,7 @@ enum {
         HID_USAGE(HID_USAGE_DESKTOP_X),                        \
         HID_USAGE(HID_USAGE_DESKTOP_Y),                        \
         HID_REPORT_COUNT(2), HID_REPORT_SIZE(8),               \
-        HID_INPUT(HID_CONSTANT | HID_VARIABLE | HID_ABSOLUTE), \
+        HID_INPUT(HID_DATA | HID_VARIABLE | HID_ABSOLUTE),     \
     HID_COLLECTION_END
 
 #define GAMECON_REPORT_DESC_LIGHTS                             \
