@@ -12,6 +12,7 @@
 #include "cli.h"
 #include "buttons.h"
 #include "hebtn.h"
+#include "turntable.h"
 
 static void handle_save()
 {
@@ -36,6 +37,7 @@ static void disp_sensor()
 {
     const uint16_t ppr[8] = { 200, 128, 64, 32, 256, 160, 96, 48};
     printf("[TURNTABLE]\n");
+    printf("  Sensor: %s\n", turntable_sensor_name());
     printf("  PPR: %d\n", ppr[iidx_cfg->sensor.ppr & 7]);
     printf("  Reversed: %d\n", iidx_cfg->sensor.reversed);
     printf("  Binary/LR Mode: %s\n", iidx_cfg->sensor.binary ? "Yes" : "No");

@@ -14,5 +14,6 @@ uint8_t turntable_read();
 uint16_t turntable_raw();
 void turntable_update();
 bool turntable_is_alternative();
+const char *turntable_sensor_name();
 
 #endif
