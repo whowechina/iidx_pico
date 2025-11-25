@@ -15,6 +15,7 @@
 #include "pico/bootrom.h"
 
 #include "rgb.h"
+#include "hebtn.h"
 #include "config.h"
 
 static iidx_cfg_t cfg_save;
@@ -692,6 +693,15 @@ static void key_theme_key_change()
         }
     }
 
+    if (hebtn_any_present()) {
+        for (int i = 0; i < 4; i++) {
+            if (JUST_PRESSED(E1 << i)) {
+                PROFILE_EX.key_light_mode = i;
+                break;
+            }
+        }
+    }
+
     if (theme >= 0) {
         for (int i = 0; i < 11; i++) {
             PROFILE.key_on[i].mode = COLOR_MODE_HSV;
@@ -709,6 +719,13 @@ static void key_theme_loop()
     for (int i = 0; i < 11; i++) {
         hsv_t hsv = blink_slow ? PROFILE.key_on[i].hsv
                                : PROFILE.key_off[i].hsv;
+        if ((i >= 7) && hebtn_any_present()) {
+            int mode = PROFILE_EX.key_light_mode % 4;
+            if (i - 7 == mode) {
+                hsv = blink_fast ? PROFILE.key_on[i].hsv
+                                : PROFILE.key_off[i].hsv;
+            }
+        }
         setup_led_button[i] = rgb_from_hsv(hsv);
     }
 }

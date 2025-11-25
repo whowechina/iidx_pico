@@ -21,14 +21,17 @@
 #define KEY_NUM HALL_KEY_NUM
 
 static bool hebtn_presence[KEY_NUM];
+static bool hebtn_any_presence = false;
 static uint16_t reading[KEY_NUM];
 static bool key_actuated[KEY_NUM];
 
 static void hebtn_discovery()
 {
     hebtn_update();
+    hebtn_any_presence = false;
     for (int i = 0; i < KEY_NUM; i++) {
         hebtn_presence[i] = (reading[i] > 200);
+        hebtn_any_presence |= hebtn_presence[i];
     }
 }
 
@@ -63,6 +66,11 @@ void hebtn_init()
 uint8_t hebtn_keynum()
 {
     return KEY_NUM;
+}
+
+bool hebtn_any_present()
+{
+    return hebtn_any_presence;
 }
 
 bool hebtn_present(uint8_t chn)
@@ -214,6 +222,16 @@ uint8_t hebtn_travel_byte(uint8_t chn)
     int range = hebtn_range(chn);
     int pos = hebtn_travel(chn);
     return (range != 0) ? pos * 255 / range : 0;
+}
+
+uint8_t hebtn_trigger_byte(uint8_t chn)
+{
+    if (chn >= KEY_NUM) {
+        return 0;
+    }
+    int trig = PROFILE_EX.trigger.on[chn] % 36 + 1;
+
+    return trig * 255 / 37;
 }
 
 static void read_sensors_avg(uint16_t avg[KEY_NUM])

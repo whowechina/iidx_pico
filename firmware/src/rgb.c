@@ -19,6 +19,7 @@
 #include "ws2812.pio.h"
 
 #include "board_defs.h"
+#include "hebtn.h"
 #include "config.h"
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
@@ -65,6 +66,8 @@ uint32_t rgb_apply_level(uint32_t rgb, uint8_t level)
 
 static uint8_t hid_lights[BUTTON_RGB_NUM + 3];
 static uint8_t *tt_hid = hid_lights + BUTTON_RGB_NUM;
+static uint8_t hall_level[7];
+static uint8_t hall_trig[7];
 
 uint8_t rgb_hid_light_num()
 {
@@ -216,6 +219,19 @@ void rgb_set_button_light(uint16_t buttons)
         uint16_t flag = 1 << i;
         hid_lights[i] = (buttons & flag) > 0 ? 0xff : 0;
     }
+
+    int light_mode = PROFILE_EX.key_light_mode % 4;
+
+    if (!hebtn_any_present() || (light_mode == 0)) {
+        return;
+    }
+
+    if (PROFILE_EX.key_light_mode > 0) {
+        for (int i = 0; i < 7; i++) {
+            hall_level[i] = hebtn_travel_byte(i);
+            hall_trig[i] = hebtn_trigger_byte(i);
+        }
+    }
 }
 
 void rgb_set_hid_light(uint8_t const *lights, uint8_t num)
@@ -267,6 +283,48 @@ static void tt_lights_update()
     }
 }
 
+uint32_t rgb_transit(uint32_t rgb1, uint32_t rgb2, uint8_t pos)
+{
+    uint8_t r1 = (rgb1 >> 16) & 0xff;
+    uint8_t g1 = (rgb1 >> 8) & 0xff;
+    uint8_t b1 = rgb1 & 0xff;
+    
+    uint8_t r2 = (rgb2 >> 16) & 0xff;
+    uint8_t g2 = (rgb2 >> 8) & 0xff;
+    uint8_t b2 = rgb2 & 0xff;
+    
+    uint8_t r = r1 + ((int16_t)(r2 - r1) * pos / 255);
+    uint8_t g = g1 + ((int16_t)(g2 - g1) * pos / 255);
+    uint8_t b = b1 + ((int16_t)(b2 - b1) * pos / 255);
+    
+    return r << 16 | g << 8 | b;
+}
+
+static uint32_t calc_button_light(int key)
+{
+    uint32_t rgb_on = rgb_from_hsv(PROFILE.key_on[key].hsv);
+    uint32_t rgb_off = rgb_from_hsv(PROFILE.key_off[key].hsv);
+
+    int light_mode = PROFILE_EX.key_light_mode % 4;
+
+    if ((key > 7) || !hebtn_any_present() || (light_mode == 0)) {
+        return hid_lights[key] ? rgb_on : rgb_off;
+    }
+
+    uint32_t begin = (PROFILE_EX.key_light_mode == 2) ? 0 : rgb_off;
+    uint32_t end = rgb_on;
+
+    int level = hall_level[key];
+    if (light_mode == 3) {
+        if (level >= hall_trig[key]) {
+            level = 255;
+        } else {
+            level = level * 255 / hall_trig[key];
+        }
+    }
+    return rgb_transit(begin, end, level);
+}
+
 static void button_lights_update()
 {
     uint64_t now = time_us_64();
@@ -280,9 +338,7 @@ static void button_lights_update()
 
     for (int i = 0; i < BUTTON_RGB_NUM; i++) {
         int led = button_rgb_map[i];
-        hsv_t hsv = hid_lights[i] ? PROFILE.key_on[i].hsv
-                                  : PROFILE.key_off[i].hsv;
-        button_led_buf[led] = rgb_from_hsv(hsv);
+        button_led_buf[led] = calc_button_light(i);
     }
 }
 
