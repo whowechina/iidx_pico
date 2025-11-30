@@ -307,7 +307,7 @@ static uint32_t calc_button_light(int key)
 
     int light_mode = PROFILE_EX.key_light_mode % 4;
 
-    if ((key > 7) || !hebtn_any_present() || (light_mode == 0)) {
+    if ((key >= 7) || !hebtn_any_present() || (light_mode == 0)) {
         return hid_lights[key] ? rgb_on : rgb_off;
     }
 
