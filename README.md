@@ -79,7 +79,7 @@ If you're interested in buying from me, or for commercial use, please contact me
 * 11x Kailh Choc v1 or v2 key switches, I suggest using linear switches for the 7 main buttons.  
   https://www.kailhswitch.com/mechanical-keyboard-switches/low-profile-key-switches/burnt-orange-switch.html  
   https://www.kailhswitch.com/mechanical-keyboard-switches/key-switches/kailh-low-profile-switch-choc-v2.html
-* 7x Kailh low-profile stabilizers.  
+* 7x Kailh 2.0U low-profile stabilizers.  
   https://chosfox.com/products/kailh-1350-choc-switch-6-25u-stabilizer-set
 * 2x Panasonic EVQP1K05M square tactile switches for IIDX Pico and IIDX Jumbo.  
   https://www3.panasonic.biz/ac/e/dl/catalog/index.jsp?series_cd=3473&part_no=EVQP1K05M

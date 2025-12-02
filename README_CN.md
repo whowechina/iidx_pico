@@ -78,7 +78,7 @@
 * 11x 凯华巧克力 V1 或者 V2 键盘矮轴。我建议给 7 个主按键使用线性轴体。  
   https://www.kailhswitch.com/mechanical-keyboard-switches/low-profile-key-switches/burnt-orange-switch.html  
   https://www.kailhswitch.com/mechanical-keyboard-switches/key-switches/kailh-low-profile-switch-choc-v2.html
-* 7x 凯华矮轴巧克力 V1 的卫星轴。  
+* 7x 凯华 2.0U 矮轴巧克力卫星轴。  
   https://chosfox.com/products/kailh-1350-choc-switch-6-25u-stabilizer-set
 * 2x 松下 EVQP1K05M 微动开关，仅针对 IIDX Pico 和 IIDX Jumbo。  
   https://www3.panasonic.biz/ac/e/dl/catalog/index.jsp?series_cd=3473&part_no=EVQP1K05M
