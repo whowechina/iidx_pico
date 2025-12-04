@@ -131,12 +131,14 @@ void turntable_update()
         }
     }
 
-    raw_angle = sum / count;
+    int angle = sum / count;
+    
+    raw_angle = iidx_cfg->sensor.reversed ? (4095 - angle) : angle;
 }
 
 uint16_t turntable_raw()
 {
-    return iidx_cfg->sensor.reversed ? 4095 - raw_angle : raw_angle; // 12bit
+    return raw_angle;
 }
 
 uint8_t turntable_read()
