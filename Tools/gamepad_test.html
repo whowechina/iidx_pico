@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gamepad Tester</title>
+    <title>Gamepad Test</title>
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -176,7 +176,6 @@
             height: 6px;
             background: #007bff;
             border-radius: 3px;
-            transition: top 0.1s ease;
             box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
         }
         .axis-center-line {
@@ -188,45 +187,24 @@
             background: #6c757d;
             transform: translateY(-50%);
         }
-        .total-count {
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
-            color: #007bff;
-            margin: 20px 0;
-            padding: 15px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
+
         .button-group {
             margin-bottom: 20px;
         }
         .button-group-title {
             font-size: 16px;
             font-weight: bold;
-            color: #495057;
+            color: #333;
             margin-bottom: 10px;
-            text-align: center;
+            text-align: left;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎮 Gamepad Button Tester 游戏手柄按钮检测器</h1>
-        <p style="text-align: center; color: #666;">For detecting button aging and bounce issues - Only counts button press edge triggers 用于检测按钮老化和抖动问题 - 只计算按下边沿触发次数</p>
-        
+        <h1>🎮 Gamepad Test 游戏手柄测试</h1>
         <div id="status" class="status disconnected">
             Please connect a gamepad and press any button to activate 请连接游戏手柄并按任意按钮激活
-        </div>
-
-        <div class="controls">
-            <button class="reset-btn" onclick="resetAllCounts()">🔄 Reset All 复位所有</button>
-            <button class="reset-btn" onclick="resetCurrentGamepad()" style="background-color: #6c757d;">Reset Current 复位当前</button>
-        </div>
-
-        <div class="total-count">
-            Total Presses 总按键次数: <span id="totalCount">0</span>
         </div>
 
         <div id="gamepads"></div>
@@ -237,7 +215,6 @@
         let gamepads = {};
         let buttonStates = {};
         let buttonCounts = {};
-        let totalCount = 0;
         let isGamepadSupported = 'getGamepads' in navigator;
 
         // 初始化
@@ -285,10 +262,10 @@
         // 获取轴名称
         function getAxisName(index) {
             const axisNames = [
-                'Left X 左 X', 'Left Y 左 Y', 
-                'Right X 右 X', 'Right Y 右 Y'
+                'Left X<br>左 X', 'Left Y<br>左 Y', 
+                'Right X<br>右 X', 'Right Y<br>右 Y'
             ];
-            return axisNames[index] || `Axis ${index} 轴 ${index}`;
+            return axisNames[index] || `Axis ${index}<br>轴 ${index}`;
         }
 
         // 检测按钮状态变化
@@ -305,8 +282,6 @@
             if (isPressed && !buttonStates[key]) {
                 buttonStates[key] = true;
                 buttonCounts[key]++;
-                totalCount++;
-                updateTotalCount();
                 
                 // 添加视觉反馈
                 const buttonElement = document.getElementById(`button-${gamepadIndex}-${buttonIndex}`);
@@ -321,10 +296,7 @@
             }
         }
 
-        // 更新总计数显示
-        function updateTotalCount() {
-            document.getElementById('totalCount').textContent = totalCount;
-        }
+
 
         // 渲染手柄界面
         function renderGamepads() {
@@ -385,7 +357,12 @@
 
                 gamepadDiv.innerHTML = `
                     <div class="gamepad-title">
-                        🎮 ${gamepad.id} Idex 索引: ${gamepad.index}
+                        🎮 ${gamepad.id} Index 索引: ${gamepad.index}
+                        <button class="reset-btn" onclick="resetGamepad(${gamepad.index})" 
+                                style="float: right; padding: 6px 12px; font-size: 14px; background-color: #6c757d;">
+                            🔄 Reset 复位
+                        </button>
+                        <div style="clear: both;"></div>
                     </div>
                     ${buttonsHTML}
                     <div class="axes-section">
@@ -432,17 +409,38 @@
 
                 // 更新轴显示
                 gamepad.axes.forEach((axis, axisIndex) => {
+                    // 限制轴值到 -1 到 +1 范围
+                    const clampedAxis = Math.max(-1, Math.min(1, axis));
+                    
                     const axisElement = document.getElementById(`axis-${gamepad.index}-${axisIndex}`);
                     if (axisElement) {
-                        axisElement.textContent = axis.toFixed(3);
+                        // 显示原始值，但标记如果超出范围
+                        const displayValue = axis.toFixed(3);
+                        const isOutOfRange = axis < -1 || axis > 1;
+                        axisElement.textContent = isOutOfRange ? `${displayValue}⚠️` : displayValue;
+                        
+                        // 如果超出范围，改变颜色
+                        if (isOutOfRange) {
+                            axisElement.style.color = 'red';
+                            axisElement.style.fontWeight = 'bold';
+                        } else {
+                            axisElement.style.color = '';
+                            axisElement.style.fontWeight = '';
+                        }
                     }
                     
-                    // 更新轴条显示
+                    // 更新轴条显示 - 使用限制后的值
                     const axisBarElement = document.getElementById(`axis-bar-${gamepad.index}-${axisIndex}`);
                     if (axisBarElement) {
-                        // 将轴值(-1到1)转换为位置(0%到94%)，留出指示器高度空间
-                        const position = ((axis + 1) / 2) * 94; // 0-94%
+                        const position = ((clampedAxis + 1) / 2) * 94; // 使用限制后的值
                         axisBarElement.style.top = `${position}%`;
+                        
+                        // 如果原始值超出范围，改变指示器颜色
+                        if (axis < -1 || axis > 1) {
+                            axisBarElement.style.background = '#dc3545'; // 红色警告
+                        } else {
+                            axisBarElement.style.background = '#007bff'; // 默认蓝色
+                        }
                     }
                 });
 
@@ -469,8 +467,6 @@
         function resetAllCounts() {
             buttonCounts = {};
             buttonStates = {};
-            totalCount = 0;
-            updateTotalCount();
             renderGamepads();
         }
 
@@ -489,13 +485,9 @@
                 // 复位这个手柄的所有按钮计数
                 for (let i = 0; i < gamepad.buttons.length; i++) {
                     const key = `${gamepad.index}-${i}`;
-                    const oldCount = buttonCounts[key] || 0;
                     buttonCounts[key] = 0;
                     buttonStates[key] = false;
-                    totalCount -= oldCount;
                 }
-                totalCount = Math.max(0, totalCount);
-                updateTotalCount();
                 renderGamepads();
             } else {
                 // 多个手柄，让用户选择
@@ -515,15 +507,29 @@
 
                 for (let i = 0; i < gamepad.buttons.length; i++) {
                     const key = `${gamepadIndex}-${i}`;
-                    const oldCount = buttonCounts[key] || 0;
                     buttonCounts[key] = 0;
                     buttonStates[key] = false;
-                    totalCount -= oldCount;
                 }
-                totalCount = Math.max(0, totalCount);
-                updateTotalCount();
                 renderGamepads();
             }
+        }
+
+        // 复位指定手柄
+        function resetGamepad(gamepadIndex) {
+            const gamepadList = navigator.getGamepads();
+            const gamepad = gamepadList[gamepadIndex];
+            
+            if (!gamepad) {
+                alert('Gamepad not found 手柄未找到');
+                return;
+            }
+
+            for (let i = 0; i < gamepad.buttons.length; i++) {
+                const key = `${gamepadIndex}-${i}`;
+                buttonCounts[key] = 0;
+                buttonStates[key] = false;
+            }
+            renderGamepads();
         }
 
         // 启动主循环
