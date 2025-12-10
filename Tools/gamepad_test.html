@@ -89,7 +89,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.066s ease;
             position: relative;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
@@ -282,17 +282,18 @@
             if (isPressed && !buttonStates[key]) {
                 buttonStates[key] = true;
                 buttonCounts[key]++;
-                
-                // 添加视觉反馈
-                const buttonElement = document.getElementById(`button-${gamepadIndex}-${buttonIndex}`);
-                if (buttonElement) {
-                    buttonElement.classList.add('pressed');
-                    setTimeout(() => {
-                        buttonElement.classList.remove('pressed');
-                    }, 200);
-                }
             } else if (!isPressed && buttonStates[key]) {
                 buttonStates[key] = false;
+            }
+
+            // 实时更新视觉状态（按下亮起，松开熄灭）
+            const buttonElement = document.getElementById(`button-${gamepadIndex}-${buttonIndex}`);
+            if (buttonElement) {
+                if (isPressed) {
+                    buttonElement.classList.add('pressed');
+                } else {
+                    buttonElement.classList.remove('pressed');
+                }
             }
         }
 
