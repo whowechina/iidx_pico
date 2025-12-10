@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gamepad Tester</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .status {
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .status.connected {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .controls {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .reset-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 10px;
+        }
+        .reset-btn:hover {
+            background-color: #c82333;
+        }
+        .gamepad {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .gamepad-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .buttons-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: flex-start;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .button-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #e9ecef, #ffffff);
+            border: 3px solid #dee2e6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .button-circle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        .button-circle.pressed {
+            background: linear-gradient(145deg, #28a745, #34ce57);
+            border-color: #1e7e34;
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(40, 167, 69, 0.5);
+        }
+        .button-name {
+            font-weight: bold;
+            font-size: 10px;
+            margin-bottom: 3px;
+            text-align: center;
+            line-height: 1;
+        }
+        .button-count {
+            font-size: 16px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .button-circle.pressed .button-count {
+            color: white;
+        }
+        /* 特殊按钮颜色 */
+        .button-circle.action {
+            background: linear-gradient(145deg, #ffeaa7, #fdcb6e);
+            border-color: #e17055;
+        }
+        .button-circle.shoulder {
+            background: linear-gradient(145deg, #a29bfe, #6c5ce7);
+            color: white;
+        }
+        .button-circle.dpad {
+            background: linear-gradient(145deg, #fd79a8, #e84393);
+            color: white;
+        }
+        .button-circle.system {
+            background: linear-gradient(145deg, #636e72, #2d3436);
+            color: white;
+        }
+        .axes-section {
+            margin-top: 20px;
+        }
+        .axes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
+            gap: 10px;
+        }
+        .axis-item {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+        }
+        .axis-name {
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        .axis-value {
+            font-size: 14px;
+            font-family: monospace;
+            margin-bottom: 8px;
+        }
+        .axis-bar {
+            width: 100%;
+            height: 80px;
+            background: linear-gradient(to bottom, #e9ecef 0%, #f8f9fa 50%, #e9ecef 100%);
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            position: relative;
+            margin: 5px 0;
+        }
+        .axis-indicator {
+            position: absolute;
+            width: 100%;
+            height: 6px;
+            background: #007bff;
+            border-radius: 3px;
+            transition: top 0.1s ease;
+            box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+        }
+        .axis-center-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #6c757d;
+            transform: translateY(-50%);
+        }
+        .total-count {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+            margin: 20px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .button-group {
+            margin-bottom: 20px;
+        }
+        .button-group-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Gamepad Button Tester 游戏手柄按钮检测器</h1>
+        <p style="text-align: center; color: #666;">For detecting button aging and bounce issues - Only counts button press edge triggers 用于检测按钮老化和抖动问题 - 只计算按下边沿触发次数</p>
+        
+        <div id="status" class="status disconnected">
+            Please connect a gamepad and press any button to activate 请连接游戏手柄并按任意按钮激活
+        </div>
+
+        <div class="controls">
+            <button class="reset-btn" onclick="resetAllCounts()">🔄 Reset All 复位所有</button>
+            <button class="reset-btn" onclick="resetCurrentGamepad()" style="background-color: #6c757d;">Reset Current 复位当前</button>
+        </div>
+
+        <div class="total-count">
+            Total Presses 总按键次数: <span id="totalCount">0</span>
+        </div>
+
+        <div id="gamepads"></div>
+    </div>
+
+    <script>
+        // 全局状态
+        let gamepads = {};
+        let buttonStates = {};
+        let buttonCounts = {};
+        let totalCount = 0;
+        let isGamepadSupported = 'getGamepads' in navigator;
+
+        // 初始化
+        if (!isGamepadSupported) {
+            document.getElementById('status').textContent = 'Your browser does not support Gamepad API (您的浏览器不支持 Gamepad API)';
+            document.getElementById('status').className = 'status disconnected';
+        }
+
+        // 添加事件监听器
+        window.addEventListener('gamepadconnected', (e) => {
+            console.log('手柄已连接:', e.gamepad);
+            updateStatus();
+            renderGamepads(); // 添加这行
+        });
+
+        window.addEventListener('gamepaddisconnected', (e) => {
+            console.log('手柄已断开:', e.gamepad);
+            delete gamepads[e.gamepad.index];
+            delete buttonStates[e.gamepad.index];
+            delete buttonCounts[e.gamepad.index];
+            updateStatus();
+            renderGamepads();
+        });
+
+        // 更新状态显示
+        function updateStatus() {
+            const gamepadList = navigator.getGamepads();
+            const connectedGamepads = Array.from(gamepadList).filter(gp => gp !== null);
+            
+            const statusElement = document.getElementById('status');
+            if (connectedGamepads.length > 0) {
+                statusElement.textContent = `Connected ${connectedGamepads.length} gamepad(s) (已连接 ${connectedGamepads.length} 个手柄)`;
+                statusElement.className = 'status connected';
+            } else {
+                statusElement.textContent = 'Please connect a gamepad and press any button to activate (请连接游戏手柄并按任意按钮激活)';
+                statusElement.className = 'status disconnected';
+            }
+        }
+
+        // 获取按钮信息（名称和类型）
+        function getButtonInfo(index) {
+            return { name: `${index}`, type: 'default' };
+        }
+
+        // 获取轴名称
+        function getAxisName(index) {
+            const axisNames = [
+                'Left X 左 X', 'Left Y 左 Y', 
+                'Right X 右 X', 'Right Y 右 Y'
+            ];
+            return axisNames[index] || `Axis ${index} 轴 ${index}`;
+        }
+
+        // 检测按钮状态变化
+        function checkButtonPress(gamepadIndex, buttonIndex, isPressed) {
+            const key = `${gamepadIndex}-${buttonIndex}`;
+            
+            // 初始化状态
+            if (!(key in buttonStates)) {
+                buttonStates[key] = false;
+                buttonCounts[key] = 0;
+            }
+
+            // 检测按下边沿（从未按下变为按下）
+            if (isPressed && !buttonStates[key]) {
+                buttonStates[key] = true;
+                buttonCounts[key]++;
+                totalCount++;
+                updateTotalCount();
+                
+                // 添加视觉反馈
+                const buttonElement = document.getElementById(`button-${gamepadIndex}-${buttonIndex}`);
+                if (buttonElement) {
+                    buttonElement.classList.add('pressed');
+                    setTimeout(() => {
+                        buttonElement.classList.remove('pressed');
+                    }, 200);
+                }
+            } else if (!isPressed && buttonStates[key]) {
+                buttonStates[key] = false;
+            }
+        }
+
+        // 更新总计数显示
+        function updateTotalCount() {
+            document.getElementById('totalCount').textContent = totalCount;
+        }
+
+        // 渲染手柄界面
+        function renderGamepads() {
+            const container = document.getElementById('gamepads');
+            container.innerHTML = '';
+
+            const gamepadList = navigator.getGamepads();
+            
+            for (let i = 0; i < gamepadList.length; i++) {
+                const gamepad = gamepadList[i];
+                if (!gamepad) continue;
+
+                const gamepadDiv = document.createElement('div');
+                gamepadDiv.className = 'gamepad';
+
+                // 按按钮类型分组
+                const buttonGroups = {
+                    default: { title: 'Buttons 按钮', buttons: [] }
+                };
+
+                gamepad.buttons.forEach((button, buttonIndex) => {
+                    const buttonInfo = getButtonInfo(buttonIndex);
+                    const key = `${gamepad.index}-${buttonIndex}`;
+                    
+                    // 确保初始化计数
+                    if (!(key in buttonCounts)) {
+                        buttonCounts[key] = 0;
+                    }
+                    
+                    const count = buttonCounts[key];
+                    
+                    buttonGroups.default.buttons.push({
+                        index: buttonIndex,
+                        name: buttonInfo.name,
+                        type: buttonInfo.type,
+                        count: count
+                    });
+                });
+
+                let buttonsHTML = '';
+                for (const [groupType, group] of Object.entries(buttonGroups)) {
+                    if (group.buttons.length > 0) {
+                        buttonsHTML += `
+                            <div class="button-group">
+                                <div class="button-group-title">${group.title}</div>
+                                <div class="buttons-container">
+                                    ${group.buttons.map(btn => `
+                                        <div class="button-circle ${btn.type}" id="button-${gamepad.index}-${btn.index}">
+                                            <div class="button-name">${btn.name}</div>
+                                            <div class="button-count">${btn.count}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+
+                gamepadDiv.innerHTML = `
+                    <div class="gamepad-title">
+                        🎮 ${gamepad.id} (索引: ${gamepad.index})
+                    </div>
+                    ${buttonsHTML}
+                    <div class="axes-section">
+                        <h4>摇杆轴</h4>
+                        <div class="axes-grid">
+                            ${gamepad.axes.map((axis, axisIndex) => `
+                                <div class="axis-item">
+                                    <div class="axis-name">${getAxisName(axisIndex)}</div>
+                                    <div class="axis-value" id="axis-${gamepad.index}-${axisIndex}">${axis.toFixed(3)}</div>
+                                    <div class="axis-bar">
+                                        <div class="axis-center-line"></div>
+                                        <div class="axis-indicator" id="axis-bar-${gamepad.index}-${axisIndex}"></div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(gamepadDiv);
+            }
+        }
+
+        // 主循环 - 持续检测手柄状态
+        function gameLoop() {
+            const gamepadList = navigator.getGamepads();
+            let needsRender = false;
+            
+            for (let i = 0; i < gamepadList.length; i++) {
+                const gamepad = gamepadList[i];
+                if (!gamepad) continue;
+                
+                // 检查是否有新手柄
+                if (!gamepads[gamepad.index]) {
+                    gamepads[gamepad.index] = true;
+                    needsRender = true;
+                }
+
+                // 检测按钮状态
+                gamepad.buttons.forEach((button, buttonIndex) => {
+                    const isPressed = button.pressed || button.value > 0.5;
+                    checkButtonPress(gamepad.index, buttonIndex, isPressed);
+                });
+
+                // 更新轴显示
+                gamepad.axes.forEach((axis, axisIndex) => {
+                    const axisElement = document.getElementById(`axis-${gamepad.index}-${axisIndex}`);
+                    if (axisElement) {
+                        axisElement.textContent = axis.toFixed(3);
+                    }
+                    
+                    // 更新轴条显示
+                    const axisBarElement = document.getElementById(`axis-bar-${gamepad.index}-${axisIndex}`);
+                    if (axisBarElement) {
+                        // 将轴值(-1到1)转换为位置(0%到94%)，留出指示器高度空间
+                        const position = ((axis + 1) / 2) * 94; // 0-94%
+                        axisBarElement.style.top = `${position}%`;
+                    }
+                });
+
+                // 更新按钮计数显示
+                gamepad.buttons.forEach((button, buttonIndex) => {
+                    const key = `${gamepad.index}-${buttonIndex}`;
+                    const count = buttonCounts[key] || 0;
+                    const countElement = document.querySelector(`#button-${gamepad.index}-${buttonIndex} .button-count`);
+                    if (countElement) {
+                        countElement.textContent = count;
+                    }
+                });
+            }
+
+            if (needsRender) {
+                renderGamepads();
+            }
+
+            updateStatus();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // 复位所有计数
+        function resetAllCounts() {
+            buttonCounts = {};
+            buttonStates = {};
+            totalCount = 0;
+            updateTotalCount();
+            renderGamepads();
+        }
+
+        // 复位当前手柄计数
+        function resetCurrentGamepad() {
+            const gamepadList = navigator.getGamepads();
+            const connectedGamepads = Array.from(gamepadList).filter(gp => gp !== null);
+            
+            if (connectedGamepads.length === 0) {
+                alert('No gamepad connected 没有连接的手柄');
+                return;
+            }
+
+            if (connectedGamepads.length === 1) {
+                const gamepad = connectedGamepads[0];
+                // 复位这个手柄的所有按钮计数
+                for (let i = 0; i < gamepad.buttons.length; i++) {
+                    const key = `${gamepad.index}-${i}`;
+                    const oldCount = buttonCounts[key] || 0;
+                    buttonCounts[key] = 0;
+                    buttonStates[key] = false;
+                    totalCount -= oldCount;
+                }
+                totalCount = Math.max(0, totalCount);
+                updateTotalCount();
+                renderGamepads();
+            } else {
+                // 多个手柄，让用户选择
+                let gamepadIndex = prompt(`Detected ${connectedGamepads.length} gamepads, enter gamepad index to reset (0-${connectedGamepads.length-1}) (检测到 ${connectedGamepads.length} 个手柄，请输入要复位的手柄索引 (0-${connectedGamepads.length-1})):`);
+                gamepadIndex = parseInt(gamepadIndex);
+                
+                if (isNaN(gamepadIndex) || gamepadIndex < 0 || gamepadIndex >= gamepadList.length) {
+                    alert('Invalid gamepad index 无效的手柄索引');
+                    return;
+                }
+
+                const gamepad = gamepadList[gamepadIndex];
+                if (!gamepad) {
+                    alert('Gamepad at this index is not connected 该索引的手柄未连接');
+                    return;
+                }
+
+                for (let i = 0; i < gamepad.buttons.length; i++) {
+                    const key = `${gamepadIndex}-${i}`;
+                    const oldCount = buttonCounts[key] || 0;
+                    buttonCounts[key] = 0;
+                    buttonStates[key] = false;
+                    totalCount -= oldCount;
+                }
+                totalCount = Math.max(0, totalCount);
+                updateTotalCount();
+                renderGamepads();
+            }
+        }
+
+        // 启动主循环
+        updateStatus();
+        renderGamepads();
+        gameLoop();
+    </script>
+</body>
+</html>
