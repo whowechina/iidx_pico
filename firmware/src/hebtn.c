@@ -20,6 +20,8 @@
 
 #define KEY_NUM HALL_KEY_NUM
 
+#define HALL_PRESENCE_THRESHOLD 500 // about 0.4V on 3.3V reference
+
 static bool hebtn_presence[KEY_NUM];
 static bool hebtn_any_presence = false;
 static uint16_t reading[KEY_NUM];
@@ -30,7 +32,7 @@ static void hebtn_discovery()
     hebtn_update();
     hebtn_any_presence = false;
     for (int i = 0; i < KEY_NUM; i++) {
-        hebtn_presence[i] = (reading[i] > 200);
+        hebtn_presence[i] = (reading[i] > HALL_PRESENCE_THRESHOLD);
         hebtn_any_presence |= hebtn_presence[i];
     }
 }
