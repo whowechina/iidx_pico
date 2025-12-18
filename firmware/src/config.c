@@ -78,7 +78,8 @@ static iidx_cfg_t default_cfg = {
     .hall = {
         .calibrated = { .up = { 3600, 3600, 3600, 3600, 3600, 3600, 3600 },
                         .down = { 2100, 2100, 2100, 2100, 2100, 2100, 2100 },
-                      }
+                      },
+        .suppressed = false,
     },
 
     .profile_ex = { {

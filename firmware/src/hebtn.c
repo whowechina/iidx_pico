@@ -72,7 +72,7 @@ uint8_t hebtn_keynum()
 
 bool hebtn_any_present()
 {
-    return hebtn_any_presence;
+    return !iidx_cfg->hall.suppressed && hebtn_any_presence;
 }
 
 bool hebtn_present(uint8_t chn)
@@ -80,7 +80,7 @@ bool hebtn_present(uint8_t chn)
     if (chn >= KEY_NUM) {
         return false;
     }
-    return hebtn_presence[chn];
+    return !iidx_cfg->hall.suppressed && hebtn_presence[chn];
 }
 
 uint32_t hebtn_presence_map()

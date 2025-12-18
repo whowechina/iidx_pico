@@ -46,6 +46,11 @@ static void disp_sensor()
 static void disp_hall()
 {
     printf("[HALL EFFECT BUTTON]\n");
+    if (iidx_cfg->hall.suppressed) {
+        printf("  !!! Suppressed !!!\n");
+        return;
+    }
+
     for (int i = 0; i < hebtn_keynum(); i++) {
         if (!hebtn_present(i)) {
             printf("  Key %d: Not Present.\n", i + 1);
@@ -67,6 +72,27 @@ static void handle_display()
 static void handle_calibrate(int argc, char *argv[])
 {
     hebtn_calibrate();
+}
+
+static void handle_suppress_hall(int argc, char *argv[])
+{
+    const char *usage = "Usage: suppress-hall <on|off>\n";
+    if (argc != 1) {
+        printf(usage);
+        return;
+    }
+    
+    const char *choices[] = {"on", "off"};
+    int sel = cli_match_prefix(choices, count_of(choices), argv[0]);
+    if (sel < 0) {
+        printf(usage);
+        return;
+    }
+
+    iidx_cfg->hall.suppressed = (sel == 0);
+    
+    config_changed();
+    disp_hall();
 }
 
 static void handle_trigger(int argc, char *argv[])
@@ -133,6 +159,7 @@ void commands_init()
 {
     cli_register("display", handle_display, "Display current config.");
     cli_register("calibrate", handle_calibrate, "Calibrate the key sensors.");
+    cli_register("suppress-hall", handle_suppress_hall, "Suppress hall effect button.");
     cli_register("trigger", handle_trigger, "Set Hall effect switch triggering.");
     cli_register("debug", handle_debug, "Toggle debug features.");
     cli_register("save", handle_save, "Save config to flash.");

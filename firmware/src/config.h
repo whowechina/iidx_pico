@@ -52,7 +52,8 @@ typedef struct __attribute ((packed)) {
             uint16_t up[7];
             uint16_t down[7];
         } calibrated;
-        uint8_t not_used[4];
+        bool suppressed;
+        uint8_t not_used[3];
     } hall;
     struct {
         struct {
