@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pico Series CLI Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cascadia Code', 'JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: #2d2d30;
+            padding: 15px 20px;
+            border-bottom: 1px solid #3e3e42;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: normal;
+            color: #cccccc;
+            flex-shrink: 0;
+        }
+
+        button {
+            background: #0e639c;
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #1177bb;
+        }
+
+        button:active {
+            background: #0d5a8f;
+        }
+
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .disconnect-btn {
+            background: #c72e2e;
+        }
+
+        .disconnect-btn:hover {
+            background: #d73a3a;
+        }
+
+        .status {
+            margin-left: auto;
+            font-size: 12px;
+            color: #858585;
+        }
+
+        .status.connected {
+            color: #4ec9b0;
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .terminal-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #1e1e1e;
+            overflow: hidden;
+        }
+
+        .terminal-output {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 15px;
+            font-size: 14px;
+            line-height: 1.2;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .terminal-output::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .terminal-output::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+
+        .terminal-output::-webkit-scrollbar-thumb {
+            background: #424242;
+            border-radius: 5px;
+        }
+
+        .terminal-output::-webkit-scrollbar-thumb:hover {
+            background: #4e4e4e;
+        }
+
+        .terminal-output:focus {
+            outline: none;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background: #d4d4d4;
+            animation: blink 1s step-end infinite;
+            vertical-align: text-bottom;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .input-line {
+            display: inline;
+            color: #d4d4d4;
+        }
+
+        .prompt {
+            color: #4ec9b0;
+        }
+
+        .sidebar {
+            width: 180px;
+            background: #252526;
+            border-left: 1px solid #3e3e42;
+            padding: 15px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sidebar h3 {
+            font-size: 12px;
+            color: #858585;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar button {
+            width: 100%;
+            text-align: left;
+            background: #3c3c3c;
+            padding: 8px 12px;
+            font-size: 13px;
+            border-radius: 3px;
+        }
+
+        .sidebar button:hover {
+            background: #505050;
+        }
+
+        .sidebar button:active {
+            background: #0e639c;
+        }
+
+        .sidebar .separator {
+            height: 20px;
+        }
+
+        .sidebar button.danger {
+            background: #5a1d1d;
+            color: #f48771;
+        }
+
+        .sidebar button.danger:hover:not(:disabled) {
+            background: #7a2525;
+        }
+
+        .sidebar button.danger:active {
+            background: #c72e2e;
+        }
+
+        .output-line {
+            margin: 2px 0;
+        }
+
+        .output-sent {
+            color: #4fc1ff;
+        }
+
+        .output-received {
+            color: #d4d4d4;
+        }
+
+        .output-error {
+            color: #f48771;
+        }
+
+        .output-info {
+            color: #858585;
+        }
+
+        .output-prompt {
+            color: #dcdcaa;
+            font-weight: bold;
+        }
+
+        .output-label {
+            color: #4fc1ff;
+        }
+
+        .output-title {
+            color: #f48771;
+            font-weight: bold;
+        }
+
+        .output-marker {
+            color: #4ec9b0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>WHowe China Pico Series CLI Tool</h1>
+        <button id="connectBtn">Connect</button>
+        <button id="disconnectBtn" class="disconnect-btn" style="display:none;">Disconnect</button>
+        <div class="status" id="statusText">Disconnected</div>
+    </div>
+
+    <div class="main-container">
+        <div class="terminal-container">
+            <div class="terminal-output" id="terminalOutput" tabindex="0"></div>
+        </div>
+
+        <div class="sidebar">
+            <h3>Quick Commands</h3>
+            <button id="cmdHelp" disabled>Help</button>
+            <button id="cmdDisplay" disabled>Display</button>
+            <button id="cmdFps" disabled>Show FPS</button>
+            <button id="cmdStat" disabled>Statistics</button>
+            <div class="separator"></div>
+            <button id="cmdUpdate" class="danger" disabled>Update</button>
+            <button id="cmdFactory" class="danger" disabled>Factory Default</button>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let port = null;
+        let reader = null;
+        let writer = null;
+        let readableStreamClosed = null;
+        let writableStreamClosed = null;
+
+        // UI Elements
+        const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        const statusText = document.getElementById('statusText');
+        const terminalOutput = document.getElementById('terminalOutput');
+        const cmdHelp = document.getElementById('cmdHelp');
+        const cmdDisplay = document.getElementById('cmdDisplay');
+        const cmdFactory = document.getElementById('cmdFactory');
+        const cmdFps = document.getElementById('cmdFps');
+        const cmdStat = document.getElementById('cmdStat');
+        const cmdUpdate = document.getElementById('cmdUpdate');
+
+        // Input handling
+        let currentInput = '';
+        let inputLine = null;
+        let cursor = null;
+        let receiveBuffer = ''; // Buffer for incomplete lines
+
+        // Check Web Serial API support
+        if (!('serial' in navigator)) {
+            addOutput('Error: Web Serial API is not supported in this browser. Please use Chrome, Edge, or Opera.', 'error');
+            connectBtn.disabled = true;
+        }
+
+        // Connect to port
+        async function connect() {
+            try {
+                // Request port from user
+                port = await navigator.serial.requestPort();
+
+                await port.open({ baudRate: 115200 });
+
+                // Setup read stream
+                const textDecoder = new TextDecoderStream();
+                readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
+                reader = textDecoder.readable.getReader();
+
+                // Setup write stream
+                const textEncoder = new TextEncoderStream();
+                writableStreamClosed = textEncoder.readable.pipeTo(port.writable);
+                writer = textEncoder.writable.getWriter();
+
+                // Start reading
+                readLoop();
+
+                // Update UI
+                updateUIConnected(true);
+
+            } catch (error) {
+                addOutput(`Connection error: ${error.message}`, 'error');
+                await disconnect();
+            }
+        }
+
+        // Disconnect from port
+        async function disconnect() {
+            if (reader) {
+                await reader.cancel();
+                reader = null;
+            }
+
+            if (writer) {
+                await writer.close();
+                writer = null;
+            }
+
+            if (port) {
+                await port.close();
+                port = null;
+            }
+
+            updateUIConnected(false);
+        }
+
+        // Read loop
+        async function readLoop() {
+            try {
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    if (value) {
+                        // Add to buffer
+                        receiveBuffer += value;
+                        
+                        // Process complete lines (ending with \n or \r)
+                        let lines = receiveBuffer.split(/\r?\n/);
+                        
+                        // Keep the last incomplete line in buffer
+                        receiveBuffer = lines.pop() || '';
+                        
+                        // Display complete lines
+                        for (let i = 0; i < lines.length; i++) {
+                            if (i > 0 || lines[i]) {
+                                addCompleteLine(lines[i]);
+                            }
+                        }
+                        
+                        // Check if buffer looks like a complete prompt (ends with >)
+                        // Display immediately if it matches prompt pattern
+                        if (receiveBuffer && receiveBuffer.match(/[a-z]+_pico>$/)) {
+                            addCompleteLine(receiveBuffer);
+                            receiveBuffer = '';
+                        }
+                    }
+                }
+            } catch (error) {
+                if (error.name !== 'NetworkError') {
+                    addCompleteLine(`Read error: ${error.message}`);
+                }
+            }
+        }
+        
+        // Add a complete line to terminal
+        function addCompleteLine(text) {
+            // Remove cursor temporarily
+            if (cursor && cursor.parentElement) {
+                cursor.remove();
+            }
+
+            // Check if line starts with prompt pattern: word_pico>
+            const promptMatch = text.match(/^([a-z]+_pico>)(.*)$/);
+            // Check if line starts with config label pattern: two spaces + text + colon + space
+            const labelMatch = text.match(/^(  .+?: )(.*)$/);
+            // Check if line is a title: [text with letters, spaces, hyphens, underscores]
+            const titleMatch = text.match(/^(\[[a-zA-Z \-_]+\])$/);
+            // Check if line is a marker: optional spaces + <<text>>
+            const markerMatch = text.match(/^\s*(<<.+>>)\s*$/);
+            
+            // Get or create last line
+            let lastLine = terminalOutput.lastElementChild;
+            if (!lastLine || !lastLine.classList.contains('output-line')) {
+                lastLine = document.createElement('div');
+                lastLine.className = 'output-line';
+                terminalOutput.appendChild(lastLine);
+            }
+            
+            if (promptMatch) {
+                // New line for prompt
+                if (lastLine.textContent) {
+                    lastLine = document.createElement('div');
+                    lastLine.className = 'output-line';
+                    terminalOutput.appendChild(lastLine);
+                }
+                
+                // Highlight the prompt part
+                const promptSpan = document.createElement('span');
+                promptSpan.className = 'output-prompt';
+                promptSpan.textContent = promptMatch[1];
+                lastLine.appendChild(promptSpan);
+                
+                // Add the rest of the line if exists
+                if (promptMatch[2]) {
+                    const restSpan = document.createElement('span');
+                    restSpan.className = 'output-received';
+                    restSpan.textContent = promptMatch[2];
+                    lastLine.appendChild(restSpan);
+                }
+            } else if (labelMatch) {
+                // New line for label
+                if (lastLine.textContent) {
+                    lastLine = document.createElement('div');
+                    lastLine.className = 'output-line';
+                    terminalOutput.appendChild(lastLine);
+                }
+                
+                // Highlight the label part
+                const labelSpan = document.createElement('span');
+                labelSpan.className = 'output-label';
+                labelSpan.textContent = labelMatch[1];
+                lastLine.appendChild(labelSpan);
+                
+                // Add the rest of the line if exists
+                if (labelMatch[2]) {
+                    const restSpan = document.createElement('span');
+                    restSpan.className = 'output-received';
+                    restSpan.textContent = labelMatch[2];
+                    lastLine.appendChild(restSpan);
+                }
+            } else if (titleMatch) {
+                // New line for title
+                if (lastLine.textContent) {
+                    lastLine = document.createElement('div');
+                    lastLine.className = 'output-line';
+                    terminalOutput.appendChild(lastLine);
+                }
+                
+                // Highlight the title
+                const titleSpan = document.createElement('span');
+                titleSpan.className = 'output-title';
+                titleSpan.textContent = titleMatch[1];
+                lastLine.appendChild(titleSpan);
+            } else if (markerMatch) {
+                // New line for marker
+                if (lastLine.textContent) {
+                    lastLine = document.createElement('div');
+                    lastLine.className = 'output-line';
+                    terminalOutput.appendChild(lastLine);
+                }
+                
+                // Highlight the marker
+                const markerSpan = document.createElement('span');
+                markerSpan.className = 'output-marker';
+                markerSpan.textContent = markerMatch[1];
+                lastLine.appendChild(markerSpan);
+            } else {
+                // Normal text - create new line if current line has content
+                if (lastLine.textContent || text === '') {
+                    lastLine = document.createElement('div');
+                    lastLine.className = 'output-line';
+                    terminalOutput.appendChild(lastLine);
+                }
+                
+                if (text) {
+                    const span = document.createElement('span');
+                    span.className = 'output-received';
+                    span.textContent = text;
+                    lastLine.appendChild(span);
+                }
+            }
+
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+
+            // Restore cursor if connected
+            if (port) {
+                showCursor();
+            }
+        }
+
+        // Send command
+        async function sendCommand(command) {
+            if (!writer) return;
+
+            try {
+                await writer.write(command + '\n');
+            } catch (error) {
+                addOutput(`Write error: ${error.message}`, 'error');
+            }
+        }
+
+        // Add output to terminal (for errors)
+        function addOutput(text, type = 'received') {
+            // Remove cursor temporarily
+            if (cursor && cursor.parentElement) {
+                cursor.remove();
+            }
+
+            const span = document.createElement('span');
+            span.className = `output-${type}`;
+            span.textContent = text;
+            
+            let lastLine = terminalOutput.lastElementChild;
+            if (!lastLine || !lastLine.classList.contains('output-line')) {
+                lastLine = document.createElement('div');
+                lastLine.className = 'output-line';
+                terminalOutput.appendChild(lastLine);
+            }
+            lastLine.appendChild(span);
+
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+
+            if (port) {
+                showCursor();
+            }
+        }
+
+        // Show cursor at current position
+        function showCursor() {
+            // Remove existing cursor and input if any
+            if (cursor && cursor.parentElement) {
+                cursor.remove();
+            }
+            if (inputLine && inputLine.parentElement) {
+                inputLine.remove();
+            }
+
+            // Get or create last line
+            let lastLine = terminalOutput.lastElementChild;
+            if (!lastLine || !lastLine.classList.contains('output-line')) {
+                lastLine = document.createElement('div');
+                lastLine.className = 'output-line';
+                terminalOutput.appendChild(lastLine);
+            }
+            
+            // Add input text if any
+            if (currentInput) {
+                inputLine = document.createElement('span');
+                inputLine.className = 'input-line';
+                inputLine.textContent = currentInput;
+                lastLine.appendChild(inputLine);
+            } else {
+                inputLine = null;
+            }
+            
+            // Add cursor
+            cursor = document.createElement('span');
+            cursor.className = 'cursor';
+            lastLine.appendChild(cursor);
+            
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+
+        // Update input display
+        function updateInput() {
+            showCursor();
+        }
+
+        // Update UI based on connection state
+        function updateUIConnected(connected) {
+            connectBtn.style.display = connected ? 'none' : 'inline-block';
+            disconnectBtn.style.display = connected ? 'inline-block' : 'none';
+            statusText.textContent = connected ? 'Connected' : 'Disconnected';
+            statusText.className = connected ? 'status connected' : 'status';
+            
+            // Enable/disable quick command buttons
+            cmdHelp.disabled = !connected;
+            cmdDisplay.disabled = !connected;
+            cmdFactory.disabled = !connected;
+            cmdFps.disabled = !connected;
+            cmdStat.disabled = !connected;
+            cmdUpdate.disabled = !connected;
+
+            if (connected) {
+                currentInput = '';
+                showCursor();
+                terminalOutput.focus();
+            } else {
+                if (cursor && cursor.parentElement) {
+                    cursor.remove();
+                }
+                if (inputLine && inputLine.parentElement) {
+                    inputLine.remove();
+                }
+                currentInput = '';
+                cursor = null;
+                inputLine = null;
+            }
+        }
+
+        // Event Listeners
+        connectBtn.addEventListener('click', connect);
+        disconnectBtn.addEventListener('click', disconnect);
+
+        // Terminal keyboard input
+        terminalOutput.addEventListener('keydown', (e) => {
+            if (!port) return;
+
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (currentInput.trim()) {
+                    sendCommand(currentInput.trim());
+                    currentInput = '';
+                    // Remove cursor and input, will be restored when new prompt arrives
+                    if (cursor && cursor.parentElement) {
+                        cursor.remove();
+                        cursor = null;
+                    }
+                    if (inputLine && inputLine.parentElement) {
+                        inputLine.remove();
+                        inputLine = null;
+                    }
+                }
+            } else if (e.key === 'Backspace') {
+                e.preventDefault();
+                if (currentInput.length > 0) {
+                    currentInput = currentInput.slice(0, -1);
+                    updateInput();
+                }
+            } else if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+                e.preventDefault();
+                currentInput += e.key;
+                updateInput();
+            }
+        });
+
+        // Keep focus on terminal
+        terminalOutput.addEventListener('blur', () => {
+            if (port) {
+                setTimeout(() => terminalOutput.focus(), 0);
+            }
+        });
+
+        // Quick command buttons
+        cmdHelp.addEventListener('click', () => sendCommand('help'));
+        cmdDisplay.addEventListener('click', () => sendCommand('display'));
+        cmdFps.addEventListener('click', () => sendCommand('fps'));
+        cmdStat.addEventListener('click', () => sendCommand('stat'));
+        cmdUpdate.addEventListener('click', () => {
+            if (confirm('Are you sure you want to update the firmware?')) {
+                sendCommand('update');
+            }
+        });
+        cmdFactory.addEventListener('click', () => {
+            if (confirm('Are you sure you want to reset to factory defaults? All settings will be lost.')) {
+                sendCommand('factory');
+            }
+        });
+
+        // Initialize
+    </script>
+</body>
+</html>

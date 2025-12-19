@@ -181,9 +181,11 @@
 * [Nice Looking Manual Here]（doc/IIDX_Pico_Manual.pdf）  
   <img src="doc/manual.gif" width="80%">
 
-### 游戏手柄测试工具
-* 我使用 Copilot 创建了这个游戏手柄测试页面。你可以用它来检查所有按钮和轴是否正常工作。  
+### 我写的工具
+* 游戏手柄测试 - 你可以用它来检查所有按钮和轴是否正常工作。  
   https://whowechina.github.io/iidx_pico/Tools/gamepad_test.html
+* 命令行工具 - 你可以使用这个工具访问控制器内置的 CLI 端口。  
+  https://whowechina.github.io/iidx_pico/Tools/cli_tool.html
 
 ## CAD 源文件
 我使用的是 OnShape 的免费订阅。它很强大，但不能将原始设计存档到本地，所以我只能在这里分享链接。STL/DXF/DWG 文件是从这个在线文档导出的。  

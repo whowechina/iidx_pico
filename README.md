@@ -179,9 +179,12 @@ For following prints, FDM, PLA, 0.4 nozzle, 0.2mm layer, 3 to 4 walls.
 * [Nice Looking Manual Here](doc/IIDX_Pico_Manual.pdf)  
   <img src="doc/manual.gif" width="80%">
 
-### Gamepad Test Tool
-* I created this gamepad test page using Copilot. You can use it to check if all buttons and axes are working correctly.   
+### Tools I Made
+* Gamepad test - You can use it to check if all buttons and axes are working correctly.   
   https://whowechina.github.io/iidx_pico/Tools/gamepad_test.html
+* Command-line tool - You can access controller's built-in CLI port using this tool.  
+  https://whowechina.github.io/iidx_pico/Tools/cli_tool.html
+
 
 ## CAD Source File
 I'm using OnShape free subscription. It's powerful but it can't archive original designs to local, so I can only share the link here. STL/DXF/DWG files are exported from this online document.  
