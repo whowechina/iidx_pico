@@ -79,8 +79,8 @@
             border-radius: 10px;
         }
         .button-circle {
-            width: 80px;
-            height: 80px;
+            width: 64px;
+            height: 64px;
             border-radius: 50%;
             background: linear-gradient(145deg, #e9ecef, #ffffff);
             border: 3px solid #dee2e6;
@@ -157,26 +157,39 @@
             margin-bottom: 5px;
         }
         .axis-value {
-            font-size: 14px;
+            font-size: 11px;
             font-family: monospace;
-            margin-bottom: 8px;
+            margin-top: 5px;
+            color: #495057;
         }
         .axis-bar {
-            width: 100%;
-            height: 80px;
+            width: 35%;
+            height: 100px;
             background: linear-gradient(to bottom, #e9ecef 0%, #f8f9fa 50%, #e9ecef 100%);
             border: 1px solid #ced4da;
             border-radius: 4px;
             position: relative;
-            margin: 5px 0;
+            margin: 5px auto;
         }
         .axis-indicator {
             position: absolute;
-            width: 100%;
+            width: 200%;
             height: 6px;
             background: #007bff;
             border-radius: 3px;
             box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+            left: -50%;
+            z-index: 10;
+        }
+        .axis-trail {
+            position: absolute;
+            width: 200%;
+            height: 4px;
+            background: #007bff;
+            border-radius: 2px;
+            left: -50%;
+            pointer-events: none;
+            transition: opacity 0.6s ease;
         }
         .axis-center-line {
             position: absolute;
@@ -186,6 +199,78 @@
             height: 1px;
             background: #6c757d;
             transform: translateY(-50%);
+        }
+
+        .stick-2d {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+            grid-column: span 2;
+        }
+        .stick-2d-canvas {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%);
+            border: 2px solid #ced4da;
+            border-radius: 50%;
+            position: relative;
+            margin: 5px auto;
+        }
+        .stick-2d-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 2px;
+            height: 2px;
+            background: #6c757d;
+            transform: translate(-50%, -50%);
+        }
+        .stick-2d-cross-h {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #adb5bd;
+            transform: translateY(-50%);
+        }
+        .stick-2d-cross-v {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: #adb5bd;
+            transform: translateX(-50%);
+        }
+        .stick-2d-indicator {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: #007bff;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.6);
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+        .stick-2d-trail {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #007bff;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            transition: opacity 0.6s ease;
+        }
+        .stick-2d-value {
+            font-size: 11px;
+            font-family: monospace;
+            margin-top: 5px;
+            color: #495057;
         }
 
         .button-group {
@@ -215,6 +300,7 @@
         let gamepads = {};
         let buttonStates = {};
         let buttonCounts = {};
+        let stickTrails = {}; // 存储摇杆拖尾历史
         let isGamepadSupported = 'getGamepads' in navigator;
 
         // 初始化
@@ -235,6 +321,7 @@
             delete gamepads[e.gamepad.index];
             delete buttonStates[e.gamepad.index];
             delete buttonCounts[e.gamepad.index];
+            delete stickTrails[e.gamepad.index];
             updateStatus();
             renderGamepads();
         });
@@ -266,6 +353,92 @@
                 'Right X<br>右 X', 'Right Y<br>右 Y'
             ];
             return axisNames[index] || `Axis ${index}<br>轴 ${index}`;
+        }
+
+        // 更新摇杆拖尾效果
+        function updateStickTrail(gamepadIndex, stickName, posX, posY, canvasElement) {
+            const key = `${gamepadIndex}-${stickName}`;
+            const maxTrails = 15; // 最大拖尾点数量
+            
+            // 初始化拖尾数组
+            if (!stickTrails[key]) {
+                stickTrails[key] = [];
+            }
+            
+            // 添加新位置
+            stickTrails[key].push({ x: posX, y: posY, time: Date.now() });
+            
+            // 限制拖尾数量
+            if (stickTrails[key].length > maxTrails) {
+                stickTrails[key].shift();
+            }
+            
+            // 清除旧的拖尾元素
+            if (canvasElement) {
+                const oldTrails = canvasElement.querySelectorAll('.stick-2d-trail');
+                oldTrails.forEach(trail => trail.remove());
+                
+                // 创建新的拖尾元素
+                stickTrails[key].forEach((pos, index) => {
+                    const trail = document.createElement('div');
+                    trail.className = 'stick-2d-trail';
+                    trail.style.left = `${pos.x}%`;
+                    trail.style.top = `${pos.y}%`;
+                    
+                    // 计算透明度（越旧越透明）
+                    const opacity = (index + 1) / stickTrails[key].length * 0.5;
+                    trail.style.opacity = opacity;
+                    
+                    // 计算大小（越旧越小）
+                    const size = 4 + (index + 1) / stickTrails[key].length * 6;
+                    trail.style.width = `${size}px`;
+                    trail.style.height = `${size}px`;
+                    
+                    canvasElement.appendChild(trail);
+                });
+            }
+        }
+
+        // 更新单轴拖尾效果
+        function updateAxisTrail(gamepadIndex, axisIndex, position, containerElement) {
+            const key = `axis-${gamepadIndex}-${axisIndex}`;
+            const maxTrails = 15; // 最大拖尾点数量
+            
+            // 初始化拖尾数组
+            if (!stickTrails[key]) {
+                stickTrails[key] = [];
+            }
+            
+            // 添加新位置
+            stickTrails[key].push({ position: position, time: Date.now() });
+            
+            // 限制拖尾数量
+            if (stickTrails[key].length > maxTrails) {
+                stickTrails[key].shift();
+            }
+            
+            // 清除旧的拖尾元素
+            if (containerElement) {
+                const oldTrails = containerElement.querySelectorAll('.axis-trail');
+                oldTrails.forEach(trail => trail.remove());
+                
+                // 创建新的拖尾元素
+                stickTrails[key].forEach((pos, index) => {
+                    const trail = document.createElement('div');
+                    trail.className = 'axis-trail';
+                    trail.style.top = `${pos.position}%`;
+                    
+                    // 计算透明度（越旧越透明）
+                    const opacity = (index + 1) / stickTrails[key].length * 0.4;
+                    trail.style.opacity = opacity;
+                    
+                    // 计算高度（越旧越小）
+                    const height = 2 + (index + 1) / stickTrails[key].length * 2;
+                    trail.style.height = `${height}px`;
+                    
+                    containerElement.appendChild(trail);
+                });
+            }
         }
 
         // 检测按钮状态变化
@@ -361,7 +534,7 @@
                         🎮 ${gamepad.id} Index 索引: ${gamepad.index}
                         <button class="reset-btn" onclick="resetGamepad(${gamepad.index})" 
                                 style="float: right; padding: 6px 12px; font-size: 14px; background-color: #6c757d;">
-                            🔄 Reset 复位
+                            🔄 Reset Counts 复位计数
                         </button>
                         <div style="clear: both;"></div>
                     </div>
@@ -369,14 +542,38 @@
                     <div class="axes-section">
                         <h4>Axes 摇杆轴</h4>
                         <div class="axes-grid">
+                            ${gamepad.axes.length >= 2 ? `
+                                <div class="stick-2d">
+                                    <div class="axis-name">Left Stick<br>左摇杆</div>
+                                    <div class="stick-2d-canvas" id="stick-left-${gamepad.index}">
+                                        <div class="stick-2d-cross-h"></div>
+                                        <div class="stick-2d-cross-v"></div>
+                                        <div class="stick-2d-center"></div>
+                                        <div class="stick-2d-indicator" id="stick-left-indicator-${gamepad.index}"></div>
+                                    </div>
+                                    <div class="stick-2d-value" id="stick-left-value-${gamepad.index}">X: 0.000, Y: 0.000</div>
+                                </div>
+                            ` : ''}
+                            ${gamepad.axes.length >= 4 ? `
+                                <div class="stick-2d">
+                                    <div class="axis-name">Right Stick<br>右摇杆</div>
+                                    <div class="stick-2d-canvas" id="stick-right-${gamepad.index}">
+                                        <div class="stick-2d-cross-h"></div>
+                                        <div class="stick-2d-cross-v"></div>
+                                        <div class="stick-2d-center"></div>
+                                        <div class="stick-2d-indicator" id="stick-right-indicator-${gamepad.index}"></div>
+                                    </div>
+                                    <div class="stick-2d-value" id="stick-right-value-${gamepad.index}">X: 0.000, Y: 0.000</div>
+                                </div>
+                            ` : ''}
                             ${gamepad.axes.map((axis, axisIndex) => `
                                 <div class="axis-item">
                                     <div class="axis-name">${getAxisName(axisIndex)}</div>
-                                    <div class="axis-value" id="axis-${gamepad.index}-${axisIndex}">${axis.toFixed(3)}</div>
                                     <div class="axis-bar">
                                         <div class="axis-center-line"></div>
                                         <div class="axis-indicator" id="axis-bar-${gamepad.index}-${axisIndex}"></div>
                                     </div>
+                                    <div class="axis-value" id="axis-${gamepad.index}-${axisIndex}">${axis.toFixed(3)}</div>
                                 </div>
                             `).join('')}
                         </div>
@@ -432,6 +629,7 @@
                     
                     // 更新轴条显示 - 使用限制后的值
                     const axisBarElement = document.getElementById(`axis-bar-${gamepad.index}-${axisIndex}`);
+                    const axisBarContainer = axisBarElement ? axisBarElement.parentElement : null;
                     if (axisBarElement) {
                         const position = ((clampedAxis + 1) / 2) * 94; // 使用限制后的值
                         axisBarElement.style.top = `${position}%`;
@@ -442,8 +640,52 @@
                         } else {
                             axisBarElement.style.background = '#007bff'; // 默认蓝色
                         }
+                        
+                        // 添加拖尾效果
+                        updateAxisTrail(gamepad.index, axisIndex, position, axisBarContainer);
                     }
                 });
+
+                // 更新2D摇杆显示
+                if (gamepad.axes.length >= 2) {
+                    const leftX = Math.max(-1, Math.min(1, gamepad.axes[0]));
+                    const leftY = Math.max(-1, Math.min(1, gamepad.axes[1]));
+                    const leftIndicator = document.getElementById(`stick-left-indicator-${gamepad.index}`);
+                    const leftValue = document.getElementById(`stick-left-value-${gamepad.index}`);
+                    const leftCanvas = document.getElementById(`stick-left-${gamepad.index}`);
+                    if (leftIndicator) {
+                        const posX = ((leftX + 1) / 2) * 100;
+                        const posY = ((leftY + 1) / 2) * 100;
+                        leftIndicator.style.left = `${posX}%`;
+                        leftIndicator.style.top = `${posY}%`;
+                        
+                        // 添加拖尾效果
+                        updateStickTrail(gamepad.index, 'left', posX, posY, leftCanvas);
+                    }
+                    if (leftValue) {
+                        leftValue.textContent = `X: ${gamepad.axes[0].toFixed(3)}, Y: ${gamepad.axes[1].toFixed(3)}`;
+                    }
+                }
+                
+                if (gamepad.axes.length >= 4) {
+                    const rightX = Math.max(-1, Math.min(1, gamepad.axes[2]));
+                    const rightY = Math.max(-1, Math.min(1, gamepad.axes[3]));
+                    const rightIndicator = document.getElementById(`stick-right-indicator-${gamepad.index}`);
+                    const rightValue = document.getElementById(`stick-right-value-${gamepad.index}`);
+                    const rightCanvas = document.getElementById(`stick-right-${gamepad.index}`);
+                    if (rightIndicator) {
+                        const posX = ((rightX + 1) / 2) * 100;
+                        const posY = ((rightY + 1) / 2) * 100;
+                        rightIndicator.style.left = `${posX}%`;
+                        rightIndicator.style.top = `${posY}%`;
+                        
+                        // 添加拖尾效果
+                        updateStickTrail(gamepad.index, 'right', posX, posY, rightCanvas);
+                    }
+                    if (rightValue) {
+                        rightValue.textContent = `X: ${gamepad.axes[2].toFixed(3)}, Y: ${gamepad.axes[3].toFixed(3)}`;
+                    }
+                }
 
                 // 更新按钮计数显示
                 gamepad.buttons.forEach((button, buttonIndex) => {
