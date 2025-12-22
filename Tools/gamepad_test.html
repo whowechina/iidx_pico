@@ -496,6 +496,7 @@
         let ledStates = {}; // 存储每个 LED 的状态
         let outputReportId = 0;
         let outputReportSize = 0;
+        let hidUpdateTimer = null; // 定期发送定时器
 
         // 初始化
         if (!isGamepadSupported) {
@@ -522,6 +523,12 @@
 
         function disconnectHIDDevice() {
             if (!hidDevice) return;
+            
+            // 清除定时器
+            if (hidUpdateTimer) {
+                clearInterval(hidUpdateTimer);
+                hidUpdateTimer = null;
+            }
             
             hidDevice.close();
             hidDevice = null;
@@ -563,9 +570,23 @@
                 // 更新按钮文本
                 document.getElementById('hid-connect-btn').innerHTML = 
                     '🔌 <span class="lang-en">Disconnect</span><span class="lang-zh">断开</span>';
+                
+                // 启动定时发送，每250ms（每秒4次）
+                if (hidUpdateTimer) clearInterval(hidUpdateTimer);
+                hidUpdateTimer = setInterval(() => {
+                    if (hidDevice) {
+                        sendOutputReport();
+                    }
+                }, 250);
 
                 // 监听断开
                 hidDevice.addEventListener('disconnect', () => {
+                    // 清除定时器
+                    if (hidUpdateTimer) {
+                        clearInterval(hidUpdateTimer);
+                        hidUpdateTimer = null;
+                    }
+                    
                     document.getElementById('hid-status').innerHTML = 
                         '<span class="lang-en">Device disconnected</span><span class="lang-zh">设备已断开</span>';
                     document.getElementById('hid-status').className = 'hid-status disconnected';
