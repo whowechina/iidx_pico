@@ -9,11 +9,54 @@
             font-family: 'Segoe UI', Arial, sans-serif;
             margin: 20px;
             background-color: #f5f5f5;
+            position: relative;
         }
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            position: relative;
         }
+        .lang-switch {
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+        .lang-btn {
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            background-size: cover;
+            background-position: center;
+            border-radius: 5px;
+            padding: 0;
+        }
+        .lang-btn.lang-en-btn {
+            background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 100"%3E%3Cg%3E%3Crect width="190" height="7.69" fill="%23B22234"/%3E%3Crect width="190" height="7.69" y="7.69" fill="white"/%3E%3Crect width="190" height="7.69" y="15.38" fill="%23B22234"/%3E%3Crect width="190" height="7.69" y="23.07" fill="white"/%3E%3Crect width="190" height="7.69" y="30.76" fill="%23B22234"/%3E%3Crect width="190" height="7.69" y="38.45" fill="white"/%3E%3Crect width="190" height="7.69" y="46.14" fill="%23B22234"/%3E%3Crect width="190" height="7.69" y="53.83" fill="white"/%3E%3Crect width="190" height="7.69" y="61.52" fill="%23B22234"/%3E%3Crect width="190" height="7.69" y="69.21" fill="white"/%3E%3Crect width="190" height="7.69" y="76.9" fill="%23B22234"/%3E%3Crect width="190" height="7.69" y="84.59" fill="white"/%3E%3Crect width="190" height="7.69" y="92.28" fill="%23B22234"/%3E%3Crect width="76" height="53.85" fill="%233C3B6E"/%3E%3C/g%3E%3C/svg%3E');
+        }
+        .lang-btn.lang-zh-btn {
+            background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200"%3E%3Crect width="300" height="200" fill="%23de2910"/%3E%3Cg fill="%23ffde00"%3E%3Cpath d="M60,30 l20,60 l-50,-40 h62 l-50,40 z"/%3E%3Cpath d="M120,10 l5,15 l-12,-10 h15 l-12,10 z"/%3E%3Cpath d="M140,25 l5,15 l-12,-10 h15 l-12,10 z"/%3E%3Cpath d="M140,50 l5,15 l-12,-10 h15 l-12,10 z"/%3E%3Cpath d="M120,65 l5,15 l-12,-10 h15 l-12,10 z"/%3E%3C/g%3E%3C/svg%3E');
+        }
+        .lang-btn:hover {
+            opacity: 0.8;
+            transform: scale(1.05);
+            border-color: #007bff;
+        }
+        .lang-btn.active {
+            opacity: 1;
+            transform: scale(1.1);
+            border-color: #007bff;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+        }
+        .lang-en { display: inline; }
+        .lang-zh { display: none; }
+        body.zh .lang-en { display: none; }
+        body.zh .lang-zh { display: inline; }
         h1 {
             text-align: center;
             color: #333;
@@ -154,7 +197,7 @@
         .axis-name {
             font-weight: bold;
             font-size: 12px;
-            margin-bottom: 5px;
+            margin-bottom: 12px;
         }
         .axis-value {
             font-size: 11px;
@@ -283,19 +326,164 @@
             margin-bottom: 10px;
             text-align: left;
         }
+
+        /* HID LED 控制面板样式 */
+        .hid-panel {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .hid-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #ffc107;
+            padding-bottom: 10px;
+        }
+        .hid-status {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            text-align: center;
+        }
+        .hid-status.connected {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .hid-status.disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .hid-connect-btn {
+            display: block;
+            margin: 0 auto 15px;
+            background-color: #ffc107;
+            color: #333;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .hid-connect-btn:hover {
+            background-color: #e0a800;
+        }
+        .led-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .led-button {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #6c757d, #495057);
+            border: 3px solid #343a40;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            text-align: center;
+            padding: 8px 5px 5px 5px;
+        }
+        .led-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+        .led-button.on {
+            background: linear-gradient(145deg, #ffc107, #ff9800);
+            border-color: #ff6f00;
+            box-shadow: 0 0 20px rgba(255, 193, 7, 0.6), 0 4px 8px rgba(0,0,0,0.2);
+            color: #000;
+        }
+        .led-button.dragging {
+            cursor: ns-resize;
+        }
+        .brightness-indicator {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 9px;
+            background: rgba(0,0,0,0.6);
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: white;
+            font-weight: bold;
+            pointer-events: none;
+            margin: 0;
+        }
+        .led-icon {
+            font-size: 29px;
+            margin: 0 0 2px 0;
+        }
+        .led-name {
+            font-size: 11px;
+            line-height: 1;
+            word-wrap: break-word;
+            margin: 0 0 2px 0;
+            font-weight: bold;
+        }
+            margin: 0px 0 2px 0;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎮 Gamepad Test 游戏手柄测试</h1>
+        <div class="lang-switch">
+            <button class="lang-btn lang-en-btn active" id="lang-en" onclick="switchLanguage('en')" title="English"></button>
+            <button class="lang-btn lang-zh-btn" id="lang-zh" onclick="switchLanguage('zh')" title="中文"></button>
+        </div>
+        <h1>🎮 <span class="lang-en">Gamepad Test</span><span class="lang-zh">游戏手柄测试</span></h1>
         <div id="status" class="status disconnected">
-            Please connect a gamepad and press any button to activate 请连接游戏手柄并按任意按钮激活
+            <span class="lang-en">Please connect a gamepad and press any button to activate</span><span class="lang-zh">请连接游戏手柄并按任意按钮激活</span>
         </div>
 
         <div id="gamepads"></div>
+
+        <!-- HID LED 控制面板 -->
+        <div class="hid-panel">
+            <div class="hid-title">💡 <span class="lang-en">HID Light Control</span><span class="lang-zh">HID 灯光控制</span></div>
+            <div id="hid-status" class="hid-status disconnected">
+                <span class="lang-en">Click button to connect HID device</span><span class="lang-zh">点击按钮连接 HID 设备</span>
+            </div>
+            <button class="hid-connect-btn" id="hid-connect-btn" onclick="toggleHIDConnection()">🔌 <span class="lang-en">Connect HID Device</span><span class="lang-zh">连接 HID 设备</span></button>
+            <div class="led-grid" id="led-container">
+                <!-- LED 按钮将动态生成 -->
+            </div>
+        </div>
     </div>
 
     <script>
+        // 语言切换
+        function switchLanguage(lang) {
+            if (lang === 'zh') {
+                document.body.classList.add('zh');
+                document.getElementById('lang-en').classList.remove('active');
+                document.getElementById('lang-zh').classList.add('active');
+            } else {
+                document.body.classList.remove('zh');
+                document.getElementById('lang-en').classList.add('active');
+                document.getElementById('lang-zh').classList.remove('active');
+            }
+        }
+
         // 全局状态
         let gamepads = {};
         let buttonStates = {};
@@ -303,10 +491,299 @@
         let stickTrails = {}; // 存储摇杆拖尾历史
         let isGamepadSupported = 'getGamepads' in navigator;
 
+        // HID 相关变量
+        let hidDevice = null;
+        let ledStates = {}; // 存储每个 LED 的状态
+        let outputReportId = 0;
+        let outputReportSize = 0;
+
         // 初始化
         if (!isGamepadSupported) {
-            document.getElementById('status').textContent = 'Your browser does not support Gamepad API (您的浏览器不支持 Gamepad API)';
+            document.getElementById('status').innerHTML = '<span class="lang-en">Your browser does not support Gamepad API</span><span class="lang-zh">您的浏览器不支持 Gamepad API</span>';
             document.getElementById('status').className = 'status disconnected';
+        }
+
+        // 检查 WebHID 支持
+        if (!('hid' in navigator)) {
+            const hidStatus = document.getElementById('hid-status');
+            hidStatus.innerHTML = '<span class="lang-en">WebHID API not supported</span><span class="lang-zh">不支持 WebHID API</span>';
+            hidStatus.className = 'hid-status disconnected';
+        }
+
+        // ========== HID 功能 ==========
+        
+        function toggleHIDConnection() {
+            if (hidDevice) {
+                disconnectHIDDevice();
+            } else {
+                connectHIDDevice();
+            }
+        }
+
+        function disconnectHIDDevice() {
+            if (!hidDevice) return;
+            
+            hidDevice.close();
+            hidDevice = null;
+            ledStates = {};
+            
+            // 更新状态
+            document.getElementById('hid-status').innerHTML = 
+                '<span class="lang-en">Click button to connect HID device</span><span class="lang-zh">点击按钮连接 HID 设备</span>';
+            document.getElementById('hid-status').className = 'hid-status disconnected';
+            document.getElementById('led-container').innerHTML = '';
+            
+            // 更新按钮文本
+            document.getElementById('hid-connect-btn').innerHTML = 
+                '🔌 <span class="lang-en">Connect HID Device</span><span class="lang-zh">连接 HID 设备</span>';
+        }
+        
+        async function connectHIDDevice() {
+            try {
+                const devices = await navigator.hid.requestDevice({ filters: [] });
+                
+                if (devices.length === 0) {
+                    return;
+                }
+
+                hidDevice = devices[0];
+                await hidDevice.open();
+                
+                console.log('HID Device connected:', hidDevice);
+                
+                // 解析 Output Report
+                parseOutputReports();
+                
+                // 更新状态
+                const deviceName = hidDevice.productName || 'HID Device';
+                document.getElementById('hid-status').innerHTML = 
+                    `✅ <span class="lang-en">Connected: ${deviceName}</span><span class="lang-zh">已连接: ${deviceName}</span>`;
+                document.getElementById('hid-status').className = 'hid-status connected';
+                
+                // 更新按钮文本
+                document.getElementById('hid-connect-btn').innerHTML = 
+                    '🔌 <span class="lang-en">Disconnect</span><span class="lang-zh">断开</span>';
+
+                // 监听断开
+                hidDevice.addEventListener('disconnect', () => {
+                    document.getElementById('hid-status').innerHTML = 
+                        '<span class="lang-en">Device disconnected</span><span class="lang-zh">设备已断开</span>';
+                    document.getElementById('hid-status').className = 'hid-status disconnected';
+                    document.getElementById('led-container').innerHTML = '';
+                    hidDevice = null;
+                    ledStates = {};
+                    
+                    // 更新按钮文本
+                    document.getElementById('hid-connect-btn').innerHTML = 
+                        '🔌 <span class="lang-en">Connect HID Device</span><span class="lang-zh">连接 HID 设备</span>';
+                });
+
+            } catch (error) {
+                console.error('HID connection error:', error);
+                const isZh = document.body.classList.contains('zh');
+                alert(isZh ? `连接失败: ${error.message}` : `Failed to connect HID device: ${error.message}`);
+            }
+        }
+
+        function parseOutputReports() {
+            const container = document.getElementById('led-container');
+            container.innerHTML = '';
+            ledStates = {};
+
+            let ledIndex = 0;
+
+            hidDevice.collections.forEach((collection) => {
+                if (!collection.outputReports || collection.outputReports.length === 0) {
+                    return;
+                }
+
+                collection.outputReports.forEach((report) => {
+                    outputReportId = report.reportId;
+                    
+                    if (!report.items || report.items.length === 0) {
+                        return;
+                    }
+
+                    // 计算报告总大小
+                    let totalBits = 0;
+                    report.items.forEach(item => {
+                        totalBits += (item.reportSize || 0) * (item.reportCount || 1);
+                    });
+                    outputReportSize = Math.ceil(totalBits / 8);
+
+                    // 为每个 item 创建 LED 按钮
+                    report.items.forEach((item) => {
+                        const reportSize = item.reportSize || 8;
+                        const reportCount = item.reportCount || 1;
+
+                        // 如果是单字节字段，为每个计数创建一个 LED
+                        for (let i = 0; i < reportCount; i++) {
+                            const ledName = `${ledIndex + 1}`;
+                            createLEDButton(ledIndex, ledName);
+                            ledStates[ledIndex] = 0;
+                            ledIndex++;
+                        }
+                    });
+                });
+            });
+
+            if (ledIndex === 0) {
+                container.innerHTML = '<div style="text-align:center;color:#6c757d;"><span class="lang-en">No output LEDs found</span><span class="lang-zh">未找到输出 LED</span></div>';
+            }
+        }
+
+        function createLEDButton(index, name) {
+            const container = document.getElementById('led-container');
+            
+            const button = document.createElement('div');
+            button.className = 'led-button';
+            button.id = `led-${index}`;
+            button.style.position = 'relative';
+            
+            button.innerHTML = `
+                <div class="led-name">${name}</div>
+                <div class="led-icon">💡</div>
+                <div class="brightness-indicator" id="brightness-${index}">0</div>
+            `;
+            
+            // 点击切换亮灭
+            button.addEventListener('click', (e) => {
+                if (!button.classList.contains('dragging')) {
+                    toggleLED(index);
+                }
+            });
+
+            // 拖拽调整亮度
+            let isDragging = false;
+            let startY = 0;
+            let startBrightness = 0;
+
+            button.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                startY = e.clientY;
+                startBrightness = ledStates[index] || 0;
+                button.classList.add('dragging');
+                e.preventDefault();
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                
+                // 向上拖增加亮度，向下拖减少亮度
+                const deltaY = startY - e.clientY;
+                const sensitivity = 2; // 灵敏度：每像素对应的亮度变化
+                let newBrightness = startBrightness + Math.round(deltaY * sensitivity);
+                
+                // 限制范围 0-255
+                newBrightness = Math.max(0, Math.min(255, newBrightness));
+                
+                // 更新亮度
+                setLEDBrightness(index, newBrightness);
+                e.preventDefault();
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    button.classList.remove('dragging');
+                }
+            });
+            
+            container.appendChild(button);
+            updateLEDVisual(index);
+        }
+
+        function setLEDBrightness(index, brightness) {
+            ledStates[index] = brightness;
+            updateLEDVisual(index);
+            sendOutputReport();
+        }
+
+        function updateLEDVisual(index) {
+            const button = document.getElementById(`led-${index}`);
+            const indicator = document.getElementById(`brightness-${index}`);
+            const brightness = ledStates[index] || 0;
+            
+            if (!button) return;
+            
+            // 更新亮度显示
+            indicator.textContent = brightness;
+            
+            if (brightness === 0) {
+                // 关闭状态
+                button.classList.remove('on');
+                button.style.background = '';
+                button.style.borderColor = '';
+                button.style.boxShadow = '';
+                button.style.color = '';
+            } else {
+                // 亮起状态，根据亮度调整视觉效果
+                button.classList.add('on');
+                
+                // 计算视觉亮度（即使亮度为1也要明显可见）
+                // 将 1-255 映射到 30%-100% 的视觉亮度
+                const visualBrightness = 30 + (brightness / 255) * 70;
+                
+                // HSL 色相：从橙色(30)到黄色(50)
+                const hue = 30 + (brightness / 255) * 20;
+                const saturation = 100;
+                const lightness = visualBrightness;
+                
+                button.style.background = `linear-gradient(145deg, 
+                    hsl(${hue}, ${saturation}%, ${lightness}%), 
+                    hsl(${hue - 10}, ${saturation}%, ${lightness - 10}%))`;
+                button.style.borderColor = `hsl(${hue}, ${saturation}%, ${lightness - 20}%)`;
+                
+                // 光晕效果强度随亮度变化
+                const glowIntensity = 0.2 + (brightness / 255) * 0.6;
+                const glowSize = 10 + (brightness / 255) * 15;
+                button.style.boxShadow = `0 0 ${glowSize}px rgba(255, 193, 7, ${glowIntensity}), 0 4px 8px rgba(0,0,0,0.2)`;
+                
+                // 文字颜色
+                button.style.color = brightness > 128 ? '#000' : '#333';
+            }
+        }
+
+        async function toggleLED(index) {
+            if (!hidDevice) {
+                const isZh = document.body.classList.contains('zh');
+                alert(isZh ? '未连接设备' : 'No HID device connected');
+                return;
+            }
+
+            // 切换状态：0 -> 255, 其他 -> 0
+            ledStates[index] = ledStates[index] === 0 ? 255 : 0;
+            
+            // 更新视觉效果
+            updateLEDVisual(index);
+
+            // 发送报告
+            await sendOutputReport();
+        }
+
+        async function sendOutputReport() {
+            try {
+                // 构建输出数据
+                const data = new Uint8Array(outputReportSize);
+                
+                // 填充每个 LED 的状态
+                Object.keys(ledStates).forEach(index => {
+                    const byteIndex = parseInt(index);
+                    if (byteIndex < data.length) {
+                        data[byteIndex] = ledStates[index];
+                    }
+                });
+
+                // 发送报告
+                await hidDevice.sendReport(outputReportId, data);
+                
+                console.log(`Sent Output Report ${outputReportId}:`, Array.from(data));
+
+            } catch (error) {
+                console.error('Failed to send output report:', error);
+                const isZh = document.body.classList.contains('zh');
+                alert(isZh ? `发送失败: ${error.message}` : `Failed to send LED data: ${error.message}`);
+            }
         }
 
         // 添加事件监听器
@@ -333,10 +810,10 @@
             
             const statusElement = document.getElementById('status');
             if (connectedGamepads.length > 0) {
-                statusElement.textContent = `Connected ${connectedGamepads.length} gamepad(s) (已连接 ${connectedGamepads.length} 个手柄)`;
+                statusElement.innerHTML = `<span class="lang-en">Connected ${connectedGamepads.length} gamepad(s)</span><span class="lang-zh">已连接 ${connectedGamepads.length} 个手柄</span>`;
                 statusElement.className = 'status connected';
             } else {
-                statusElement.textContent = 'Please connect a gamepad and press any button to activate (请连接游戏手柄并按任意按钮激活)';
+                statusElement.innerHTML = '<span class="lang-en">Please connect a gamepad and press any button to activate</span><span class="lang-zh">请连接游戏手柄并按任意按钮激活</span>';
                 statusElement.className = 'status disconnected';
             }
         }
@@ -349,10 +826,12 @@
         // 获取轴名称
         function getAxisName(index) {
             const axisNames = [
-                'Left X<br>左 X', 'Left Y<br>左 Y', 
-                'Right X<br>右 X', 'Right Y<br>右 Y'
+                '<span class="lang-en">Left X</span><span class="lang-zh">左 X</span>', 
+                '<span class="lang-en">Left Y</span><span class="lang-zh">左 Y</span>', 
+                '<span class="lang-en">Right X</span><span class="lang-zh">右 X</span>', 
+                '<span class="lang-en">Right Y</span><span class="lang-zh">右 Y</span>'
             ];
-            return axisNames[index] || `Axis ${index}<br>轴 ${index}`;
+            return axisNames[index] || `<span class="lang-en">Axis ${index}</span><span class="lang-zh">轴 ${index}</span>`;
         }
 
         // 更新摇杆拖尾效果
@@ -488,7 +967,7 @@
 
                 // 按按钮类型分组
                 const buttonGroups = {
-                    default: { title: 'Buttons 按钮', buttons: [] }
+                    default: { title: '<span class="lang-en">Buttons</span><span class="lang-zh">按钮</span>', buttons: [] }
                 };
 
                 gamepad.buttons.forEach((button, buttonIndex) => {
@@ -531,20 +1010,20 @@
 
                 gamepadDiv.innerHTML = `
                     <div class="gamepad-title">
-                        🎮 ${gamepad.id} Index 索引: ${gamepad.index}
+                        🎮 ${gamepad.id} <span class="lang-en">Index</span><span class="lang-zh">索引</span>: ${gamepad.index}
                         <button class="reset-btn" onclick="resetGamepad(${gamepad.index})" 
                                 style="float: right; padding: 6px 12px; font-size: 14px; background-color: #6c757d;">
-                            🔄 Reset Counts 复位计数
+                            🔄 <span class="lang-en">Reset Counts</span><span class="lang-zh">复位计数</span>
                         </button>
                         <div style="clear: both;"></div>
                     </div>
                     ${buttonsHTML}
                     <div class="axes-section">
-                        <h4>Axes 摇杆轴</h4>
+                        <h4><span class="lang-en">Axes</span><span class="lang-zh">摇杆轴</span></h4>
                         <div class="axes-grid">
                             ${gamepad.axes.length >= 2 ? `
                                 <div class="stick-2d">
-                                    <div class="axis-name">Left Stick<br>左摇杆</div>
+                                    <div class="axis-name"><span class="lang-en">Left Stick</span><span class="lang-zh">左摇杆</span></div>
                                     <div class="stick-2d-canvas" id="stick-left-${gamepad.index}">
                                         <div class="stick-2d-cross-h"></div>
                                         <div class="stick-2d-cross-v"></div>
@@ -556,7 +1035,7 @@
                             ` : ''}
                             ${gamepad.axes.length >= 4 ? `
                                 <div class="stick-2d">
-                                    <div class="axis-name">Right Stick<br>右摇杆</div>
+                                    <div class="axis-name"><span class="lang-en">Right Stick</span><span class="lang-zh">右摇杆</span></div>
                                     <div class="stick-2d-canvas" id="stick-right-${gamepad.index}">
                                         <div class="stick-2d-cross-h"></div>
                                         <div class="stick-2d-cross-v"></div>
@@ -719,7 +1198,8 @@
             const connectedGamepads = Array.from(gamepadList).filter(gp => gp !== null);
             
             if (connectedGamepads.length === 0) {
-                alert('No gamepad connected 没有连接的手柄');
+                const isZh = document.body.classList.contains('zh');
+                alert(isZh ? '没有连接的手柄' : 'No gamepad connected');
                 return;
             }
 
@@ -734,17 +1214,22 @@
                 renderGamepads();
             } else {
                 // 多个手柄，让用户选择
-                let gamepadIndex = prompt(`Detected ${connectedGamepads.length} gamepads, enter gamepad index to reset (0-${connectedGamepads.length-1}) (检测到 ${connectedGamepads.length} 个手柄，请输入要复位的手柄索引 (0-${connectedGamepads.length-1})):`);
+                const isZh = document.body.classList.contains('zh');
+                let gamepadIndex = prompt(isZh 
+                    ? `检测到 ${connectedGamepads.length} 个手柄，请输入要复位的手柄索引 (0-${connectedGamepads.length-1}):` 
+                    : `Detected ${connectedGamepads.length} gamepads, enter gamepad index to reset (0-${connectedGamepads.length-1}):`);
                 gamepadIndex = parseInt(gamepadIndex);
                 
                 if (isNaN(gamepadIndex) || gamepadIndex < 0 || gamepadIndex >= gamepadList.length) {
-                    alert('Invalid gamepad index 无效的手柄索引');
+                    const isZh = document.body.classList.contains('zh');
+                    alert(isZh ? '无效的手柄索引' : 'Invalid gamepad index');
                     return;
                 }
 
                 const gamepad = gamepadList[gamepadIndex];
                 if (!gamepad) {
-                    alert('Gamepad at this index is not connected 该索引的手柄未连接');
+                    const isZh = document.body.classList.contains('zh');
+                    alert(isZh ? '该索引的手柄未连接' : 'Gamepad at this index is not connected');
                     return;
                 }
 
@@ -763,7 +1248,8 @@
             const gamepad = gamepadList[gamepadIndex];
             
             if (!gamepad) {
-                alert('Gamepad not found 手柄未找到');
+                const isZh = document.body.classList.contains('zh');
+                alert(isZh ? '手柄未找到' : 'Gamepad not found');
                 return;
             }
 
