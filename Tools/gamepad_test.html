@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gamepad Test</title>
+    <title>whowechina Series Controller Test</title>
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -375,35 +375,67 @@
         }
         .led-grid {
             display: flex;
-            flex-wrap: wrap;
+            flex-direction: column;
             gap: 15px;
-            justify-content: center;
+            align-items: center;
             padding: 20px;
-            background: #f8f9fa;
+            background: #2a2a2a;
             border-radius: 10px;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
         }
         .led-button {
             width: 72px;
             height: 72px;
-            border-radius: 50%;
-            background: linear-gradient(145deg, #6c757d, #495057);
+            border-radius: 8px;
             border: 3px solid #343a40;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
             cursor: pointer;
-            transition: all 0.2s ease;
+            /* 只对 transform 添加过渡，不包括 box-shadow（光晕） */
+            transition: transform 0.2s ease;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             color: white;
             font-size: 11px;
             font-weight: bold;
             text-align: center;
-            padding: 8px 5px 5px 5px;
+            padding: 5px;
+        }
+        /* 形状变体 */
+        .led-button.shape-circle {
+            border-radius: 50%;
+        }
+        .led-button.shape-square {
+            border-radius: 8px;
+        }
+        .led-button.shape-portrait {
+            border-radius: 8px;
+        }
+        .led-button.shape-landscape {
+            border-radius: 8px;
+        }
+        .led-button.rgb-type {
+            position: relative;
+            padding: 5px; /* 上下左右完全对称，保持圆形 */
+        }
+        .led-button.rgb-type .led-name {
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            text-align: center;
         }
         .led-button:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+        .led-button.rgb-type:hover {
+            transform: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
         .led-button.on {
             background: linear-gradient(145deg, #ffc107, #ff9800);
@@ -413,6 +445,8 @@
         }
         .led-button.dragging {
             cursor: ns-resize;
+            /* 拖拽时维持悬停效果 */
+            transform: translateY(-2px);
         }
         .brightness-indicator {
             position: absolute;
@@ -439,8 +473,75 @@
             margin: 0 0 2px 0;
             font-weight: bold;
         }
-            margin: 0px 0 2px 0;
+        .rgb-sliders {
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            width: 75%;
+            height: 60%;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: calc(50% - 30% - 6px); /* 50%是中心，-30%是容器半高，-6px是标题半高 */
+            flex-direction: column;
+        }
+        .rgb-sliders-row {
+            display: flex;
+            justify-content: space-between;
+            height: 100%;
+            width: 100%;
+        }
+        .rgb-slider-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            margin: 0 2%;
+        }
+        .rgb-slider-title {
+            font-size: 10px;
             font-weight: bold;
+            margin-bottom: 2px;
+            color: #666;
+        }
+        .rgb-slider {
+            width: 100%;
+            flex: 1;
+            background: linear-gradient(to top, #333, #666);
+            border-radius: 3px;
+            position: relative;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .rgb-slider-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            border-radius: 3px;
+        }
+        .rgb-slider.r .rgb-slider-fill {
+            background: linear-gradient(to top, #000, #f00);
+        }
+        .rgb-slider.g .rgb-slider-fill {
+            background: linear-gradient(to top, #000, #0f0);
+        }
+        .rgb-slider.b .rgb-slider-fill {
+            background: linear-gradient(to top, #000, #00f);
+        }
+        .rgb-slider-value {
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 8px;
+            background: rgba(0,0,0,0.6);
+            padding: 1px 4px;
+            border-radius: 2px;
+            color: white;
+            font-weight: bold;
+            pointer-events: none;
+            min-width: 20px;
+            text-align: center;
         }
     </style>
 </head>
@@ -450,7 +551,7 @@
             <button class="lang-btn lang-en-btn active" id="lang-en" onclick="switchLanguage('en')" title="English"></button>
             <button class="lang-btn lang-zh-btn" id="lang-zh" onclick="switchLanguage('zh')" title="中文"></button>
         </div>
-        <h1>🎮 <span class="lang-en">Gamepad Test</span><span class="lang-zh">游戏手柄测试</span></h1>
+        <h1>🎮 <span class="lang-en"><a href="https://github.com/whowechina" target="_blank" style="color: inherit; text-decoration: none;">whowechina</a> Series Controller Test</span><span class="lang-zh"><a href="https://github.com/whowechina" target="_blank" style="color: inherit; text-decoration: none;">whowechina</a> 系列手台测试</span></h1>
         <div id="status" class="status disconnected">
             <span class="lang-en">Please connect a gamepad and press any button to activate</span><span class="lang-zh">请连接游戏手柄并按任意按钮激活</span>
         </div>
@@ -497,6 +598,56 @@
         let outputReportId = 0;
         let outputReportSize = 0;
         let hidUpdateTimer = null; // 定期发送定时器
+        let currentLedMapping = null; // 当前设备的LED映射配置
+
+        // LED 映射配置 - 根据设备名称定义灯光布局
+        const ledMappingConfig = {
+            "IIDX Pico Controller": {
+                lights: [
+                    { name: "E1", index: 7, x: 10, y: 8, color: "red", shape: "square", size: 50},
+                    { name: "E2", index: 8, x: 20, y: 8, color: "green", shape: "square", size: 50},
+                    { name: "E3", index: 9, x: 30, y: 8, color: "green", shape: "square", size: 50},
+                    { name: "E4", index: 10, x: 40, y: 8, color: "green", shape: "square", size: 50},
+    
+                    { name: "B2", index: 1, x: 14, y: 28, color: "blue", shape: "portrait", size: 95},
+                    { name: "B4", index: 3, x: 26, y: 28, color: "blue", shape: "portrait", size: 95},
+                    { name: "B6", index: 5, x: 38, y: 28, color: "blue", shape: "portrait", size: 95},
+    
+                    { name: "B1", index: 0, x: 9, y: 43, color: "white", shape: "portrait", size: 95},
+                    { name: "B3", index: 2, x: 21, y: 43, color: "white", shape: "portrait", size: 95},
+                    { name: "B5", index: 4, x: 33, y: 43, color: "white", shape: "portrait", size: 95},
+                    { name: "B7", index: 6, x: 45, y: 43, color: "white", shape: "portrait", size: 95},
+    
+                    { name: "TT", index: 11, x: 72, y: 28, color: "rgb", shape: "circle", size: 300},
+                ]
+            },
+            "AIC Pico LED": {
+                lights: [
+                    { name: "AIC Pico", index: 0, x: 15, y: 15, color: "rgb", shape: "circle", size: 200 }
+                ]
+            },
+            "Popn Pico": {
+                lights: [
+                    { name: "B2", index: 1, x: 14, y: 8, color: "yellow", shape: "circle", size: 95},
+                    { name: "B4", index: 3, x: 29, y: 8, color: "blue", shape: "circle", size: 95},
+                    { name: "B6", index: 5, x: 44, y: 8, color: "blue", shape: "circle", size: 95},
+                    { name: "B8", index: 7, x: 59, y: 8, color: "yellow", shape: "circle", size: 95},
+    
+                    { name: "B1", index: 0, x: 9, y: 23, color: "white", shape: "circle", size: 95},
+                    { name: "B3", index: 2, x: 24, y: 23, color: "green", shape: "circle", size: 95},
+                    { name: "B5", index: 4, x: 39, y: 23, color: "red", shape: "circle", size: 95},
+                    { name: "B7", index: 6, x: 54, y: 23, color: "green", shape: "circle", size: 95},
+                    { name: "B9", index: 8, x: 69, y: 23, color: "white", shape: "circle", size: 95},
+
+                    { name: "Cabnet", index: 9, x: 88, y: 15, color: "rgb", shape: "portrait", size: 200},
+                ]
+            },
+            // 可以在此添加更多设备的配置
+            // 支持的形状: "square" (正方形), "circle" (圆形), "portrait" (竖长方形), "landscape" (横长方形)
+            // size: 缩放因子，默认100，基础大小为容器宽度的10%，size=100即10%，size=50即5%，size=200即20%
+            // x: 横向位置，范围0-100，0为最左，100为最右（百分比）
+            // y: 纵向位置，范围0-100，相对于容器宽度计算（保持1:1宽高比）
+        };
 
         // 初始化
         if (!isGamepadSupported) {
@@ -538,7 +689,11 @@
             document.getElementById('hid-status').innerHTML = 
                 '<span class="lang-en">Click button to connect HID device</span><span class="lang-zh">点击按钮连接 HID 设备</span>';
             document.getElementById('hid-status').className = 'hid-status disconnected';
-            document.getElementById('led-container').innerHTML = '';
+            
+            // 清空LED容器并重置高度
+            const container = document.getElementById('led-container');
+            container.innerHTML = '';
+            container.style.minHeight = '';
             
             // 更新按钮文本
             document.getElementById('hid-connect-btn').innerHTML = 
@@ -558,11 +713,24 @@
                 
                 console.log('HID Device connected:', hidDevice);
                 
+                // 获取设备名称并查找映射配置
+                const deviceName = hidDevice.productName || 'HID Device';
+                console.log('Device productName:', JSON.stringify(deviceName));
+                console.log('Available mappings:', Object.keys(ledMappingConfig));
+                
+                currentLedMapping = ledMappingConfig[deviceName] || null;
+                
+                if (currentLedMapping) {
+                    console.log('✅ Found LED mapping for device:', deviceName);
+                } else {
+                    console.log('⚠️ No LED mapping found for device:', deviceName);
+                    console.log('Using default layout');
+                }
+                
                 // 解析 Output Report
                 parseOutputReports();
                 
                 // 更新状态
-                const deviceName = hidDevice.productName || 'HID Device';
                 document.getElementById('hid-status').innerHTML = 
                     `✅ <span class="lang-en">Connected: ${deviceName}</span><span class="lang-zh">已连接: ${deviceName}</span>`;
                 document.getElementById('hid-status').className = 'hid-status connected';
@@ -632,140 +800,674 @@
                     });
                     outputReportSize = Math.ceil(totalBits / 8);
 
-                    // 为每个 item 创建 LED 按钮
-                    report.items.forEach((item) => {
-                        const reportSize = item.reportSize || 8;
-                        const reportCount = item.reportCount || 1;
-
-                        // 如果是单字节字段，为每个计数创建一个 LED
-                        for (let i = 0; i < reportCount; i++) {
-                            const ledName = `${ledIndex + 1}`;
-                            createLEDButton(ledIndex, ledName);
-                            ledStates[ledIndex] = 0;
-                            ledIndex++;
-                        }
-                    });
+                    // 初始化所有LED状态为0
+                    for (let i = 0; i < outputReportSize; i++) {
+                        ledStates[i] = 0;
+                    }
                 });
             });
 
-            if (ledIndex === 0) {
+            // 使用映射配置创建LED按钮
+            console.log('Checking mapping:', currentLedMapping);
+            console.log('Has lights?', currentLedMapping && currentLedMapping.lights);
+            
+            // 将容器设置为相对定位，用于绝对定位按钮（对所有情况都需要）
+            container.style.position = 'relative';
+            
+            // 设置CSS变量存储容器宽度，用于坐标计算（对所有情况都需要）
+            const updateContainerWidth = () => {
+                const width = container.offsetWidth;
+                container.style.setProperty('--container-width', `${width}px`);
+            };
+            updateContainerWidth();
+            window.addEventListener('resize', updateContainerWidth);
+            
+            if (currentLedMapping && currentLedMapping.lights) {
+                console.log('🎨 Applying LED mapping with', currentLedMapping.lights.length, 'lights');
+                console.log('Lights data:', currentLedMapping.lights);
+                
+                // 计算所需的最小高度（找到Y+按钮高度的最大值）
+                const calculateMinHeight = () => {
+                    let maxBottom = 0;
+                    currentLedMapping.lights.forEach((led) => {
+                        const basePercent = 10;
+                        const actualSize = basePercent * (led.size || 100) / 100;
+                        let heightSize = actualSize;
+                        
+                        if (led.shape === 'landscape') {
+                            heightSize = actualSize * 5 / 8;
+                        }
+                        
+                        const y = led.y || 0;
+                        const bottom = y + heightSize;
+                        maxBottom = Math.max(maxBottom, bottom);
+                    });
+                    
+                    // 加上余量（额外5%的高度）
+                    const minHeight = (maxBottom + 5) * container.offsetWidth / 100;
+                    container.style.minHeight = `${minHeight}px`;
+                };
+                
+                // 初始计算和监听窗口变化
+                setTimeout(calculateMinHeight, 0);
+                window.addEventListener('resize', calculateMinHeight);
+                
+                try {
+                    currentLedMapping.lights.forEach((led, ledIndex) => {
+                        console.log('Creating LED', ledIndex, ':', led);
+                        
+                        // 处理count属性，创建多个连续的LED
+                        const count = led.count || 1;
+                        const dx = led.dx !== undefined ? led.dx : (led.x || 0) * 0.1;
+                        const dy = led.dy !== undefined ? led.dy : (led.y || 0) * 0.1;
+                        
+                        for (let i = 0; i < count; i++) {
+                            // 计算当前LED的属性
+                            let currentIndex = Array.isArray(led.index) 
+                                ? led.index.map(idx => idx + i * (led.color === 'rgb' ? 3 : 1))
+                                : led.index + i;
+                            const currentName = count > 1 ? `${led.name} ${i + 1}` : led.name;
+                            const currentX = (led.x || 0) + i * dx;
+                            const currentY = (led.y || 0) + i * dy;
+                            
+                            if (led.color === 'rgb') {
+                                // RGB 类型：确保index是数组
+                                if (!Array.isArray(currentIndex)) {
+                                    currentIndex = [currentIndex, currentIndex + 1, currentIndex + 2];
+                                }
+                                
+                                // 创建一个按钮，控制三个通道
+                                const button = createLEDButton(
+                                    currentIndex, // 传递整个数组
+                                    currentName, 
+                                    'rgb', 
+                                    null, 
+                                    currentName, 
+                                    led.shape, 
+                                    false, 
+                                    led.size, 
+                                    currentX, 
+                                    currentY
+                                );
+                                console.log('  Created RGB button:', currentName, 'with index', currentIndex);
+                                
+                                if (button) {
+                                    container.appendChild(button);
+                                    updateLEDVisual(currentIndex, 'rgb', null);
+                                }
+                            } else {
+                                // 普通单色LED
+                                const button = createLEDButton(
+                                    currentIndex, 
+                                    currentName, 
+                                    led.color || 'white', 
+                                    null, 
+                                    null, 
+                                    led.shape, 
+                                    false, 
+                                    led.size, 
+                                    currentX, 
+                                    currentY
+                                );
+                                console.log('  Created', led.color || 'white', 'button:', currentName);
+                                
+                                if (button) {
+                                    container.appendChild(button);
+                                    updateLEDVisual(currentIndex, led.color || 'white', null);
+                                }
+                            }
+                        }
+                    });
+                    
+                    console.log('✅ LED mapping applied, total lights:', container.children.length);
+                } catch (error) {
+                    console.error('Error applying LED mapping:', error);
+                }
+            } else {
+                console.log('📋 Using default LED layout');
+                // 如果没有映射配置，使用默认方式创建LED按钮（网格布局）
+                let ledIndex = 0;
+                let maxLedIndex = 0;
+                hidDevice.collections.forEach((collection) => {
+                    if (!collection.outputReports || collection.outputReports.length === 0) {
+                        return;
+                    }
+
+                    collection.outputReports.forEach((report) => {
+                        report.items.forEach((item) => {
+                            const reportCount = item.reportCount || 1;
+                            
+                            for (let i = 0; i < reportCount; i++) {
+                                const ledName = `${ledIndex}`;
+                                // 创建网格布局：每行8个，间距12%
+                                const col = ledIndex % 8;
+                                const row = Math.floor(ledIndex / 8);
+                                const x = 6 + col * 12; // 6, 18, 30, 42, 54, 66, 78, 90
+                                const y = 6 + row * 12;
+                                const button = createLEDButton(ledIndex, ledName, 'white', null, null, 'circle', true, 80, x, y);
+                                container.appendChild(button);
+                                updateLEDVisual(ledIndex, 'white', null);
+                                maxLedIndex = ledIndex;
+                                ledIndex++;
+                            }
+                        });
+                    });
+                });
+                
+                // 计算默认布局的最小高度
+                const calculateMinHeight = () => {
+                    const totalRows = Math.floor(maxLedIndex / 8) + 1;
+                    const basePercent = 10;
+                    const actualSize = basePercent * 80 / 100; // size=80
+                    const lastRowY = 6 + (totalRows - 1) * 12;
+                    const maxBottom = lastRowY + actualSize;
+                    const minHeight = (maxBottom + 6) * container.offsetWidth / 100;
+                    container.style.minHeight = `${minHeight}px`;
+                };
+                
+                setTimeout(calculateMinHeight, 0);
+                window.addEventListener('resize', calculateMinHeight);
+            }
+
+            if (container.children.length === 0) {
                 container.innerHTML = '<div style="text-align:center;color:#6c757d;"><span class="lang-en">No output LEDs found</span><span class="lang-zh">未找到输出 LED</span></div>';
             }
         }
 
-        function createLEDButton(index, name) {
-            const container = document.getElementById('led-container');
-            
+        function createLEDButton(index, name, color = 'white', channel = null, groupId = null, shape = 'square', showIcon = true, size = 100, x = 0, y = 0) {
             const button = document.createElement('div');
-            button.className = 'led-button';
-            button.id = `led-${index}`;
-            button.style.position = 'relative';
             
+            // 如果是RGB类型且index不是数组，自动转换为数组[index, index+1, index+2]
+            if (color === 'rgb' && !Array.isArray(index)) {
+                index = [index, index + 1, index + 2];
+            }
+            
+            const isRGB = (color === 'rgb' && Array.isArray(index));
+            button.className = `led-button shape-${shape || 'square'}${isRGB ? ' rgb-type' : ''}`;
+            
+            // RGB类型使用groupId作ID，其他使用index
+            const buttonId = isRGB ? `led-rgb-${groupId}` : `led-${index}${channel || ''}`;
+            button.id = buttonId;
+            button.style.position = 'absolute';
+            
+            // 保存index（可能是数组或单个数字）
+            if (Array.isArray(index)) {
+                button.dataset.ledIndices = JSON.stringify(index);
+            } else {
+                button.dataset.ledIndex = index;
+            }
+            button.dataset.ledColor = color;
+            if (channel) button.dataset.channel = channel;
+            if (groupId) button.dataset.groupId = groupId;
+            if (shape) button.dataset.shape = shape;
+            
+            // 应用size缩放（基于容器宽度）
+            // 基础大小为容器宽度的10%，size为缩放因子（100=原始大小）
+            const basePercent = 10; // 基础大小占容器宽度的百分比
+            const actualSize = basePercent * (size || 100) / 100;
+            
+            // 根据形状设置宽高比
+            let widthSize = actualSize;
+            let heightSize = actualSize;
+            
+            if (shape === 'portrait') {
+                // 竖长方形：宽5 高8
+                widthSize = actualSize * 5 / 8;
+                heightSize = actualSize;
+            } else if (shape === 'landscape') {
+                // 横长方形：宽8 高5
+                widthSize = actualSize;
+                heightSize = actualSize * 5 / 8;
+            }
+            // square 和 circle 保持 1:1
+            
+            // 应用X、Y坐标定位（X和Y都是0-100的数值，都相对于容器宽度计算，保持1:1比例）
+            // 坐标代表元素的中心点
+            if (x !== undefined && x !== null) {
+                button.style.left = `calc(var(--container-width) * ${x} / 100 - var(--container-width) * ${widthSize} / 200)`;
+            }
+            if (y !== undefined && y !== null) {
+                // Y使用容器宽度作为基准，将数值转换为像素
+                button.style.top = `calc(var(--container-width) * ${y} / 100 - var(--container-width) * ${heightSize} / 200)`;
+            }
+            
+            button.style.width = `calc(var(--container-width) * ${widthSize} / 100)`;
+            button.style.height = `calc(var(--container-width) * ${heightSize} / 100)`;
+            button.style.fontSize = `calc(var(--container-width) * ${actualSize} / 100 * 0.15)`; // 字体大小也按比例调整
+            
+            const iconHtml = showIcon ? '<div class="led-icon">💡</div>' : '';
+            const rgbSlidersHtml = (color === 'rgb' && Array.isArray(index)) ? `
+                <div class="rgb-sliders">
+                    <div class="rgb-sliders-row">
+                        <div class="rgb-slider-container">
+                            <div class="rgb-slider-title">R</div>
+                            <div class="rgb-slider r" data-channel="0">
+                                <div class="rgb-slider-fill" data-channel="0"></div>
+                                <div class="rgb-slider-value" id="rgb-val-${groupId}-0">0</div>
+                            </div>
+                        </div>
+                        <div class="rgb-slider-container">
+                            <div class="rgb-slider-title">G</div>
+                            <div class="rgb-slider g" data-channel="1">
+                                <div class="rgb-slider-fill" data-channel="1"></div>
+                                <div class="rgb-slider-value" id="rgb-val-${groupId}-1">0</div>
+                            </div>
+                        </div>
+                        <div class="rgb-slider-container">
+                            <div class="rgb-slider-title">B</div>
+                            <div class="rgb-slider b" data-channel="2">
+                                <div class="rgb-slider-fill" data-channel="2"></div>
+                                <div class="rgb-slider-value" id="rgb-val-${groupId}-2">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ` : '';
+            const indicatorId = (color === 'rgb' && Array.isArray(index)) ? `brightness-rgb-${groupId}` : `brightness-${index}${channel || ''}`;
+            const indicatorHtml = (color === 'rgb' && Array.isArray(index)) ? '' : `<div class="brightness-indicator" id="${indicatorId}">0</div>`;
             button.innerHTML = `
                 <div class="led-name">${name}</div>
-                <div class="led-icon">💡</div>
-                <div class="brightness-indicator" id="brightness-${index}">0</div>
+                ${iconHtml}
+                ${rgbSlidersHtml}
+                ${indicatorHtml}
             `;
             
-            // 点击切换亮灭
+            // 点击事件：非RGB类型切换亮灭
             button.addEventListener('click', (e) => {
-                if (!button.classList.contains('dragging')) {
-                    toggleLED(index);
-                }
-            });
-
-            // 拖拽调整亮度
-            let isDragging = false;
-            let startY = 0;
-            let startBrightness = 0;
-
-            button.addEventListener('mousedown', (e) => {
-                isDragging = true;
-                startY = e.clientY;
-                startBrightness = ledStates[index] || 0;
-                button.classList.add('dragging');
-                e.preventDefault();
-            });
-
-            document.addEventListener('mousemove', (e) => {
-                if (!isDragging) return;
-                
-                // 向上拖增加亮度，向下拖减少亮度
-                const deltaY = startY - e.clientY;
-                const sensitivity = 2; // 灵敏度：每像素对应的亮度变化
-                let newBrightness = startBrightness + Math.round(deltaY * sensitivity);
-                
-                // 限制范围 0-255
-                newBrightness = Math.max(0, Math.min(255, newBrightness));
-                
-                // 更新亮度
-                setLEDBrightness(index, newBrightness);
-                e.preventDefault();
-            });
-
-            document.addEventListener('mouseup', () => {
-                if (isDragging) {
-                    isDragging = false;
-                    button.classList.remove('dragging');
+                if (!button.classList.contains('dragging') && color !== 'rgb') {
+                    toggleLED(index, color, channel);
                 }
             });
             
-            container.appendChild(button);
-            updateLEDVisual(index);
+            // RGB类型：设置滑条交互
+            if (color === 'rgb' && Array.isArray(index)) {
+                const sliderContainers = button.querySelectorAll('.rgb-slider-container');
+                sliderContainers.forEach((container) => {
+                    const slider = container.querySelector('.rgb-slider');
+                    const channelIndex = parseInt(slider.dataset.channel);
+                    const fill = slider.querySelector('.rgb-slider-fill');
+                    const valueLabel = container.querySelector('.rgb-slider-value');
+                    
+                    let isDragging = false;
+                    
+                    const updateSlider = (e) => {
+                        const rect = slider.getBoundingClientRect();
+                        const y = e.clientY - rect.top;
+                        const height = rect.height;
+                        const percent = Math.max(0, Math.min(1, 1 - (y / height)));
+                        const value = Math.round(percent * 255);
+                        
+                        ledStates[index[channelIndex]] = value;
+                        fill.style.height = `${percent * 100}%`;
+                        
+                        // 更新数值显示
+                        if (valueLabel) {
+                            valueLabel.textContent = value;
+                        }
+                        
+                        updateLEDVisual(index, 'rgb', null);
+                        sendOutputReport();
+                    };
+                    
+                    slider.addEventListener('mousedown', (e) => {
+                        isDragging = true;
+                        updateSlider(e);
+                        e.stopPropagation();
+                        e.preventDefault();
+                    });
+                    
+                    document.addEventListener('mousemove', (e) => {
+                        if (isDragging) {
+                            updateSlider(e);
+                            e.preventDefault();
+                        }
+                    });
+                    
+                    document.addEventListener('mouseup', () => {
+                        isDragging = false;
+                    });
+                    
+                    // 初始化滑条高度和数值显示
+                    const initialValue = ledStates[index[channelIndex]] || 0;
+                    fill.style.height = `${(initialValue / 255) * 100}%`;
+                    if (valueLabel) {
+                        valueLabel.textContent = initialValue;
+                    }
+                });
+            }
+
+            // 拖拽调整（仅限非RGB类型）
+            if (color !== 'rgb') {
+                let isDragging = false;
+                let lastY = 0;
+
+                button.addEventListener('mousedown', (e) => {
+                    isDragging = true;
+                    lastY = e.clientY;
+                    button.classList.add('dragging');
+                    e.preventDefault();
+                });
+
+                document.addEventListener('mousemove', (e) => {
+                    if (!isDragging) return;
+                    
+                    const deltaY = lastY - e.clientY;
+                    const sensitivity = 2;
+                    const currentBrightness = ledStates[index] || 0;
+                    let newBrightness = currentBrightness + Math.round(deltaY * sensitivity);
+                    newBrightness = Math.max(0, Math.min(255, newBrightness));
+                    setLEDBrightness(index, newBrightness, color, channel);
+                    lastY = e.clientY;
+                    e.preventDefault();
+                });
+
+                document.addEventListener('mouseup', () => {
+                    if (isDragging) {
+                        isDragging = false;
+                        button.classList.remove('dragging');
+                    }
+                });
+            }
+            
+            updateLEDVisual(index, color, channel);
+            return button;
         }
 
-        function setLEDBrightness(index, brightness) {
+        function setLEDBrightness(index, brightness, color = 'white', channel = null) {
             ledStates[index] = brightness;
-            updateLEDVisual(index);
+            updateLEDVisual(index, color, channel);
             sendOutputReport();
         }
 
-        function updateLEDVisual(index) {
-            const button = document.getElementById(`led-${index}`);
-            const indicator = document.getElementById(`brightness-${index}`);
-            const brightness = ledStates[index] || 0;
-            
-            if (!button) return;
-            
-            // 更新亮度显示
-            indicator.textContent = brightness;
-            
-            if (brightness === 0) {
-                // 关闭状态
-                button.classList.remove('on');
-                button.style.background = '';
-                button.style.borderColor = '';
-                button.style.boxShadow = '';
-                button.style.color = '';
-            } else {
-                // 亮起状态，根据亮度调整视觉效果
-                button.classList.add('on');
+        // 设置RGB灯的颜色
+        function setRGBColor(groupId, r, g, b) {
+            // 查找该groupId对应的三个通道索引
+            const light = currentLedMapping.lights.find(led => led.name === groupId && led.color === 'rgb');
+            if (light && Array.isArray(light.index)) {
+                ledStates[light.index[0]] = r; // R通道
+                ledStates[light.index[1]] = g; // G通道
+                ledStates[light.index[2]] = b; // B通道
                 
-                // 计算视觉亮度（即使亮度为1也要明显可见）
-                // 将 1-255 映射到 30%-100% 的视觉亮度
-                const visualBrightness = 30 + (brightness / 255) * 70;
+                // 更新视觉（使用RGB按钮ID）
+                updateLEDVisual(light.index, 'rgb', null);
                 
-                // HSL 色相：从橙色(30)到黄色(50)
-                const hue = 30 + (brightness / 255) * 20;
-                const saturation = 100;
-                const lightness = visualBrightness;
-                
-                button.style.background = `linear-gradient(145deg, 
-                    hsl(${hue}, ${saturation}%, ${lightness}%), 
-                    hsl(${hue - 10}, ${saturation}%, ${lightness - 10}%))`;
-                button.style.borderColor = `hsl(${hue}, ${saturation}%, ${lightness - 20}%)`;
-                
-                // 光晕效果强度随亮度变化
-                const glowIntensity = 0.2 + (brightness / 255) * 0.6;
-                const glowSize = 10 + (brightness / 255) * 15;
-                button.style.boxShadow = `0 0 ${glowSize}px rgba(255, 193, 7, ${glowIntensity}), 0 4px 8px rgba(0,0,0,0.2)`;
-                
-                // 文字颜色
-                button.style.color = brightness > 128 ? '#000' : '#333';
+                sendOutputReport();
             }
         }
 
-        async function toggleLED(index) {
+        // 调整RGB灯的亮度（保持颜色比例）
+        function adjustRGBBrightness(groupId, delta) {
+            const light = currentLedMapping.lights.find(led => led.name === groupId && led.color === 'rgb');
+            if (!light || !Array.isArray(light.index)) return;
+            
+            const rIndex = light.index[0];
+            const gIndex = light.index[1];
+            const bIndex = light.index[2];
+            
+            let r = ledStates[rIndex] || 0;
+            let g = ledStates[gIndex] || 0;
+            let b = ledStates[bIndex] || 0;
+            
+            // 计算当前最大值（用于保持颜色比例）
+            const maxValue = Math.max(r, g, b, 1);
+            
+            // 计算新的最大值
+            let newMaxValue = maxValue + Math.round(delta);
+            newMaxValue = Math.max(0, Math.min(255, newMaxValue));
+            
+            // 按比例调整所有通道
+            const ratio = newMaxValue / maxValue;
+            r = Math.round(r * ratio);
+            g = Math.round(g * ratio);
+            b = Math.round(b * ratio);
+            
+            // 更新状态
+            ledStates[rIndex] = r;
+            ledStates[gIndex] = g;
+            ledStates[bIndex] = b;
+            
+            // 更新视觉
+            updateLEDVisual(light.index, 'rgb', null);
+            
+            sendOutputReport();
+        }
+
+        // 调整RGB灯的饱和度（灰度）
+        function adjustRGBSaturation(groupId, deltaX) {
+            const light = currentLedMapping.lights.find(led => led.name === groupId && led.color === 'rgb');
+            if (!light || !Array.isArray(light.index)) return;
+            
+            const rIndex = light.index[0];
+            const gIndex = light.index[1];
+            const bIndex = light.index[2];
+            
+            let r = ledStates[rIndex] || 0;
+            let g = ledStates[gIndex] || 0;
+            let b = ledStates[bIndex] || 0;
+            
+            // 计算当前的平均值（灰度）
+            const avg = (r + g + b) / 3;
+            
+            // 调整饱和度：向右拖拽增加饱和度（离灰度更远），向左拖拽降低饱和度（趋向灰度）
+            const sensitivity = 0.02; // 饱和度调整灵敏度
+            const saturationChange = deltaX * sensitivity;
+            
+            // 计算新的RGB值：在当前值和灰度之间插值
+            // saturationChange > 0: 增加饱和度（远离灰度）
+            // saturationChange < 0: 降低饱和度（趋向灰度）
+            r = r + (r - avg) * saturationChange;
+            g = g + (g - avg) * saturationChange;
+            b = b + (b - avg) * saturationChange;
+            
+            // 限制范围
+            r = Math.max(0, Math.min(255, Math.round(r)));
+            g = Math.max(0, Math.min(255, Math.round(g)));
+            b = Math.max(0, Math.min(255, Math.round(b)));
+            
+            // 更新状态
+            ledStates[rIndex] = r;
+            ledStates[gIndex] = g;
+            ledStates[bIndex] = b;
+            
+            // 更新视觉（使用RGB按钮ID）
+            const rgbLight = currentLedMapping.lights.find(led => led.name === groupId && led.color === 'rgb');
+            if (rgbLight) {
+                updateLEDVisual(rgbLight.index, 'rgb', null);
+            }
+            
+            sendOutputReport();
+        }
+
+        function updateLEDVisual(index, color = 'white', channel = null) {
+            // RGB类型使用数组索引，其他使用单个索引
+            let button;
+            if (color === 'rgb' && Array.isArray(index)) {
+                // 通过index数组查找对应的RGB按钮
+                const buttons = document.querySelectorAll('.led-button.rgb-type');
+                for (const btn of buttons) {
+                    const indices = btn.dataset.ledIndices;
+                    if (indices && JSON.stringify(JSON.parse(indices)) === JSON.stringify(index)) {
+                        button = btn;
+                        break;
+                    }
+                }
+            } else {
+                const buttonId = `led-${index}${channel || ''}`;
+                button = document.getElementById(buttonId);
+            }
+            
+            if (!button) return;
+            
+            // RGB类型显示混合后的亮度
+            let brightness;
+            if (color === 'rgb' && Array.isArray(index)) {
+                const r = ledStates[index[0]] || 0;
+                const g = ledStates[index[1]] || 0;
+                const b = ledStates[index[2]] || 0;
+                brightness = Math.max(r, g, b); // 使用最大值作为显示亮度
+                
+                // 更新亮度指示器
+                const indicator = button.querySelector('.brightness-indicator');
+                if (indicator) {
+                    indicator.textContent = brightness;
+                }
+            } else {
+                brightness = ledStates[index] || 0;
+                
+                // 更新亮度显示
+                const indicator = document.getElementById(`brightness-${index}${channel || ''}`);
+                if (indicator) {
+                    indicator.textContent = brightness;
+                }
+            }
+            
+            // 定义颜色映射（在两种状态都需要使用）
+            const colorMap = {
+                'red': { hue: 0, rgb: '255, 0, 0' },
+                'green': { hue: 120, rgb: '0, 255, 0' },
+                'blue': { hue: 240, rgb: '0, 0, 255' },
+                'yellow': { hue: 60, rgb: '255, 255, 0' },
+                'cyan': { hue: 180, rgb: '0, 255, 255' },
+                'magenta': { hue: 300, rgb: '255, 0, 255' },
+                'white': { hue: 0, rgb: '255, 255, 255' },
+                'orange': { hue: 30, rgb: '255, 165, 0' }
+            };
+            
+            // 计算暗色外框和主体颜色
+            let darkBorderColor, hue, saturation;
+            
+            if (color === 'rgb' && Array.isArray(index)) {
+                // RGB类型：根据实际RGB值计算色相
+                const r = ledStates[index[0]] || 0;
+                const g = ledStates[index[1]] || 0;
+                const b = ledStates[index[2]] || 0;
+                
+                // 计算色相（简化版）
+                const max = Math.max(r, g, b);
+                const min = Math.min(r, g, b);
+                const delta = max - min;
+                
+                if (delta === 0 || max === 0) {
+                    hue = 0; // 灰色
+                    saturation = 0; // 无饱和度，显示为灰色
+                } else {
+                    saturation = 20; // 正常饱和度
+                    if (max === r) {
+                        hue = 60 * (((g - b) / delta) % 6);
+                    } else if (max === g) {
+                        hue = 60 * (((b - r) / delta) + 2);
+                    } else {
+                        hue = 60 * (((r - g) / delta) + 4);
+                    }
+                    if (hue < 0) hue += 360;
+                }
+                
+                darkBorderColor = max === 0 ? `hsl(0, 0%, 25%)` : `hsl(${hue}, 100%, 25%)`;
+            } else {
+                const colorInfo = colorMap[color] || colorMap['white'];
+                hue = colorInfo.hue;
+                saturation = 20;
+                if (color === 'white') {
+                    darkBorderColor = `hsl(0, 0%, 35%)`;
+                } else {
+                    darkBorderColor = `hsl(${hue}, 100%, 22%)`;
+                }
+            }
+            
+            // 主体固定为85%亮度、根据颜色调整饱和度
+            button.style.background = `linear-gradient(145deg, hsl(${hue}, ${saturation}%, 85%), hsl(${hue}, ${saturation}%, 80%))`;
+            
+            if (brightness === 0) {
+                // 关闭状态 - 只显示主体，无光晕
+                button.classList.remove('on');
+                button.style.borderColor = darkBorderColor;
+                button.style.boxShadow = '';
+                button.style.color = '#444';
+            } else {
+                // 亮起状态：主体不变，只通过光晕显示点亮效果
+                button.classList.add('on');
+                
+                // 使用 RGB 模式计算光晕：
+                // 0-160: 映射到颜色的 0-255
+                // 160-255: 保持主颜色 255，逐步提高其他通道到 128（发白但不完全白）
+                let glowR, glowG, glowB;
+                const glowAlpha = 0.2 + (brightness / 255) * 0.6;
+                
+                // 获取基础颜色的 RGB
+                let baseR, baseG, baseB;
+                if (color === 'rgb' && Array.isArray(index)) {
+                    // RGB类型：使用实际的RGB值
+                    baseR = (ledStates[index[0]] || 0) / 255;
+                    baseG = (ledStates[index[1]] || 0) / 255;
+                    baseB = (ledStates[index[2]] || 0) / 255;
+                    
+                    // 对于RGB类型，brightness已经是最大值
+                } else {
+                    const colorInfo = colorMap[color] || colorMap['white'];
+                    const rgb = colorInfo.rgb.split(',').map(v => parseInt(v.trim()));
+                    baseR = rgb[0] / 255;
+                    baseG = rgb[1] / 255;
+                    baseB = rgb[2] / 255;
+                }
+                
+                if (brightness <= 160) {
+                    // 0-160: 线性映射到颜色的 0-255
+                    const intensity = (brightness / 160) * 255;
+                    glowR = Math.round(baseR * intensity);
+                    glowG = Math.round(baseG * intensity);
+                    glowB = Math.round(baseB * intensity);
+                } else {
+                    // 160-255: 主颜色保持 255，其他通道提升到 128
+                    const ratio = (brightness - 160) / 95;
+                    const otherChannelValue = Math.round(ratio * 128);
+                    glowR = baseR === 1 ? 255 : Math.round(baseR * 255 + (1 - baseR) * otherChannelValue);
+                    glowG = baseG === 1 ? 255 : Math.round(baseG * 255 + (1 - baseG) * otherChannelValue);
+                    glowB = baseB === 1 ? 255 : Math.round(baseB * 255 + (1 - baseB) * otherChannelValue);
+                }
+                
+                const glowColor = `rgba(${glowR}, ${glowG}, ${glowB}, ${glowAlpha})`;
+                
+                let borderColor;
+                if (color === 'rgb' && channel) {
+                    switch (channel) {
+                        case 'R':
+                            borderColor = `hsl(0, 100%, 30%)`;
+                            break;
+                        case 'G':
+                            borderColor = `hsl(120, 100%, 25%)`;
+                            break;
+                        case 'B':
+                            borderColor = `hsl(240, 100%, 30%)`;
+                            break;
+                    }
+                } else {
+                    if (color === 'white') {
+                        borderColor = `hsl(0, 0%, 40%)`;
+                    } else {
+                        borderColor = `hsl(${hue}, 100%, 25%)`;
+                    }
+                }
+                
+                button.style.borderColor = borderColor;
+                
+                // 增强的光晕效果：内部光晕+外部扩散+底部阴影
+                // 蓝色系需要额外增强（人眼对蓝色感知较暗）
+                const isBlue = (color === 'blue' || color === 'cyan' || (color === 'rgb' && channel === 'B'));
+                const glowBoost = isBlue ? 1.4 : 1.0;
+                const glowIntensity = (0.3 + (brightness / 255) * 0.7) * glowBoost;
+                const glowSize = (15 + (brightness / 255) * 25) * glowBoost;
+                button.style.boxShadow = `
+                    0 0 ${glowSize * 0.4}px ${glowColor},
+                    0 0 ${glowSize}px ${glowColor.replace(/[\d.]+\)$/, `${glowIntensity * 0.5})`)},
+                    0 0 ${glowSize * 1.5}px ${glowColor.replace(/[\d.]+\)$/, `${glowIntensity * 0.3})`)},
+                    0 4px 12px rgba(0,0,0,0.3)`;
+                
+                // 文字颜色
+                button.style.color = '#444';
+            }
+        }
+
+        async function toggleLED(index, color = 'white', channel = null) {
             if (!hidDevice) {
                 const isZh = document.body.classList.contains('zh');
                 alert(isZh ? '未连接设备' : 'No HID device connected');
@@ -776,7 +1478,7 @@
             ledStates[index] = ledStates[index] === 0 ? 255 : 0;
             
             // 更新视觉效果
-            updateLEDVisual(index);
+            updateLEDVisual(index, color, channel);
 
             // 发送报告
             await sendOutputReport();
@@ -797,8 +1499,6 @@
 
                 // 发送报告
                 await hidDevice.sendReport(outputReportId, data);
-                
-                console.log(`Sent Output Report ${outputReportId}:`, Array.from(data));
 
             } catch (error) {
                 console.error('Failed to send output report:', error);
