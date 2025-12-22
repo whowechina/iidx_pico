@@ -408,13 +408,7 @@
         .led-button.shape-circle {
             border-radius: 50%;
         }
-        .led-button.shape-square {
-            border-radius: 8px;
-        }
-        .led-button.shape-portrait {
-            border-radius: 8px;
-        }
-        .led-button.shape-landscape {
+        .led-button.shape-rectangle {
             border-radius: 8px;
         }
         .led-button.rgb-type {
@@ -594,9 +588,8 @@
 
         // HID 相关变量
         let hidDevice = null;
-        let ledStates = {}; // 存储每个 LED 的状态
-        let outputReportId = 0;
-        let outputReportSize = 0;
+        let ledStates = {}; // 存储每个 LED 的状态 { ledIndex: { reportId, value } }
+        let outputReports = new Map(); // 存储每个 report ID 的信息 { reportId: { size, data } }
         let hidUpdateTimer = null; // 定期发送定时器
         let currentLedMapping = null; // 当前设备的LED映射配置
 
@@ -604,19 +597,19 @@
         const ledMappingConfig = {
             "IIDX Pico Controller": {
                 lights: [
-                    { name: "E1", index: 7, x: 10, y: 8, color: "red", shape: "square", size: 50},
-                    { name: "E2", index: 8, x: 20, y: 8, color: "green", shape: "square", size: 50},
-                    { name: "E3", index: 9, x: 30, y: 8, color: "green", shape: "square", size: 50},
-                    { name: "E4", index: 10, x: 40, y: 8, color: "green", shape: "square", size: 50},
+                    { name: "E1", index: 7, x: 10, y: 8, color: "red", shape: "rectangle", size: 50},
+                    { name: "E2", index: 8, x: 20, y: 8, color: "green", shape: "rectangle", size: 50},
+                    { name: "E3", index: 9, x: 30, y: 8, color: "green", shape: "rectangle", size: 50},
+                    { name: "E4", index: 10, x: 40, y: 8, color: "green", shape: "rectangle", size: 50},
     
-                    { name: "B2", index: 1, x: 14, y: 28, color: "blue", shape: "portrait", size: 95},
-                    { name: "B4", index: 3, x: 26, y: 28, color: "blue", shape: "portrait", size: 95},
-                    { name: "B6", index: 5, x: 38, y: 28, color: "blue", shape: "portrait", size: 95},
+                    { name: "B2", index: 1, x: 15, y: 28, color: "blue", shape: "rectangle", ratio: 1.6, size: 65},
+                    { name: "B4", index: 3, x: 27, y: 28, color: "blue", shape: "rectangle", ratio: 1.6, size: 65},
+                    { name: "B6", index: 5, x: 39, y: 28, color: "blue", shape: "rectangle", ratio: 1.6, size: 65},
     
-                    { name: "B1", index: 0, x: 9, y: 43, color: "white", shape: "portrait", size: 95},
-                    { name: "B3", index: 2, x: 21, y: 43, color: "white", shape: "portrait", size: 95},
-                    { name: "B5", index: 4, x: 33, y: 43, color: "white", shape: "portrait", size: 95},
-                    { name: "B7", index: 6, x: 45, y: 43, color: "white", shape: "portrait", size: 95},
+                    { name: "B1", index: 0, x: 9, y: 43, color: "white", shape: "rectangle", ratio: 1.6, size: 65},
+                    { name: "B3", index: 2, x: 21, y: 43, color: "white", shape: "rectangle", ratio: 1.6, size: 65},
+                    { name: "B5", index: 4, x: 33, y: 43, color: "white", shape: "rectangle", ratio: 1.6, size: 65},
+                    { name: "B7", index: 6, x: 45, y: 43, color: "white", shape: "rectangle", ratio: 1.6, size: 65},
     
                     { name: "TT", index: 11, x: 72, y: 28, color: "rgb", shape: "circle", size: 300},
                 ]
@@ -639,11 +632,22 @@
                     { name: "B7", index: 6, x: 54, y: 23, color: "green", shape: "circle", size: 95},
                     { name: "B9", index: 8, x: 69, y: 23, color: "white", shape: "circle", size: 95},
 
-                    { name: "Cabnet", index: 9, x: 88, y: 15, color: "rgb", shape: "portrait", size: 200},
+                    { name: "Cabnet", index: 9, x: 88, y: 15, color: "rgb", shape: "rectangle", ratio: 1.6, size: 200},
                 ]
             },
-            // 可以在此添加更多设备的配置
-            // 支持的形状: "square" (正方形), "circle" (圆形), "portrait" (竖长方形), "landscape" (横长方形)
+            "Diva Pico LED": {
+                lights: [
+                    { name: "G", index: 93, count: 32, x: 2, y: 3, di: -3, dx: 3, dy: 0, color: "green", shape: "rectangle", ratio: 2.4, size: 18},
+                    { name: "R", index: 94, count: 32, x: 2, y: 8.5, di: -3, dx: 3, dy: 0, color: "red", shape: "rectangle", ratio: 2.4, size: 18},
+                    { name: "B", index: 95, count: 32, x: 2, y: 14, di: -3, dx: 3, dy: 0, color: "blue", shape: "rectangle", ratio: 2.4, size: 18},
+                    { name: "△", index: 96, x: 16, y: 25, color: "green", shape: "circle", size: 95},
+                    { name: "▢", index: 97, x: 36, y: 25, color: "pink", shape: "circle", size: 95},
+                    { name: "✕", index: 98, x: 56, y: 25, color: "blue", shape: "circle", size: 95},
+                    { name: "◯", index: 99, x: 76, y: 25, color: "red", shape: "circle", size: 95},
+                ]
+            },            // 可以在此添加更多设备的配置
+            // 支持的形状: "rectangle" (矩形), "circle" (圆形)
+            // ratio: 高宽比，仅rectangle有效，默认1（正方形），1.6表示高度是宽度的1.6倍
             // size: 缩放因子，默认100，基础大小为容器宽度的10%，size=100即10%，size=50即5%，size=200即20%
             // x: 横向位置，范围0-100，0为最左，100为最右（百分比）
             // y: 纵向位置，范围0-100，相对于容器宽度计算（保持1:1宽高比）
@@ -778,6 +782,7 @@
             const container = document.getElementById('led-container');
             container.innerHTML = '';
             ledStates = {};
+            outputReports.clear();
 
             let ledIndex = 0;
 
@@ -787,7 +792,7 @@
                 }
 
                 collection.outputReports.forEach((report) => {
-                    outputReportId = report.reportId;
+                    const reportId = report.reportId;
                     
                     if (!report.items || report.items.length === 0) {
                         return;
@@ -798,12 +803,26 @@
                     report.items.forEach(item => {
                         totalBits += (item.reportSize || 0) * (item.reportCount || 1);
                     });
-                    outputReportSize = Math.ceil(totalBits / 8);
+                    const reportSize = Math.ceil(totalBits / 8);
 
-                    // 初始化所有LED状态为0
-                    for (let i = 0; i < outputReportSize; i++) {
-                        ledStates[i] = 0;
-                    }
+                    // 存储该report ID的信息
+                    outputReports.set(reportId, {
+                        size: reportSize,
+                        data: new Uint8Array(reportSize)
+                    });
+                    
+                    console.log(`📋 Found output report ID ${reportId}, size: ${reportSize} bytes`);
+
+                    // 为该report的每个LED初始化状态（offset是相对于该report的）
+                    let offsetInReport = 0;
+                    report.items.forEach(item => {
+                        const count = item.reportCount || 1;
+                        for (let i = 0; i < count; i++) {
+                            ledStates[ledIndex] = { reportId: reportId, offset: offsetInReport, value: 0 };
+                            ledIndex++;
+                            offsetInReport++;
+                        }
+                    });
                 });
             });
 
@@ -834,8 +853,9 @@
                         const actualSize = basePercent * (led.size || 100) / 100;
                         let heightSize = actualSize;
                         
-                        if (led.shape === 'landscape') {
-                            heightSize = actualSize * 5 / 8;
+                        if (led.shape === 'rectangle') {
+                            const ratio = led.ratio || 1;
+                            heightSize = actualSize * ratio;
                         }
                         
                         const y = led.y || 0;
@@ -860,13 +880,17 @@
                         const count = led.count || 1;
                         const dx = led.dx !== undefined ? led.dx : (led.x || 0) * 0.1;
                         const dy = led.dy !== undefined ? led.dy : (led.y || 0) * 0.1;
+                        const di = led.di !== undefined ? led.di : (led.color === 'rgb' ? 3 : 1);
                         
                         for (let i = 0; i < count; i++) {
                             // 计算当前LED的属性
                             let currentIndex = Array.isArray(led.index) 
-                                ? led.index.map(idx => idx + i * (led.color === 'rgb' ? 3 : 1))
-                                : led.index + i;
-                            const currentName = count > 1 ? `${led.name} ${i + 1}` : led.name;
+                                ? led.index.map(idx => idx + i * di)
+                                : led.index + i * di;
+                            // 如果原始name为空，保持为空；否则根据count添加序号
+                            // 确保name是字符串类型
+                            const baseName = String(led.name || '');
+                            const currentName = baseName ? (count > 1 ? `${baseName} ${i + 1}` : baseName) : '';
                             const currentX = (led.x || 0) + i * dx;
                             const currentY = (led.y || 0) + i * dy;
                             
@@ -877,17 +901,20 @@
                                 }
                                 
                                 // 创建一个按钮，控制三个通道
+                                // 如果currentName为空，使用索引作为groupId
+                                const rgbGroupId = currentName || `rgb-${currentIndex[0]}`;
                                 const button = createLEDButton(
                                     currentIndex, // 传递整个数组
                                     currentName, 
                                     'rgb', 
                                     null, 
-                                    currentName, 
+                                    rgbGroupId, 
                                     led.shape, 
                                     false, 
                                     led.size, 
                                     currentX, 
-                                    currentY
+                                    currentY,
+                                    led.ratio
                                 );
                                 console.log('  Created RGB button:', currentName, 'with index', currentIndex);
                                 
@@ -907,7 +934,8 @@
                                     false, 
                                     led.size, 
                                     currentX, 
-                                    currentY
+                                    currentY,
+                                    led.ratio
                                 );
                                 console.log('  Created', led.color || 'white', 'button:', currentName);
                                 
@@ -974,7 +1002,7 @@
             }
         }
 
-        function createLEDButton(index, name, color = 'white', channel = null, groupId = null, shape = 'square', showIcon = true, size = 100, x = 0, y = 0) {
+        function createLEDButton(index, name, color = 'white', channel = null, groupId = null, shape = 'rectangle', showIcon = true, size = 100, x = 0, y = 0, ratio = 1) {
             const button = document.createElement('div');
             
             // 如果是RGB类型且index不是数组，自动转换为数组[index, index+1, index+2]
@@ -983,7 +1011,7 @@
             }
             
             const isRGB = (color === 'rgb' && Array.isArray(index));
-            button.className = `led-button shape-${shape || 'square'}${isRGB ? ' rgb-type' : ''}`;
+            button.className = `led-button shape-${shape || 'rectangle'}${isRGB ? ' rgb-type' : ''}`;
             
             // RGB类型使用groupId作ID，其他使用index
             const buttonId = isRGB ? `led-rgb-${groupId}` : `led-${index}${channel || ''}`;
@@ -1010,16 +1038,12 @@
             let widthSize = actualSize;
             let heightSize = actualSize;
             
-            if (shape === 'portrait') {
-                // 竖长方形：宽5 高8
-                widthSize = actualSize * 5 / 8;
-                heightSize = actualSize;
-            } else if (shape === 'landscape') {
-                // 横长方形：宽8 高5
-                widthSize = actualSize;
-                heightSize = actualSize * 5 / 8;
+            if (shape === 'rectangle') {
+                // 矩形：根据ratio设置高宽比，ratio为高度/宽度
+                // ratio默认为1（正方形），1.6表示高度是宽度的1.6倍
+                heightSize = actualSize * (ratio || 1);
             }
-            // square 和 circle 保持 1:1
+            // circle 保持 1:1
             
             // 应用X、Y坐标定位（X和Y都是0-100的数值，都相对于容器宽度计算，保持1:1比例）
             // 坐标代表元素的中心点
@@ -1064,9 +1088,11 @@
                 </div>
             ` : '';
             const indicatorId = (color === 'rgb' && Array.isArray(index)) ? `brightness-rgb-${groupId}` : `brightness-${index}${channel || ''}`;
-            const indicatorHtml = (color === 'rgb' && Array.isArray(index)) ? '' : `<div class="brightness-indicator" id="${indicatorId}">0</div>`;
+            // 当name为空时，不显示名称和亮度指示器
+            const nameHtml = name ? `<div class="led-name">${name}</div>` : '';
+            const indicatorHtml = (color === 'rgb' && Array.isArray(index)) ? '' : (name ? `<div class="brightness-indicator" id="${indicatorId}">0</div>` : '');
             button.innerHTML = `
-                <div class="led-name">${name}</div>
+                ${nameHtml}
                 ${iconHtml}
                 ${rgbSlidersHtml}
                 ${indicatorHtml}
@@ -1097,7 +1123,10 @@
                         const percent = Math.max(0, Math.min(1, 1 - (y / height)));
                         const value = Math.round(percent * 255);
                         
-                        ledStates[index[channelIndex]] = value;
+                        // 更新ledStates中的value属性
+                        if (ledStates[index[channelIndex]]) {
+                            ledStates[index[channelIndex]].value = value;
+                        }
                         fill.style.height = `${percent * 100}%`;
                         
                         // 更新数值显示
@@ -1128,7 +1157,7 @@
                     });
                     
                     // 初始化滑条高度和数值显示
-                    const initialValue = ledStates[index[channelIndex]] || 0;
+                    const initialValue = (ledStates[index[channelIndex]] && ledStates[index[channelIndex]].value) || 0;
                     fill.style.height = `${(initialValue / 255) * 100}%`;
                     if (valueLabel) {
                         valueLabel.textContent = initialValue;
@@ -1153,7 +1182,7 @@
                     
                     const deltaY = lastY - e.clientY;
                     const sensitivity = 2;
-                    const currentBrightness = ledStates[index] || 0;
+                    const currentBrightness = (ledStates[index] && ledStates[index].value) || 0;
                     let newBrightness = currentBrightness + Math.round(deltaY * sensitivity);
                     newBrightness = Math.max(0, Math.min(255, newBrightness));
                     setLEDBrightness(index, newBrightness, color, channel);
@@ -1174,7 +1203,9 @@
         }
 
         function setLEDBrightness(index, brightness, color = 'white', channel = null) {
-            ledStates[index] = brightness;
+            if (ledStates[index]) {
+                ledStates[index].value = brightness;
+            }
             updateLEDVisual(index, color, channel);
             sendOutputReport();
         }
@@ -1184,9 +1215,13 @@
             // 查找该groupId对应的三个通道索引
             const light = currentLedMapping.lights.find(led => led.name === groupId && led.color === 'rgb');
             if (light && Array.isArray(light.index)) {
-                ledStates[light.index[0]] = r; // R通道
-                ledStates[light.index[1]] = g; // G通道
-                ledStates[light.index[2]] = b; // B通道
+                const rIndex = light.index[0];
+                const gIndex = light.index[1];
+                const bIndex = light.index[2];
+                
+                if (ledStates[rIndex]) ledStates[rIndex].value = r;
+                if (ledStates[gIndex]) ledStates[gIndex].value = g;
+                if (ledStates[bIndex]) ledStates[bIndex].value = b;
                 
                 // 更新视觉（使用RGB按钮ID）
                 updateLEDVisual(light.index, 'rgb', null);
@@ -1204,9 +1239,9 @@
             const gIndex = light.index[1];
             const bIndex = light.index[2];
             
-            let r = ledStates[rIndex] || 0;
-            let g = ledStates[gIndex] || 0;
-            let b = ledStates[bIndex] || 0;
+            let r = (ledStates[rIndex] && ledStates[rIndex].value) || 0;
+            let g = (ledStates[gIndex] && ledStates[gIndex].value) || 0;
+            let b = (ledStates[bIndex] && ledStates[bIndex].value) || 0;
             
             // 计算当前最大值（用于保持颜色比例）
             const maxValue = Math.max(r, g, b, 1);
@@ -1241,9 +1276,9 @@
             const gIndex = light.index[1];
             const bIndex = light.index[2];
             
-            let r = ledStates[rIndex] || 0;
-            let g = ledStates[gIndex] || 0;
-            let b = ledStates[bIndex] || 0;
+            let r = (ledStates[rIndex] && ledStates[rIndex].value) || 0;
+            let g = (ledStates[gIndex] && ledStates[gIndex].value) || 0;
+            let b = (ledStates[bIndex] && ledStates[bIndex].value) || 0;
             
             // 计算当前的平均值（灰度）
             const avg = (r + g + b) / 3;
@@ -1265,9 +1300,9 @@
             b = Math.max(0, Math.min(255, Math.round(b)));
             
             // 更新状态
-            ledStates[rIndex] = r;
-            ledStates[gIndex] = g;
-            ledStates[bIndex] = b;
+            if (ledStates[rIndex]) ledStates[rIndex].value = r;
+            if (ledStates[gIndex]) ledStates[gIndex].value = g;
+            if (ledStates[bIndex]) ledStates[bIndex].value = b;
             
             // 更新视觉（使用RGB按钮ID）
             const rgbLight = currentLedMapping.lights.find(led => led.name === groupId && led.color === 'rgb');
@@ -1301,9 +1336,9 @@
             // RGB类型显示混合后的亮度
             let brightness;
             if (color === 'rgb' && Array.isArray(index)) {
-                const r = ledStates[index[0]] || 0;
-                const g = ledStates[index[1]] || 0;
-                const b = ledStates[index[2]] || 0;
+                const r = (ledStates[index[0]] && ledStates[index[0]].value) || 0;
+                const g = (ledStates[index[1]] && ledStates[index[1]].value) || 0;
+                const b = (ledStates[index[2]] && ledStates[index[2]].value) || 0;
                 brightness = Math.max(r, g, b); // 使用最大值作为显示亮度
                 
                 // 更新亮度指示器
@@ -1312,7 +1347,7 @@
                     indicator.textContent = brightness;
                 }
             } else {
-                brightness = ledStates[index] || 0;
+                brightness = (ledStates[index] && ledStates[index].value) || 0;
                 
                 // 更新亮度显示
                 const indicator = document.getElementById(`brightness-${index}${channel || ''}`);
@@ -1329,6 +1364,7 @@
                 'yellow': { hue: 60, rgb: '255, 255, 0' },
                 'cyan': { hue: 180, rgb: '0, 255, 255' },
                 'magenta': { hue: 300, rgb: '255, 0, 255' },
+                'pink': { hue: 330, rgb: '255, 192, 203' },
                 'white': { hue: 0, rgb: '255, 255, 255' },
                 'orange': { hue: 30, rgb: '255, 165, 0' }
             };
@@ -1338,9 +1374,9 @@
             
             if (color === 'rgb' && Array.isArray(index)) {
                 // RGB类型：根据实际RGB值计算色相
-                const r = ledStates[index[0]] || 0;
-                const g = ledStates[index[1]] || 0;
-                const b = ledStates[index[2]] || 0;
+                const r = (ledStates[index[0]] && ledStates[index[0]].value) || 0;
+                const g = (ledStates[index[1]] && ledStates[index[1]].value) || 0;
+                const b = (ledStates[index[2]] && ledStates[index[2]].value) || 0;
                 
                 // 计算色相（简化版）
                 const max = Math.max(r, g, b);
@@ -1397,9 +1433,9 @@
                 let baseR, baseG, baseB;
                 if (color === 'rgb' && Array.isArray(index)) {
                     // RGB类型：使用实际的RGB值
-                    baseR = (ledStates[index[0]] || 0) / 255;
-                    baseG = (ledStates[index[1]] || 0) / 255;
-                    baseB = (ledStates[index[2]] || 0) / 255;
+                    baseR = ((ledStates[index[0]] && ledStates[index[0]].value) || 0) / 255;
+                    baseG = ((ledStates[index[1]] && ledStates[index[1]].value) || 0) / 255;
+                    baseB = ((ledStates[index[2]] && ledStates[index[2]].value) || 0) / 255;
                     
                     // 对于RGB类型，brightness已经是最大值
                 } else {
@@ -1475,7 +1511,9 @@
             }
 
             // 切换状态：0 -> 255, 其他 -> 0
-            ledStates[index] = ledStates[index] === 0 ? 255 : 0;
+            if (ledStates[index]) {
+                ledStates[index].value = (ledStates[index].value === 0) ? 255 : 0;
+            }
             
             // 更新视觉效果
             updateLEDVisual(index, color, channel);
@@ -1486,19 +1524,31 @@
 
         async function sendOutputReport() {
             try {
-                // 构建输出数据
-                const data = new Uint8Array(outputReportSize);
+                // 按report ID分组更新数据
+                const reportsToSend = new Map();
                 
-                // 填充每个 LED 的状态
                 Object.keys(ledStates).forEach(index => {
-                    const byteIndex = parseInt(index);
-                    if (byteIndex < data.length) {
-                        data[byteIndex] = ledStates[index];
+                    const ledState = ledStates[index];
+                    const reportId = ledState.reportId;
+                    const offset = ledState.offset;
+                    const value = ledState.value;
+                    
+                    if (!outputReports.has(reportId)) {
+                        return;
+                    }
+                    
+                    const reportInfo = outputReports.get(reportId);
+                    if (offset < reportInfo.size) {
+                        reportInfo.data[offset] = value;
+                        reportsToSend.set(reportId, reportInfo);
                     }
                 });
 
-                // 发送报告
-                await hidDevice.sendReport(outputReportId, data);
+                // 发送所有需要更新的report
+                for (const [reportId, reportInfo] of reportsToSend) {
+                    console.log(`Sending report ID ${reportId}, size ${reportInfo.size} bytes:`, Array.from(reportInfo.data));
+                    await hidDevice.sendReport(reportId, reportInfo.data);
+                }
 
             } catch (error) {
                 console.error('Failed to send output report:', error);
