@@ -399,8 +399,8 @@
             // Check if line is a title: [text with letters, spaces, hyphens, underscores]
             const titleMatch = text.match(/^(\[[a-zA-Z \-_]+\])$/);
             // Check if line is a marker: optional spaces + <<text>>
-            const markerMatch = text.match(/^\s*(<<.+>>)\s*$/);
-            
+            const markerMatch = text.match(/^\s*(<<.+>>)?\s*$/);
+
             // Get or create last line
             let lastLine = terminalOutput.lastElementChild;
             if (!lastLine || !lastLine.classList.contains('output-line')) {
@@ -408,7 +408,7 @@
                 lastLine.className = 'output-line';
                 terminalOutput.appendChild(lastLine);
             }
-            
+
             if (promptMatch) {
                 // New line for prompt
                 if (lastLine.textContent) {
@@ -416,13 +416,13 @@
                     lastLine.className = 'output-line';
                     terminalOutput.appendChild(lastLine);
                 }
-                
+
                 // Highlight the prompt part
                 const promptSpan = document.createElement('span');
                 promptSpan.className = 'output-prompt';
                 promptSpan.textContent = promptMatch[1];
                 lastLine.appendChild(promptSpan);
-                
+
                 // Add the rest of the line if exists
                 if (promptMatch[2]) {
                     const restSpan = document.createElement('span');
@@ -437,13 +437,13 @@
                     lastLine.className = 'output-line';
                     terminalOutput.appendChild(lastLine);
                 }
-                
+
                 // Highlight the label part
                 const labelSpan = document.createElement('span');
                 labelSpan.className = 'output-label';
                 labelSpan.textContent = labelMatch[1];
                 lastLine.appendChild(labelSpan);
-                
+
                 // Add the rest of the line if exists
                 if (labelMatch[2]) {
                     const restSpan = document.createElement('span');
@@ -458,7 +458,7 @@
                     lastLine.className = 'output-line';
                     terminalOutput.appendChild(lastLine);
                 }
-                
+
                 // Highlight the title
                 const titleSpan = document.createElement('span');
                 titleSpan.className = 'output-title';
@@ -471,7 +471,7 @@
                     lastLine.className = 'output-line';
                     terminalOutput.appendChild(lastLine);
                 }
-                
+
                 // Highlight the marker
                 const markerSpan = document.createElement('span');
                 markerSpan.className = 'output-marker';
@@ -484,13 +484,19 @@
                     lastLine.className = 'output-line';
                     terminalOutput.appendChild(lastLine);
                 }
-                
+
                 if (text) {
                     const span = document.createElement('span');
                     span.className = 'output-received';
                     span.textContent = text;
                     lastLine.appendChild(span);
                 }
+            }
+
+            // Limit buffer to last 200 lines
+            const maxLines = 200;
+            while (terminalOutput.children.length > maxLines) {
+                terminalOutput.removeChild(terminalOutput.firstChild);
             }
 
             terminalOutput.scrollTop = terminalOutput.scrollHeight;
@@ -522,7 +528,7 @@
             const span = document.createElement('span');
             span.className = `output-${type}`;
             span.textContent = text;
-            
+
             let lastLine = terminalOutput.lastElementChild;
             if (!lastLine || !lastLine.classList.contains('output-line')) {
                 lastLine = document.createElement('div');
@@ -530,6 +536,12 @@
                 terminalOutput.appendChild(lastLine);
             }
             lastLine.appendChild(span);
+
+            // Limit buffer to last 200 lines
+            const maxLines = 200;
+            while (terminalOutput.children.length > maxLines) {
+                terminalOutput.removeChild(terminalOutput.firstChild);
+            }
 
             terminalOutput.scrollTop = terminalOutput.scrollHeight;
 
