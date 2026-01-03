@@ -387,6 +387,11 @@
         
         // Add a complete line to terminal
         function addCompleteLine(text) {
+            // Auto-send empty line when device prints "Program Flash "
+            if (text.startsWith('Program Flash ')) {
+                sendCommand('');
+            }
+
             // Remove cursor temporarily
             if (cursor && cursor.parentElement) {
                 cursor.remove();
@@ -633,18 +638,16 @@
 
             if (e.key === 'Enter') {
                 e.preventDefault();
-                if (currentInput.trim()) {
-                    sendCommand(currentInput.trim());
-                    currentInput = '';
-                    // Remove cursor and input, will be restored when new prompt arrives
-                    if (cursor && cursor.parentElement) {
-                        cursor.remove();
-                        cursor = null;
-                    }
-                    if (inputLine && inputLine.parentElement) {
-                        inputLine.remove();
-                        inputLine = null;
-                    }
+                sendCommand(currentInput.trim());
+                currentInput = '';
+                // Remove cursor and input, will be restored when new prompt arrives
+                if (cursor && cursor.parentElement) {
+                    cursor.remove();
+                    cursor = null;
+                }
+                if (inputLine && inputLine.parentElement) {
+                    inputLine.remove();
+                    inputLine = null;
                 }
             } else if (e.key === 'Backspace') {
                 e.preventDefault();
