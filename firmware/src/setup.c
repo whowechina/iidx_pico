@@ -133,36 +133,7 @@ static struct {
     uint16_t start_angle;
 } none_ctx = { 0 };
 
-static void none_rotate()
-{
-    if (!none_ctx.escaped) {
-        return;
-    }
-
-    int16_t delta = input_delta(none_ctx.start_angle);
-    if (abs(delta) > 50) {
-        join_mode(MODE_LEVEL);
-        none_ctx.escaped = false;
-    }
-}
-
-static void none_disp_escaped()
-{
-    // profiles
-    for (int i = 0; i < 4; i++) {
-        hsv_t hsv = { i * 64, 240, i == iidx_cfg->profile ? 100 : 30 };
-        uint32_t color = rgb_from_hsv(hsv);
-        color &= (i == iidx_cfg->profile) ? blink_rapid : 0xffffffff;
-        rgb_force_light(LED_E1 + i, color);
-    }
-    // options
-    for (int i = 0; i < 7; i++) {
-        hsv_t hsv = { i * 35, 240, 64 };
-        uint32_t color = rgb_from_hsv(hsv);
-        color &= (key_to_mode[i] == MODE_NONE) ? 0 : blink_slow;
-        rgb_force_light(LED_KEY_1 + i, color);
-    }
-}
+static typeof(PROFILE_EX.trigger) old_trig = {0};
 
 static void use_safe_trigger()
 {
@@ -175,8 +146,6 @@ static void use_safe_trigger()
     // might be false triggered, so clear them
     input.keys &= ~(KEY_1 | KEY_2 | KEY_3 | KEY_4 | KEY_5 | KEY_6 | KEY_7);
 }
-
-static typeof(PROFILE_EX.trigger) old_trig = {0};
 
 static void enter_escape()
 {
@@ -195,6 +164,37 @@ static void quit_escape()
     if (none_ctx.escaped) {
         none_ctx.escaped = false;
         PROFILE_EX.trigger = old_trig;
+    }
+}
+
+static void none_rotate()
+{
+    if (!none_ctx.escaped) {
+        return;
+    }
+
+    int16_t delta = input_delta(none_ctx.start_angle);
+    if (abs(delta) > 50) {
+        quit_escape();
+        join_mode(MODE_LEVEL);
+    }
+}
+
+static void none_disp_escaped()
+{
+    // profiles
+    for (int i = 0; i < 4; i++) {
+        hsv_t hsv = { i * 64, 240, i == iidx_cfg->profile ? 100 : 30 };
+        uint32_t color = rgb_from_hsv(hsv);
+        color &= (i == iidx_cfg->profile) ? blink_rapid : 0xffffffff;
+        rgb_force_light(LED_E1 + i, color);
+    }
+    // options
+    for (int i = 0; i < 7; i++) {
+        hsv_t hsv = { i * 35, 240, 64 };
+        uint32_t color = rgb_from_hsv(hsv);
+        color &= (key_to_mode[i] == MODE_NONE) ? 0 : blink_slow;
+        rgb_force_light(LED_KEY_1 + i, color);
     }
 }
 
