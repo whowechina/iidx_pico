@@ -272,6 +272,7 @@
         let writer = null;
         let readableStreamClosed = null;
         let writableStreamClosed = null;
+        let isDisconnecting = false;
 
         // UI Elements
         const connectBtn = document.getElementById('connectBtn');
@@ -301,9 +302,12 @@
         async function connect() {
             try {
                 // Request port from user
-                port = await navigator.serial.requestPort();
+                const selectedPort = await navigator.serial.requestPort();
 
-                await port.open({ baudRate: 115200 });
+                await selectedPort.open({ baudRate: 115200 });
+
+                // Only promote to global state after successful open
+                port = selectedPort;
 
                 // Setup read stream
                 const textDecoder = new TextDecoderStream();
@@ -322,29 +326,74 @@
                 updateUIConnected(true);
 
             } catch (error) {
-                addOutput(`Connection error: ${error.message}`, 'error');
-                await disconnect();
+                // User cancelled the port picker - treat as normal cancel flow
+                if (error && (error.name === 'NotFoundError' || error.name === 'AbortError')) {
+                    return;
+                }
+
+                addOutput(`Connection error: ${error.message}`, 'error', true);
+                await disconnect({ silent: true });
             }
         }
 
         // Disconnect from port
-        async function disconnect() {
+        async function disconnect(options = {}) {
+            const normalizedOptions = typeof options === 'boolean'
+                ? { silent: options, message: 'Disconnected.' }
+                : {
+                    silent: options.silent ?? false,
+                    message: options.message ?? 'Disconnected.'
+                };
+
+            const { silent, message } = normalizedOptions;
+
+            if (isDisconnecting) return;
+            isDisconnecting = true;
+
+            const currentPort = port;
+
             if (reader) {
-                await reader.cancel();
+                try {
+                    await reader.cancel();
+                } catch (_) {
+                }
+                try {
+                    await readableStreamClosed;
+                } catch (_) {
+                }
                 reader = null;
+                readableStreamClosed = null;
             }
 
             if (writer) {
-                await writer.close();
+                try {
+                    await writer.close();
+                } catch (_) {
+                }
+                try {
+                    await writableStreamClosed;
+                } catch (_) {
+                }
                 writer = null;
+                writableStreamClosed = null;
             }
 
-            if (port) {
-                await port.close();
-                port = null;
+            if (currentPort) {
+                try {
+                    await currentPort.close();
+                } catch (_) {
+                }
             }
 
+            port = null;
+            receiveBuffer = '';
             updateUIConnected(false);
+
+            if (!silent && message) {
+                addOutput(message, 'info', true);
+            }
+
+            isDisconnecting = false;
         }
 
         // Read loop
@@ -352,7 +401,10 @@
             try {
                 while (true) {
                     const { value, done } = await reader.read();
-                    if (done) break;
+                    if (done) {
+                        await disconnect({ message: 'Disconnected (device lost).' });
+                        break;
+                    }
                     if (value) {
                         // Add to buffer
                         receiveBuffer += value;
@@ -382,6 +434,7 @@
                 if (error.name !== 'NetworkError') {
                     addCompleteLine(`Read error: ${error.message}`);
                 }
+                await disconnect({ message: 'Disconnected (device lost).' });
             }
         }
         
@@ -524,7 +577,7 @@
         }
 
         // Add output to terminal (for errors)
-        function addOutput(text, type = 'received') {
+        function addOutput(text, type = 'received', forceNewLine = false) {
             // Remove cursor temporarily
             if (cursor && cursor.parentElement) {
                 cursor.remove();
@@ -536,6 +589,11 @@
 
             let lastLine = terminalOutput.lastElementChild;
             if (!lastLine || !lastLine.classList.contains('output-line')) {
+                lastLine = document.createElement('div');
+                lastLine.className = 'output-line';
+                terminalOutput.appendChild(lastLine);
+            }
+            if (forceNewLine && lastLine.textContent) {
                 lastLine = document.createElement('div');
                 lastLine.className = 'output-line';
                 terminalOutput.appendChild(lastLine);
@@ -630,7 +688,16 @@
 
         // Event Listeners
         connectBtn.addEventListener('click', connect);
-        disconnectBtn.addEventListener('click', disconnect);
+        disconnectBtn.addEventListener('click', () => disconnect({ message: 'Disconnected.' }));
+
+        if ('serial' in navigator) {
+            navigator.serial.addEventListener('disconnect', async (event) => {
+                const disconnectedPort = event.port || event.target;
+                if (port && disconnectedPort === port) {
+                    await disconnect({ message: 'Disconnected (device unplugged).' });
+                }
+            });
+        }
 
         // Terminal keyboard input
         terminalOutput.addEventListener('keydown', (e) => {
