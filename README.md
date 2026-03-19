@@ -90,7 +90,7 @@ If you're interested in buying from me, or for commercial use, please contact me
   https://www3.panasonic.biz/ac/e/dl/catalog/index.jsp?series_cd=3473&part_no=EVQP1K05M  
   https://tech.alpsalpine.com/e/products/detail/SKPMAPE010/
 * 1x USB Type-C socket (918-418K2023S40001 or KH-TYPE-C-16P)
-* 1x AS5600 (SOP8) or MT6701CT-STD (SOP8) or TMAG5273 (SOT23-6) hall angular sensor chip. If you use an MT6701 on PCB revisions before v1.6, trim its pin 8 (Z/CSN) before soldering. If you use AS5600 on new PCB revisions (v1.6 or later), please solder bridge the JP1 jumper.
+* 1x AS5600 (SOP8), MT6701CT-STD (SOP8), or TMAG5273 (SOT23-6) hall angular sensor chip. For MT6701, trim pin 8 (Z/CSN) if JP1 is not present on the PCB; for AS5600, solder bridge JP1 if it is present.
 * RGB LEDs
   * IIDX Pico and IIDX Jumbo (nicer light effect version)
     * 28x WS2812B-1516 or WS2812B-2020 for main buttons, pinout should be exactly like this:  
