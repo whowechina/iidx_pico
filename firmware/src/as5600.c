@@ -1,5 +1,6 @@
 /*
  * AS5600 Angular Hall Sensor
+ * 12-bit, I2C Interface
  * WHowe <github.com/whowechina>
  * 
  */
@@ -28,11 +29,6 @@ void as5600_init(i2c_inst_t *i2c_port)
     as5600_i2c = i2c_port;
 }
 
-bool as5600_init_sensor()
-{
-    return true;
-}
-
 bool as5600_is_present()
 {
     uint8_t buf[1] = {0x0c};
@@ -57,7 +53,7 @@ static int as5600_read_reg16(uint8_t reg)
     return (buf[0] << 8) | buf[1];
 }
 
-int as5600_read_angle()
+int as5600_read()
 {
     return as5600_read_reg16(AS5600_REG_ANGLE);
 }

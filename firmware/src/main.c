@@ -83,20 +83,35 @@ void mode_check()
     }
 }
 
-static uint8_t latest_angle;
-static uint16_t latest_buttons;
+static uint16_t latest_hybrid_buttons;
+
+static void hybrid_button_update()
+{
+    uint16_t buttons = button_read();
+    for (int i = 0; i < hebtn_keynum(); i++) {
+        if (hebtn_present(i)) {
+            buttons |= (hebtn_actuated(i) << i);
+        }
+    }
+    latest_hybrid_buttons = buttons;
+}
+
+static uint16_t hybrid_button_read()
+{
+    return latest_hybrid_buttons;
+}
 
 #define TT_HOLD_TIME_MS 200
 
-static void gen_binary_tt()
+static void gen_binary_tt(uint8_t angle)
 {
     static uint8_t previous_angle = 0;
     static bool tt_active = false;
     static bool tt_dir_cw = false;
     static uint32_t tt_timeout = 0;
 
-    int8_t delta = latest_angle - previous_angle;
-    previous_angle = latest_angle;
+    int8_t delta = angle - previous_angle;
+    previous_angle = angle;
 
     uint64_t now = time_us_32();
 
@@ -114,7 +129,9 @@ static void gen_binary_tt()
 
 static void gen_hid_report()
 {
-    uint16_t buttons = latest_buttons;
+    uint16_t buttons = hybrid_button_read();
+    uint8_t angle = turntable_read(8);
+
     if (iidx_cfg->hid.konami) {
         uint16_t aux_buttons = buttons & 0xff80;
         buttons = (buttons & 0x7f) | (aux_buttons << 1); // skips button 8
@@ -122,9 +139,9 @@ static void gen_hid_report()
     hid_joy.buttons = buttons;
 
     if (iidx_cfg->sensor.binary) {
-        gen_binary_tt();
+        gen_binary_tt(angle);
     } else {
-        hid_joy.axis[0] = latest_angle;
+        hid_joy.axis[0] = angle;
         hid_joy.axis[1] = 255 - hid_joy.axis[0];
     }
 }
@@ -133,11 +150,8 @@ static mutex_t core1_io_lock;
 static void core1_loop()
 {
     while (true) {
-        uint32_t raw_angle = turntable_raw();
-        latest_angle = turntable_read();
-
         if (mutex_try_enter(&core1_io_lock, NULL)) {
-            rgb_update(raw_angle, latest_buttons);
+            rgb_update(turntable_read_abs(12), hybrid_button_read());
             mutex_exit(&core1_io_lock);
         }
 
@@ -146,18 +160,7 @@ static void core1_loop()
     }
 }
 
-static uint16_t hybrid_button_read()
-{
-    uint16_t buttons = button_read();
-    for (int i = 0; i < hebtn_keynum(); i++) {
-        if (hebtn_present(i)) {
-            buttons |= (hebtn_actuated(i) << i);
-        }
-    }
-    return buttons;
-}
-
-static bool new_board = false;
+static bool is_hall_board = false;
 
 static void core0_loop()
 {
@@ -168,15 +171,16 @@ static void core0_loop()
         tud_task();
         cli_run();
 
-        turntable_update();
-
-        if (new_board) {
+        if (is_hall_board) {
             hebtn_update();
         }
 
-        latest_buttons = hybrid_button_read();
-        uint16_t angle = turntable_raw() >> 4;
-        setup_run(latest_buttons, angle);
+        turntable_update();
+        hybrid_button_update();
+
+        uint16_t buttons = hybrid_button_read();
+        uint16_t abs_angle = turntable_read_abs(8);
+        setup_run(buttons, abs_angle);
 
         bool ov_tt = setup_needs_tt_led();
         bool ov_btn = setup_needs_button_led();
@@ -187,7 +191,7 @@ static void core0_loop()
         if (ov_btn) {
             rgb_override_button(setup_led_button);
         } else {
-            rgb_set_button_light(latest_buttons);
+            rgb_set_button_light(buttons);
         }
 
         hid_joy.buttons = 0;
@@ -200,7 +204,7 @@ static void core0_loop()
         cli_fps_count(0);
 
         sleep_until(next_frame);
-        next_frame += 1001;
+        next_frame += 1000;
     }
 }
 
@@ -215,17 +219,17 @@ void init()
 
     if ((tt_present) && (turntable_is_alternative())) {
         // identify hall version by sensor's i2c port
-        new_board = true;
+        is_hall_board = true;
         hebtn_init();
     }
 
     if (!tt_present) {
         // even if tt not available, we still try to detect hall sensor
         hebtn_init();
-        new_board = (hebtn_presence_map() > 0);
+        is_hall_board = (hebtn_presence_map() > 0);
     }
 
-    rgb_init(new_board);
+    rgb_init(is_hall_board);
 
     tt_rainbow_init();
     tt_blade_init();

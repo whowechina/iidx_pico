@@ -16,6 +16,7 @@
 #include "hardware/i2c.h"
 
 #include "as5600.h"
+#include "mt6701.h"
 #include "tmag5273.h"
 
 #include "board_defs.h"
@@ -25,8 +26,13 @@ static i2c_inst_t *sensor_i2c = TT_SENSOR_I2C;
 static uint8_t i2c_scl = TT_SENSOR_SCL;
 static uint8_t i2c_sda = TT_SENSOR_SDA;
 
-static bool sensor_identified = false;
-static bool sensor_is_as5600 = true;
+typedef enum {
+    SENSOR_UNKNOWN,
+    SENSOR_AS5600,
+    SENSOR_MT6701,
+    SENSOR_TMAG5273
+} sensor_type_t;
+static sensor_type_t sensor_type = SENSOR_UNKNOWN;
 
 static void init_port(bool use_primary)
 {
@@ -59,23 +65,28 @@ static void deinit_port()
 
 static bool identify_sensor()
 {
-    sensor_identified = false;
+    sensor_type = SENSOR_UNKNOWN;
+
+    as5600_init(sensor_i2c);
+    if (as5600_is_present(sensor_i2c)) {
+        sensor_type = SENSOR_AS5600;
+        return true;
+    }
+
+    mt6701_init(sensor_i2c);
+    if (mt6701_is_present()) {
+        sensor_type = SENSOR_MT6701;
+        return true;
+    }
 
     tmag5273_init(0, sensor_i2c);
     if (tmag5273_is_present(0)) {
         tmag5273_use(0);
         tmag5273_init_sensor();
-        sensor_is_as5600 = false;
-        sensor_identified = true;
+        sensor_type = SENSOR_TMAG5273;
         return true;
     }
 
-    as5600_init(sensor_i2c);
-    if (as5600_is_present(sensor_i2c)) {
-        sensor_is_as5600 = true;
-        sensor_identified = true;
-        return true;
-    }
     return false;
 }
 
@@ -101,60 +112,78 @@ bool turntable_is_alternative()
     return sensor_i2c == TT_SENSOR_I2C_2;
 }
 
+#define ANGLE_BITS 14
+#define ANGLE_RANGE (1 << ANGLE_BITS)
+#define ANGLE_MAX (ANGLE_RANGE - 1)
+#define ANGLE_CENTER (ANGLE_RANGE / 2)
+
 static uint16_t raw_angle = 0;
 
 static int read_angle()
 {
-    if (sensor_is_as5600) {
-        static int cache = 0;
-        int angle = as5600_read_angle();
+    static int cache = 0;
+    if (sensor_type == SENSOR_AS5600) {
+        int angle = as5600_read();
+        if (angle >= 0) {
+            cache = angle << 2;
+        }
+        return cache;
+    }
+
+    if (sensor_type == SENSOR_MT6701) {
+        int angle = mt6701_read();
         if (angle >= 0) {
             cache = angle;
         }
         return cache;
     }
 
-    return tmag5273_read_angle() * 0x1000 / 360 / 16;
+    return tmag5273_read() * ANGLE_RANGE / 360 / 16;
 }
 
 static const int average_count = 4;
 void turntable_update()
 {
-    int sum = read_angle();
-    int count = 1;
-    for (int i = 0; i < average_count - 1; i++) {
-        int angle = read_angle();
-        int average = sum / count;
-        if (abs(angle - average) < 64) {
-            sum += angle;
-            count++;
+    int ref = read_angle();
+    int sum = 0;
+    for (int i = 1; i < average_count; i++) {
+        int d = read_angle() - ref;
+        if (d > ANGLE_CENTER) {
+             d -= ANGLE_RANGE;
         }
+        else if (d < -ANGLE_CENTER) {
+            d += ANGLE_RANGE;
+        }
+        sum += d;
     }
 
-    int angle = sum / count;
+    int angle = (ref + sum / average_count + ANGLE_RANGE) % ANGLE_RANGE;
     
-    raw_angle = iidx_cfg->sensor.reversed ? (4095 - angle) : angle;
+    raw_angle = iidx_cfg->sensor.reversed ? (ANGLE_MAX - angle) : angle;
 }
 
-uint16_t turntable_raw()
+uint16_t turntable_read_abs(uint8_t bits)
 {
-    return raw_angle;
+    if (bits >= ANGLE_BITS) {
+        return raw_angle;
+    }
+    return raw_angle >> (ANGLE_BITS - bits);
 }
 
-uint8_t turntable_read()
+uint32_t turntable_read(uint8_t bits)
 {
-    static uint8_t counter = 0;
+    static uint32_t counter = 0;
     static int16_t old_angle = 0;
 
     int16_t delta = raw_angle - old_angle;
-    if (delta > 2048) {
-        delta -= 4096;
-    } else if (delta < -2048) {
-        delta += 4096;
+    if (delta > ANGLE_CENTER) {
+        delta -= ANGLE_RANGE;
+    } else if (delta < -ANGLE_CENTER) {
+        delta += ANGLE_RANGE;
     }
 
     const uint16_t divs[8] = { 200, 128, 64, 32, 256, 160, 96, 48};
-    uint16_t step = 4096 / divs[iidx_cfg->sensor.ppr & 7];
+    uint16_t step = ANGLE_RANGE / divs[iidx_cfg->sensor.ppr & 7];
 
     if (abs(delta) >= step) {
         if (delta > 0) {
@@ -164,20 +193,29 @@ uint8_t turntable_read()
             counter--;
             old_angle -= step;
         }
-        if (old_angle > 4096) {
-            old_angle -= 4096;
+        if (old_angle > ANGLE_MAX) {
+            old_angle -= ANGLE_RANGE;
         } else if (old_angle < 0) {
-            old_angle += 4096;
+            old_angle += ANGLE_RANGE;
         }
     }
 
+    if (bits < 32) {
+        return counter & ((1UL << bits) - 1);
+    }
     return counter;
 }
 
 const char *turntable_sensor_name()
 {
-    if (!sensor_identified) {
-        return "Unknown";
+    switch (sensor_type) {
+        case SENSOR_AS5600:
+            return "AS5600";
+        case SENSOR_MT6701:
+            return "MT6701";
+        case SENSOR_TMAG5273:
+            return "TMAG5273";
+        default:
+            return "Unknown";
     }
-    return sensor_is_as5600 ? "AS5600" : "TMAG5273";
 }

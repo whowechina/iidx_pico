@@ -1,5 +1,6 @@
 /*
  * TMAG5273 Angular Hall Sensor
+ * 12-bit, I2C Interface
  * WHowe <github.com/whowechina>
  * 
  */
@@ -22,6 +23,6 @@ bool tmag5273_init_sensor();
 uint8_t tmag5273_read_reg(uint8_t addr);
 void tmag5273_write_reg(uint8_t addr, uint8_t value);
 
-uint16_t tmag5273_read_angle();
+uint16_t tmag5273_read(); // angle in 1/16 degree units, [0..360*16-1]
 
 #endif

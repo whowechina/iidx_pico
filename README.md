@@ -90,7 +90,7 @@ If you're interested in buying from me, or for commercial use, please contact me
   https://www3.panasonic.biz/ac/e/dl/catalog/index.jsp?series_cd=3473&part_no=EVQP1K05M  
   https://tech.alpsalpine.com/e/products/detail/SKPMAPE010/
 * 1x USB Type-C socket (918-418K2023S40001 or KH-TYPE-C-16P)
-* 1x AS5600 (SOP8) or TMAG5273 (SOT23-6) hall angular sensor chip.
+* 1x AS5600 (SOP8) or MT6701CT-STD (SOP8) or TMAG5273 (SOT23-6) hall angular sensor chip. If you use an MT6701 on PCB revisions before v1.6, trim its pin 8 (Z/CSN) before soldering.
 * RGB LEDs
   * IIDX Pico and IIDX Jumbo (nicer light effect version)
     * 28x WS2812B-1516 or WS2812B-2020 for main buttons, pinout should be exactly like this:  
@@ -121,7 +121,7 @@ If you're interested in buying from me, or for commercial use, please contact me
 ### Step 1 - Buy
 * Main PCB  
   Just go [JLC](https://jlcpcb.com/) or some other PCB vendor you like and make the order. Make sure the board thickness is **1.2mm**, it's very important!
-* Acrylic disc for IIDX Pico and IIDX Jumbo  
+* Acrylic disc for IIDX Pico and IIDX Jumbo.  
   Find a vendor to cut a 3mm thick black acrylic using corresponding DXF file.  
   You can 3D print a turntable disc, but it is prone to heat deformation.
 

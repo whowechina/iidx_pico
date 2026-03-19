@@ -88,7 +88,7 @@
   https://www3.panasonic.biz/ac/e/dl/catalog/index.jsp?series_cd=3473&part_no=EVQP1K05M  
   https://tech.alpsalpine.com/e/products/detail/SKPMAPE010/
 * 1x USB Type-C 插座（918-418K2023S40001 或 KH-TYPE-C-16P）。
-* 1x AS5600（SOP8） 或者 TMAG5273（SOT23-6） 霍尔角度传感器芯片。
+* 1x AS5600（SOP8）或者 MT6701CT-STD（SOP8）或者 TMAG5273（SOT23-6） 霍尔角度传感器芯片。如果你在 v1.6 之前的 PCB 版本上使用 MT6701，请在焊接前剪掉它的第 8 引脚（Z/CSN）。
 * RGB LED 灯
   * IIDX Pico 和 IIDX Jumbo（光效更好的方案）
     * 28x WS2812B-1516 或 WS2812B-2020 LED 灯珠，用于主按钮，引脚顺序必须是下图所示这种。  
