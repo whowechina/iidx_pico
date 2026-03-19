@@ -41,6 +41,7 @@ static uint32_t my_magic = 0xcafecafe;
 
 #define SAVE_SECTOR_OFFSET (PICO_FLASH_SIZE_BYTES - FLASH_SECTOR_SIZE)
 #define SAVE_TOTAL_PAGE_NUM (FLASH_SECTOR_SIZE / FLASH_PAGE_SIZE)
+#define SAVE_MAX_DATA_SIZE (SAVEDATA_MAX_PAGES * FLASH_PAGE_SIZE - 4)
 
 typedef struct __attribute ((packed)) {
     uint32_t magic;
@@ -62,7 +63,7 @@ static void save_program()
     
     savedata_page++;
     if ((savedata_page < 0) ||
-        ((savedata_page + 1) * pages_per_savedata >= SAVE_TOTAL_PAGE_NUM)) {
+        (savedata_page * pages_per_savedata >= SAVE_TOTAL_PAGE_NUM)) {
         savedata_page = 0;
     }
 
@@ -177,6 +178,14 @@ void savedata_loop()
 
 void *savedata_alloc(size_t size, void *def, void (*after_load)())
 {
+    if (module_num >= count_of(modules)) {
+        return NULL;
+    }
+
+    if (size > SAVE_MAX_DATA_SIZE - savedata_size) {
+        return NULL;
+    }
+
     modules[module_num].size = size;
     size_t offset = savedata_size;
     modules[module_num].offset = offset;
