@@ -138,7 +138,12 @@ static int read_angle()
         return cache;
     }
 
-    return tmag5273_read() * ANGLE_RANGE / 360 / 16;
+    if (sensor_type == SENSOR_TMAG5273) {
+        int angle = tmag5273_read();
+        return angle * ANGLE_RANGE / 360 / 16;
+    }
+
+    return 0;
 }
 
 static const int average_count = 4;
