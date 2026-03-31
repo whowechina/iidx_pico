@@ -703,6 +703,16 @@
         terminalOutput.addEventListener('keydown', (e) => {
             if (!port) return;
 
+            // Ctrl+C support: send ASCII 3 (\x03) to remote
+            if (e.key === 'c' && e.ctrlKey && !e.altKey && !e.metaKey) {
+                e.preventDefault();
+                if (writer) {
+                    writer.write('\x03');
+                }
+                addOutput('^C', 'sent', true);
+                return;
+            }
+
             if (e.key === 'Enter') {
                 e.preventDefault();
                 sendCommand(currentInput.trim());
