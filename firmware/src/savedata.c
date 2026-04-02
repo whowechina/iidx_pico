@@ -55,7 +55,16 @@ static int savedata_page = -1;
 static bool requesting_save = false;
 static uint64_t requesting_time = 0;
 
-static mutex_t *io_lock;
+static void do_write_flash(void *param)
+{
+    int target_page_addr = savedata_page * pages_per_savedata * FLASH_PAGE_SIZE;
+
+    if (savedata_page == 0) {
+        flash_range_erase(SAVE_SECTOR_OFFSET, FLASH_SECTOR_SIZE);
+    }
+    flash_range_program(SAVE_SECTOR_OFFSET + target_page_addr,
+                        (uint8_t *)&old_data, savedata_pkt_size);
+}
 
 static void save_program()
 {
@@ -67,22 +76,12 @@ static void save_program()
         savedata_page = 0;
     }
 
-    int target_page_addr = savedata_page * pages_per_savedata * FLASH_PAGE_SIZE;
-
-    if (mutex_enter_timeout_us(io_lock, 200000)) {
-        sleep_ms(20); /* wait for all io operations to finish */
-        uint32_t ints = save_and_disable_interrupts();
-        if (savedata_page == 0) {
-            flash_range_erase(SAVE_SECTOR_OFFSET, FLASH_SECTOR_SIZE);
-        }
-        flash_range_program(SAVE_SECTOR_OFFSET + target_page_addr,
-                            (uint8_t *)&old_data, savedata_pkt_size);
-        restore_interrupts(ints);
-        mutex_exit(io_lock);
-        printf("\nProgram Flash page %d (%8lx) done.\n", savedata_page, old_data.magic);
-    } else {
-        printf("Program Flash failed.\n");
+    if (flash_safe_execute(do_write_flash, NULL, 1000) != PICO_OK) {
+        printf("Flash write failed!\n");
+        return;
     }
+
+    printf("\nProgram Flash page %d (%8lx) done.\n", savedata_page, old_data.magic);
 }
 
 static void load_default()
@@ -154,10 +153,9 @@ uint64_t savedata_id_64()
     return board_id.id64;
 }
 
-void savedata_init(uint32_t magic, mutex_t *locker)
+void savedata_init(uint32_t magic)
 {
     my_magic = magic;
-    io_lock = locker;
     prepare_data();
     load_data();
     savedata_loop();

@@ -146,15 +146,17 @@ static void gen_hid_report()
     }
 }
 
-static mutex_t core1_io_lock;
+static void core1_init()
+{
+    flash_safe_execute_core_init();
+}
+
 static void core1_loop()
 {
-    while (true) {
-        if (mutex_try_enter(&core1_io_lock, NULL)) {
-            rgb_update(turntable_read_abs(12), hybrid_button_read());
-            mutex_exit(&core1_io_lock);
-        }
+    core1_init();
 
+    while (true) {
+        rgb_update(turntable_read_abs(12), hybrid_button_read());
         cli_fps_count(1);
         sleep_us(500);
     }
@@ -240,8 +242,7 @@ void init()
 
     setup_init();
     config_init();
-    mutex_init(&core1_io_lock);
-    savedata_init(0xca341125, &core1_io_lock);
+    savedata_init(0xca341125);
 
     cli_init("iidx_pico>", "\n   << IIDX Pico|Teeny Controller >>\n"
                             " https://github.com/whowechina\n\n");
