@@ -14,9 +14,19 @@
 #include "hebtn.h"
 #include "turntable.h"
 
-static void handle_save()
+static void handle_save(int argc, char *argv[])
 {
-    savedata_save(true);
+    if (argc == 0) {
+        savedata_save(true);
+        return;
+    }
+
+    if ((argc == 1) && (strncasecmp(argv[0], "clean", strlen(argv[0])) == 0)) {
+        savedata_save_clean();
+        return;
+    }
+
+    printf("Usage: save [clean]\n");
 }
 
 static void handle_factory_reset()

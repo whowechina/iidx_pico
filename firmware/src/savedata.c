@@ -57,27 +57,32 @@ static uint64_t requesting_time = 0;
 
 static void do_write_flash(void *param)
 {
+    bool clean = (uintptr_t)param != 0;
     int target_page_addr = savedata_page * pages_per_savedata * FLASH_PAGE_SIZE;
 
-    if (savedata_page == 0) {
+    if (clean || (savedata_page == 0)) {
         flash_range_erase(SAVE_SECTOR_OFFSET, FLASH_SECTOR_SIZE);
     }
     flash_range_program(SAVE_SECTOR_OFFSET + target_page_addr,
                         (uint8_t *)&old_data, savedata_pkt_size);
 }
 
-static void save_program()
+static void save_program(bool clean)
 {
     memcpy(&old_data, &new_data, savedata_pkt_size);
-    
-    savedata_page++;
-    if ((savedata_page < 0) ||
-        (savedata_page * pages_per_savedata >= SAVE_TOTAL_PAGE_NUM)) {
+
+    if (clean) {
         savedata_page = 0;
+    } else {
+        savedata_page++;
+        if ((savedata_page < 0) ||
+            (savedata_page * pages_per_savedata >= SAVE_TOTAL_PAGE_NUM)) {
+            savedata_page = 0;
+        }
     }
 
-    if (flash_safe_execute(do_write_flash, NULL, 1000) != PICO_OK) {
-        printf("Flash write failed!\n");
+    if (flash_safe_execute(do_write_flash, (void *)(uintptr_t)clean, 1000) != PICO_OK) {
+        printf("Flash %swrite failed!\n", clean ? "clean " : "");
         return;
     }
 
@@ -170,7 +175,7 @@ void savedata_loop()
         if (memcmp(&old_data, &new_data, savedata_pkt_size) == 0) {
             return;
         }
-        save_program();
+        save_program(false);
     }
 }
 
@@ -206,4 +211,11 @@ void savedata_save(bool immediately)
         requesting_time = 0;
         savedata_loop();
     }
+}
+
+void savedata_save_clean()
+{
+    requesting_save = false;
+    new_data.magic = my_magic;
+    save_program(true);
 }

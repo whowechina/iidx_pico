@@ -134,7 +134,7 @@ void config_changed()
 void config_factory_reset()
 {
     *iidx_cfg = default_cfg;
-    savedata_save(true);
+    savedata_save_clean();
 }
 
 void config_init()
