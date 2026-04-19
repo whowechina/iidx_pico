@@ -11,6 +11,8 @@
 
 #include "rgb.h"
 
+#define IIDX_CONFIG_VERSION 0x1c
+
 typedef struct __attribute ((packed)) {
     struct {
         struct {
@@ -34,8 +36,9 @@ typedef struct __attribute ((packed)) {
     } sensor;
     struct {
         bool konami; /* konami spoof */
-        uint8_t res;
     } hid;
+    uint8_t config_version;
+
     uint8_t profile;
     struct {
         struct {

@@ -55,6 +55,11 @@ void report_usb_hid()
 #define AUX_1_BIT 12
 #define AUX_2_BIT 11
 
+#define E1_BIT 7
+#define E2_BIT 8
+#define E3_BIT 9
+#define E4_BIT 10
+
 void boot_check()
 {
     uint16_t key1 = (1 << AUX_1_BIT);
@@ -80,6 +85,14 @@ void mode_check()
 
     if (iidx_cfg->hid.konami) {
         switch_to_konami_mode();
+    }
+}
+
+static void factory_check()
+{
+    uint16_t e_mask = (1 << E1_BIT) | (1 << E2_BIT) | (1 << E3_BIT) | (1 << E4_BIT);
+    if ((button_read() & e_mask) == e_mask) {
+        config_factory_reset();
     }
 }
 
@@ -244,10 +257,12 @@ void init()
     config_init();
     savedata_init(0xca341125);
 
+    factory_check();
+    mode_check();
+
     cli_init("iidx_pico>", "\n   << IIDX Pico|Teeny Controller >>\n"
                             " https://github.com/whowechina\n\n");
     commands_init();
-    mode_check();
 }
 
 void main(void)

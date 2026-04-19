@@ -21,6 +21,6 @@ void savedata_loop();
 
 void *savedata_alloc(size_t size, void *def, void (*after_load)());
 void savedata_save(bool immediately);
-void savedata_save_clean();
+void savedata_save_clean(); // format and save from page 0
 
 #endif

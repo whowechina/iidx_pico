@@ -23,6 +23,8 @@ static iidx_cfg_t default_cfg = {
         .konami = 0,
     },
 
+    .config_version = IIDX_CONFIG_VERSION,
+
     .profile = 0,
     .profiles = { {
             .level = { 128, 128 },
@@ -110,6 +112,12 @@ iidx_runtime_t iidx_runtime = {
 
 static void config_loaded()
 {
+    if (iidx_cfg->config_version != IIDX_CONFIG_VERSION) {
+        iidx_cfg->config_version = IIDX_CONFIG_VERSION;
+            savedata_save_clean();
+        return;
+    }
+
     if (iidx_cfg->rgb.tt.num == 0) {
         iidx_cfg->rgb.tt.num = 24;
         config_changed();
