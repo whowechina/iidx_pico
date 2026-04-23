@@ -244,6 +244,81 @@
             transform: translateY(-50%);
         }
 
+        .hat-item {
+            background: #f8f9fa;
+            grid-column: span 2;
+        }
+        .hat-name {
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+        .hat-pad {
+            width: 96px;
+            height: 96px;
+            margin: 5px auto;
+            position: relative;
+            background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%);
+            clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+        }
+        .hat-dir {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 1px solid #adb5bd;
+            background: #ffffff;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transform: translate(-50%, -50%);
+            transition: all 0.08s ease;
+        }
+        .hat-dir.active {
+            background: #007bff;
+            border-color: #0056b3;
+            color: #ffffff;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.55);
+            transform: translate(-50%, -50%) scale(1.08);
+        }
+        .hat-center {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid #adb5bd;
+            background: #f1f3f5;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.08s ease;
+        }
+        .hat-center.active {
+            background: #20c997;
+            border-color: #138a63;
+            box-shadow: 0 0 8px rgba(32, 201, 151, 0.45);
+        }
+        .hat-value {
+            font-size: 11px;
+            font-family: monospace;
+            margin-top: 6px;
+            color: #495057;
+            min-height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        @media (max-width: 540px) {
+            .hat-item {
+                grid-column: span 1;
+            }
+        }
+
         .stick-2d {
             background: #f8f9fa;
             border: 1px solid #dee2e6;
@@ -584,6 +659,8 @@
         let buttonStates = {};
         let buttonCounts = {};
         let stickTrails = {}; // 存储摇杆拖尾历史
+        let axisDisplayModes = {}; // 存储轴显示模式：axis 或 hat
+        let hatAxisLocks = {}; // 存储已锁定为 HAT 的轴
         let isGamepadSupported = 'getGamepads' in navigator;
 
         // HID 相关变量
@@ -1570,6 +1647,7 @@
             delete buttonStates[e.gamepad.index];
             delete buttonCounts[e.gamepad.index];
             delete stickTrails[e.gamepad.index];
+            clearGamepadAxisStates(e.gamepad.index);
             updateStatus();
             renderGamepads();
         });
@@ -1603,6 +1681,180 @@
                 '<span class="lang-en">Right Y</span><span class="lang-zh">右 Y</span>'
             ];
             return axisNames[index] || `<span class="lang-en">Axis ${index}</span><span class="lang-zh">轴 ${index}</span>`;
+        }
+
+        const HAT_DIRECTIONS = [
+            { en: 'Up', zh: '上', symbol: '↑', x: 50, y: 18 },
+            { en: 'Up-Right', zh: '右上', symbol: '↗', x: 72, y: 28 },
+            { en: 'Right', zh: '右', symbol: '→', x: 82, y: 50 },
+            { en: 'Down-Right', zh: '右下', symbol: '↘', x: 72, y: 72 },
+            { en: 'Down', zh: '下', symbol: '↓', x: 50, y: 82 },
+            { en: 'Down-Left', zh: '左下', symbol: '↙', x: 28, y: 72 },
+            { en: 'Left', zh: '左', symbol: '←', x: 18, y: 50 },
+            { en: 'Up-Left', zh: '左上', symbol: '↖', x: 28, y: 28 }
+        ];
+
+        const HAT_CALIBRATION = {
+            center: 1.286,
+            up: -1,
+            left: 0.714,
+            down: 0.143,
+            right: -0.429
+        };
+
+        const HAT_SEGMENTS = {
+            upRight: (HAT_CALIBRATION.up + HAT_CALIBRATION.right) / 2,
+            rightDown: (HAT_CALIBRATION.right + HAT_CALIBRATION.down) / 2,
+            downLeft: (HAT_CALIBRATION.down + HAT_CALIBRATION.left) / 2,
+            leftCenter: (HAT_CALIBRATION.left + HAT_CALIBRATION.center) / 2
+        };
+
+        function isAxisOutOfNormalRange(axisValue) {
+            return Number.isFinite(axisValue) && (axisValue < -1 || axisValue > 1);
+        }
+
+        function clearGamepadAxisStates(gamepadIndex) {
+            const prefix = `${gamepadIndex}-`;
+            Object.keys(axisDisplayModes).forEach((key) => {
+                if (key.startsWith(prefix)) {
+                    delete axisDisplayModes[key];
+                }
+            });
+            Object.keys(hatAxisLocks).forEach((key) => {
+                if (key.startsWith(prefix)) {
+                    delete hatAxisLocks[key];
+                }
+            });
+        }
+
+        function getAxisDisplayMode(gamepadIndex, axisIndex, axisValue) {
+            const key = `${gamepadIndex}-${axisIndex}`;
+            if (hatAxisLocks[key]) {
+                return 'hat';
+            }
+
+            if (isAxisOutOfNormalRange(axisValue)) {
+                hatAxisLocks[key] = true;
+                return 'hat';
+            }
+
+            return 'axis';
+        }
+
+        function decodeHatNibble(axisValue) {
+            if (!Number.isFinite(axisValue)) {
+                return 8;
+            }
+
+            if (axisValue >= HAT_SEGMENTS.leftCenter) {
+                return 8;
+            }
+            if (axisValue >= HAT_SEGMENTS.downLeft) {
+                return 6;
+            }
+            if (axisValue >= HAT_SEGMENTS.rightDown) {
+                return 4;
+            }
+            if (axisValue >= HAT_SEGMENTS.upRight) {
+                return 2;
+            }
+            return 0;
+        }
+
+        function getHatState(gamepadIndex, axisIndex, axisValue) {
+            const nibble = decodeHatNibble(axisValue);
+            return {
+                nibble,
+                directionIndex: nibble <= 7 ? nibble : -1
+            };
+        }
+
+        function getHatStateHTML(gamepadIndex, axisIndex, axisValue) {
+            const { nibble, directionIndex } = getHatState(gamepadIndex, axisIndex, axisValue);
+            const raw = Number.isFinite(axisValue) ? axisValue.toFixed(3) : String(axisValue);
+            const state = directionIndex === -1 ? 'C' : 'D';
+            return `RAW=${raw} NIBBLE=${nibble} ${state}`;
+        }
+
+        function renderLinearAxisItem(gamepadIndex, axisIndex, axisValue) {
+            return `
+                <div class="axis-item">
+                    <div class="axis-name">${getAxisName(axisIndex)}</div>
+                    <div class="axis-bar">
+                        <div class="axis-center-line"></div>
+                        <div class="axis-indicator" id="axis-bar-${gamepadIndex}-${axisIndex}"></div>
+                    </div>
+                    <div class="axis-value" id="axis-${gamepadIndex}-${axisIndex}">${axisValue.toFixed(3)}</div>
+                </div>
+            `;
+        }
+
+        function renderHatAxisItem(gamepadIndex, axisIndex, axisValue) {
+            const hatDirs = HAT_DIRECTIONS.map((dir, dirIndex) => `
+                <div class="hat-dir" id="hat-dir-${gamepadIndex}-${axisIndex}-${dirIndex}" style="left:${dir.x}%;top:${dir.y}%">${dir.symbol}</div>
+            `).join('');
+
+            return `
+                <div class="axis-item hat-item">
+                    <div class="hat-name">HAT ${axisIndex}</div>
+                    <div class="hat-pad">
+                        ${hatDirs}
+                        <div class="hat-center" id="hat-center-${gamepadIndex}-${axisIndex}"></div>
+                    </div>
+                    <div class="hat-value" id="hat-value-${gamepadIndex}-${axisIndex}">${getHatStateHTML(gamepadIndex, axisIndex, axisValue)}</div>
+                </div>
+            `;
+        }
+
+        function renderAxisItem(gamepadIndex, axisIndex, axisValue) {
+            const mode = getAxisDisplayMode(gamepadIndex, axisIndex, axisValue);
+            axisDisplayModes[`${gamepadIndex}-${axisIndex}`] = mode;
+
+            if (mode === 'hat') {
+                return renderHatAxisItem(gamepadIndex, axisIndex, axisValue);
+            }
+            return renderLinearAxisItem(gamepadIndex, axisIndex, axisValue);
+        }
+
+        function updateLinearAxisDisplay(gamepadIndex, axisIndex, axisValue) {
+            const clampedAxis = Math.max(-1, Math.min(1, axisValue));
+
+            const axisElement = document.getElementById(`axis-${gamepadIndex}-${axisIndex}`);
+            if (axisElement) {
+                axisElement.textContent = axisValue.toFixed(3);
+                axisElement.style.color = '';
+                axisElement.style.fontWeight = '';
+            }
+
+            const axisBarElement = document.getElementById(`axis-bar-${gamepadIndex}-${axisIndex}`);
+            const axisBarContainer = axisBarElement ? axisBarElement.parentElement : null;
+            if (axisBarElement) {
+                const position = ((clampedAxis + 1) / 2) * 94;
+                axisBarElement.style.top = `${position}%`;
+                axisBarElement.style.background = '#007bff';
+                updateAxisTrail(gamepadIndex, axisIndex, position, axisBarContainer);
+            }
+        }
+
+        function updateHatAxisDisplay(gamepadIndex, axisIndex, axisValue) {
+            const { directionIndex } = getHatState(gamepadIndex, axisIndex, axisValue);
+
+            const valueElement = document.getElementById(`hat-value-${gamepadIndex}-${axisIndex}`);
+            if (valueElement) {
+                valueElement.innerHTML = getHatStateHTML(gamepadIndex, axisIndex, axisValue);
+            }
+
+            for (let dir = 0; dir < HAT_DIRECTIONS.length; dir++) {
+                const dirElement = document.getElementById(`hat-dir-${gamepadIndex}-${axisIndex}-${dir}`);
+                if (dirElement) {
+                    dirElement.classList.toggle('active', dir === directionIndex);
+                }
+            }
+
+            const centerElement = document.getElementById(`hat-center-${gamepadIndex}-${axisIndex}`);
+            if (centerElement) {
+                centerElement.classList.toggle('active', directionIndex === -1);
+            }
         }
 
         // 更新摇杆拖尾效果
@@ -1816,16 +2068,7 @@
                                     <div class="stick-2d-value" id="stick-right-value-${gamepad.index}">X: 0.000, Y: 0.000</div>
                                 </div>
                             ` : ''}
-                            ${gamepad.axes.map((axis, axisIndex) => `
-                                <div class="axis-item">
-                                    <div class="axis-name">${getAxisName(axisIndex)}</div>
-                                    <div class="axis-bar">
-                                        <div class="axis-center-line"></div>
-                                        <div class="axis-indicator" id="axis-bar-${gamepad.index}-${axisIndex}"></div>
-                                    </div>
-                                    <div class="axis-value" id="axis-${gamepad.index}-${axisIndex}">${axis.toFixed(3)}</div>
-                                </div>
-                            `).join('')}
+                            ${gamepad.axes.map((axis, axisIndex) => renderAxisItem(gamepad.index, axisIndex, axis)).join('')}
                         </div>
                     </div>
                 `;
@@ -1857,42 +2100,18 @@
 
                 // 更新轴显示
                 gamepad.axes.forEach((axis, axisIndex) => {
-                    // 限制轴值到 -1 到 +1 范围
-                    const clampedAxis = Math.max(-1, Math.min(1, axis));
-                    
-                    const axisElement = document.getElementById(`axis-${gamepad.index}-${axisIndex}`);
-                    if (axisElement) {
-                        // 显示原始值，但标记如果超出范围
-                        const displayValue = axis.toFixed(3);
-                        const isOutOfRange = axis < -1 || axis > 1;
-                        axisElement.textContent = isOutOfRange ? `${displayValue}⚠️` : displayValue;
-                        
-                        // 如果超出范围，改变颜色
-                        if (isOutOfRange) {
-                            axisElement.style.color = 'red';
-                            axisElement.style.fontWeight = 'bold';
-                        } else {
-                            axisElement.style.color = '';
-                            axisElement.style.fontWeight = '';
-                        }
+                    const axisModeKey = `${gamepad.index}-${axisIndex}`;
+                    const expectedMode = getAxisDisplayMode(gamepad.index, axisIndex, axis);
+                    if (axisDisplayModes[axisModeKey] !== expectedMode) {
+                        axisDisplayModes[axisModeKey] = expectedMode;
+                        needsRender = true;
+                        return;
                     }
-                    
-                    // 更新轴条显示 - 使用限制后的值
-                    const axisBarElement = document.getElementById(`axis-bar-${gamepad.index}-${axisIndex}`);
-                    const axisBarContainer = axisBarElement ? axisBarElement.parentElement : null;
-                    if (axisBarElement) {
-                        const position = ((clampedAxis + 1) / 2) * 94; // 使用限制后的值
-                        axisBarElement.style.top = `${position}%`;
-                        
-                        // 如果原始值超出范围，改变指示器颜色
-                        if (axis < -1 || axis > 1) {
-                            axisBarElement.style.background = '#dc3545'; // 红色警告
-                        } else {
-                            axisBarElement.style.background = '#007bff'; // 默认蓝色
-                        }
-                        
-                        // 添加拖尾效果
-                        updateAxisTrail(gamepad.index, axisIndex, position, axisBarContainer);
+
+                    if (expectedMode === 'hat') {
+                        updateHatAxisDisplay(gamepad.index, axisIndex, axis);
+                    } else {
+                        updateLinearAxisDisplay(gamepad.index, axisIndex, axis);
                     }
                 });
 
