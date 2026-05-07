@@ -8,6 +8,11 @@ function(make_firmware board board_def)
                    config.c setup.c turntable.c as5600.c mt6701.c tmag5273.c
                    tt_rainbow.c tt_blade.c tt_heatbar.c
                    usb_descriptors.c)
+
+
+    target_compile_definitions(${board} PUBLIC ${board_def}
+                               PICO_XOSC_STARTUP_DELAY_MULTIPLIER=20)
+
     target_compile_definitions(${board} PUBLIC ${board_def})
     pico_enable_stdio_usb(${board} 1)
     pico_enable_stdio_uart(${board} 0)
