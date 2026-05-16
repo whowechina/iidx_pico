@@ -1,0 +1,120 @@
+(footprint "P2.0_4P_Solder"
+	(version 20240108)
+	(generator "pcbnew")
+	(generator_version "8.0")
+	(layer "F.Cu")
+	(descr "JST SH series connector, SM04B-SRSS-TB (http://www.jst-mfg.com/product/pdf/eng/eSH.pdf), generated with kicad-footprint-generator")
+	(tags "connector JST SH horizontal")
+	(property "Reference" "REF**"
+		(at 0 -3.98 0)
+		(layer "F.SilkS")
+		(uuid "e25c6d01-f859-4468-8d80-7ef7077711b2")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "P2.0_4P_Solder"
+		(at 0 3.98 0)
+		(layer "F.Fab")
+		(uuid "627a23a7-c534-413e-875e-929f8dd1885f")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Footprint" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "d03546f1-c665-4f2f-9a23-b3eea178d6cb")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "504737ad-d3c1-4261-b92a-5fac89376904")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "1b5a2264-d91d-44d2-8311-3d024bdab707")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_rect
+		(start -4.3 -1.7)
+		(end 4.3 1.7)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(fill none)
+		(layer "F.SilkS")
+		(uuid "fff15be5-5a70-4532-a64b-87df42715534")
+	)
+	(fp_rect
+		(start -4.3 -1.7)
+		(end 4.3 1.7)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(fill none)
+		(layer "F.CrtYd")
+		(uuid "1acd29ab-9fbb-4e2a-804a-5e3fb19de6ef")
+	)
+	(pad "1" smd roundrect
+		(at -3 0)
+		(size 1.2 2.5)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(roundrect_rratio 0.25)
+		(uuid "74b39c97-c120-42cb-9eda-df98d2475b58")
+	)
+	(pad "2" smd roundrect
+		(at -1 0)
+		(size 1.2 2.5)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(roundrect_rratio 0.25)
+		(uuid "ea818012-a411-445a-ac87-800ddb55c0c4")
+	)
+	(pad "3" smd roundrect
+		(at 1 0)
+		(size 1.2 2.5)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(roundrect_rratio 0.25)
+		(uuid "5327a462-cdbb-48a6-8096-429abd2a7606")
+	)
+	(pad "4" smd roundrect
+		(at 3 0)
+		(size 1.2 2.5)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(roundrect_rratio 0.25)
+		(uuid "7d88f85d-ecc5-4553-afac-ae959172d9c0")
+	)
+)
