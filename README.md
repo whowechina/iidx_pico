@@ -5,15 +5,16 @@
 
 ## Features
 * Cool thin design.
-* Three variants: IIDX Pico, IIDX Teeny, and IIDX Jumbo.
+* Many variants: IIDX Pico, IIDX Teeny, IIDX Jumbo and IIDX Itsy.
 * Foldable with soft hinge.
 * Now supports both Hall effect switches and mechanical switches.
 * Customizable lights and effects.
 * HID lights.
+* IIDX Visa card holder.
 * All source files open.
 
 ## Change Notes
-* IIDX Pico, IIDX Teeny, and IIDX Jumbo have been integrated into this repository for better management.
+* All IIDX Pico variants have been integrated into this repository for better management.
 * The old IIDX Teeny repository has been archived and will be no longer updated.
 * Old files have been moved to the Gen1Archive directory, but can also be found in the historical versions.
 
@@ -188,6 +189,11 @@ For following prints, FDM, PLA, 0.4 nozzle, 0.2mm layer, 3 to 4 walls.
 * Command-line tool - You can access controller's built-in CLI port using this tool.  
   https://whowechina.github.io/iidx_pico/Tools/cli_tool.html
 
+### Bonus - IIDX Visa Card Holder
+* IIDX Visa card holder is a bonus design for IIDX Pico. It can be used to hold your credit card sized arcade cards.
+* Print the bottom and the panel, assign different color for the pattern and text on the panel.
+* Use 4x M1.2\*1.5mm\*2mm (thread size\*length\*diameter) heat-set inserts on bottom part.
+* 4x M1.2\*3mm screws to fix the panel and the bottom together.
 
 ## CAD Source File
 I'm using OnShape free subscription. It's powerful but it can't archive original designs to local, so I can only share the link here. STL/DXF/DWG files are exported from this online document.  

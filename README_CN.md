@@ -5,15 +5,16 @@
 
 ## 敬请期待
 * 炫酷超薄设计
-* 三个变种：IIDX Pico、IIDX Teeny 和 IIDX Jumbo。
+* 多个变种：IIDX Pico、IIDX Teeny、IIDX Jumbo 和 IIDX Itsy。
 * 可折叠，带有柔性铰链。
 * 现在支持霍尔效应开关和机械开关。
 * 可自定义灯光和效果。
 * HID 灯光。
+* IIDX Visa 卡片夹。
 * 所有源文件开放。
 
 ## 变更说明
-* IIDX Pico, IIDX Teeny 和 IIDX Jumbo 三个变种都已经整合到本仓库，以便更好地管理。
+* 所有 IIDX Pico 变种都已经整合到本仓库，以便更好地管理。
 * 原先的 IIDX Teeny 仓库则已经封存，不再更新。
 * 老的文件已经转移到 Gen1Archive 目录，当然也可以在历史版本中找到。
 
@@ -188,6 +189,12 @@
   https://whowechina.github.io/iidx_pico/Tools/gamepad_test.html
 * 命令行工具 - 你可以使用这个工具访问控制器内置的 CLI 端口。  
   https://whowechina.github.io/iidx_pico/Tools/cli_tool.html
+
+### 福利 - IIDX Visa 卡片夹
+* IIDX Visa 卡片夹是 IIDX Pico 的一个额外设计。它可以用来放置你的信用卡大小的街机卡。
+* 打印底座和面板，给面板上的图案和文字部分分配不同的颜色。
+* 底座部分需要 4 个 M1.2\*1.5mm\*2mm（螺纹尺寸\*长度\*直径）的热熔螺母。
+* 4 个 M1.2\*3mm 的螺丝用来把面板和底座固定在一起。
 
 ## CAD 源文件
 我使用的是 OnShape 的免费订阅。它很强大，但不能将原始设计存档到本地，所以我只能在这里分享链接。STL/DXF/DWG 文件是从这个在线文档导出的。  
