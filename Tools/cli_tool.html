@@ -291,6 +291,7 @@
         let inputLine = null;
         let cursor = null;
         let receiveBuffer = ''; // Buffer for incomplete lines
+        const promptRegex = /^([a-z][a-z0-9_]*>)(.*)$/;
 
         // Check Web Serial API support
         if (!('serial' in navigator)) {
@@ -422,9 +423,8 @@
                             }
                         }
                         
-                        // Check if buffer looks like a complete prompt (ends with >)
-                        // Display immediately if it matches prompt pattern
-                        if (receiveBuffer && receiveBuffer.match(/[a-z]+_pico>$/)) {
+                        // Check if buffer looks like a complete prompt and display immediately
+                        if (receiveBuffer && promptRegex.test(receiveBuffer)) {
                             addCompleteLine(receiveBuffer);
                             receiveBuffer = '';
                         }
@@ -450,8 +450,8 @@
                 cursor.remove();
             }
 
-            // Check if line starts with prompt pattern: word_pico>
-            const promptMatch = text.match(/^([a-z]+_pico>)(.*)$/);
+            // Check if line starts with prompt pattern: controller_name>
+            const promptMatch = text.match(promptRegex);
             // Check if line starts with config label pattern: two spaces + text + colon + space
             const labelMatch = text.match(/^(  .+?: )(.*)$/);
             // Check if line is a title: [text with letters, spaces, hyphens, underscores]
