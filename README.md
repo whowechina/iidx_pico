@@ -193,9 +193,9 @@ For following prints, FDM, PLA, 0.4 nozzle, 0.2mm layer, 3 to 4 walls.
  <img src="doc/iidx_visa.jpg" width="40%">  
 
 * IIDX Visa card holder is a bonus design for IIDX Pico. It can be used to hold your credit card sized arcade cards.
-* Print the base and the panel, assign different color for the pattern and text on the panel. `_insert` means it's the heat-set insert version. Transparent material is recommended.
+* Print the base and the panel, assign different color for the pattern and text on the panel. `_insert` means it's the heat-set insert version. `_flat` means it's for flat head (countersunk) screws. Transparent material is recommended.
 * If you choose the `_insert` version, use 4x M1.2\*1.5mm\*2mm (thread size\*length\*diameter) heat-set inserts on base part.
-* 4x M1.2\*3mm screws to fix the panel and the base together.
+* 4x M1.2\*3mm screws to fix the panel and the base together. If you choose the `_flat` version, use M1.2\*3mm flat head screws.
 
 ## CAD Source File
 I'm using OnShape free subscription. It's powerful but it can't archive original designs to local, so I can only share the link here. STL/DXF/DWG files are exported from this online document.  
