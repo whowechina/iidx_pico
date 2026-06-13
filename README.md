@@ -95,7 +95,7 @@ If you're interested in buying from me, or for commercial use, please contact me
 * RGB LEDs
   * IIDX Pico and IIDX Jumbo (nicer light effect version)
     * 28x WS2812B-1516 or WS2812B-2020 for main buttons, pinout should be exactly like this:  
-    <img src="doc/ws2812b_2020.png" width="300px">
+      <img src="doc/ws2812b_2020.png" width="300px">
     * 4x WS2812B-3528 (or WS2812B-2835), for AUX buttons.
   * IIDX Pico and IIDX Jumbo (easier soldering version)
     * 11x WS2812B-3528 (or WS2812B-2835), forget about ridiculously tiny 28x LEDs.
@@ -110,7 +110,7 @@ If you're interested in buying from me, or for commercial use, please contact me
 * WS2812B-3528 per switch is no longer an option. Because it conflicts with the pinout.
 * 1x ADG708BRUZ, 8 to 1 analog switch, in TSSOP-16 (U4).
 * 1x LP5907MFX-4.5 or TPS7A2042PDBVR LDO, in SOT23-5 (U6), see next line.
-* 1x LM4040 shunt voltage reference, get one with 2.0~2.1V (for 4.2V LDO) or 2.2~2.5V (for 4.5V LDO) reference voltage, in SOT23-3 (U5).
+* 1x LM4040 shunt voltage reference, get one with 2.0\~2.1V (for 4.2V LDO) or 2.2\~2.5V (for 4.5V LDO) reference voltage, in SOT23-3 (U5).
 * 7x SS49E or compatible linear Hall Effect sensors, in SOT23-3 (H1-H7).
 * 1x 10ohm resistor, 0603 (R5) and leave R6 absent.
 * 1x 3.3V Zener diode, in SOD-123 or SOD-123F, such as BZT52H-C3V3 (Z1).
