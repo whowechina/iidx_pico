@@ -78,7 +78,7 @@ If you're interested in buying from me, or for commercial use, please contact me
 * Some acetate cloth tape helps to fix the wires.
 
 ### PCB and Keyboard Materials
-* 1x Raspberry Pi Pico.  
+* 1x Raspberry Pi Pico. If you're building the Itsy, use the "Supermini RP2040 Zero" module instead - it looks like the RP2040 Zero, but has components only on top side.  
   https://www.raspberrypi.com/products/raspberry-pi-pico
 * 11x Kailh Choc v1 or v2 key switches, I suggest using linear switches for the 7 main buttons.  
   https://www.kailhswitch.com/mechanical-keyboard-switches/low-profile-key-switches/burnt-orange-switch.html  

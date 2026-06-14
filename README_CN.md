@@ -76,7 +76,7 @@
 * 一些布基的醋酸胶带，用来固定电线。
 
 ### PCB 和键盘部分的材料
-* 1x 树莓派 Pico 或 Pico W。  
+* 1x 树莓派 Pico。如果你是要做 Itsy 的话，请使用 "Supermini RP2040 Zero" 模块 - 它看起来像 RP2040 Zero，但只有正面有元器件。  
   https://www.raspberrypi.com/products/raspberry-pi-pico
 * 11x 凯华巧克力 V1 或者 V2 键盘矮轴。我建议给 7 个主按键使用线性轴体。  
   https://www.kailhswitch.com/mechanical-keyboard-switches/low-profile-key-switches/burnt-orange-switch.html  
