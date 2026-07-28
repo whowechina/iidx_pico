@@ -71,14 +71,15 @@ static void save_program(bool clean)
 {
     memcpy(&old_data, &new_data, savedata_pkt_size);
 
-    if (clean) {
+    if ((savedata_page < 0) || clean) {
         savedata_page = 0;
     } else {
         savedata_page++;
-        if ((savedata_page < 0) ||
-            (savedata_page * pages_per_savedata >= SAVE_TOTAL_PAGE_NUM)) {
-            savedata_page = 0;
-        }
+    }
+
+    unsigned required_pages = (savedata_page + 1) * pages_per_savedata;
+    if (required_pages > SAVE_TOTAL_PAGE_NUM) {
+        savedata_page = 0;
     }
 
     if (flash_safe_execute(do_write_flash, (void *)(uintptr_t)clean, 1000) != PICO_OK) {
