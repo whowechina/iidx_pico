@@ -13,6 +13,7 @@
 #include "buttons.h"
 #include "hebtn.h"
 #include "turntable.h"
+#include "bt.h"
 
 static void handle_save(int argc, char *argv[])
 {
@@ -72,11 +73,23 @@ static void disp_hall()
     }
 }
 
+static void disp_bt()
+{
+    printf("[BLUETOOTH]\n");
+    printf("  Hardware: %s\n", bt_hw_name());
+    printf("  State: %s\n", bt_state_name());
+    if (bt_conn_interval() > 0) {
+        printf("  Connection interval: %lu.%02lu ms\n", bt_conn_interval() / 100,
+               bt_conn_interval() % 100);
+    }
+}
+
 static void handle_display()
 {
     disp_rgb();
     disp_sensor();
     disp_hall();
+    disp_bt();
 }
 
 static void handle_calibrate(int argc, char *argv[])

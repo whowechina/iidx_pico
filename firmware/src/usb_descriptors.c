@@ -63,6 +63,8 @@ uint8_t const desc_hid_report_joy[] = {
     GAMECON_REPORT_DESC_LIGHTS
 };
 
+const uint16_t desc_hid_report_joy_size = sizeof(desc_hid_report_joy);
+
 // Invoked when received GET HID REPORT DESCRIPTOR
 // Application return pointer to descriptor
 // Descriptor contents must exist long enough for transfer to complete

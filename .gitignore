@@ -1,6 +1,7 @@
 
-PCB/Turntable/iidx_tt-backups/
-PCB/Keyboard/iidx_pico-backups/
-Production/PCB/Turntable
-Production/PCB/Keyboard
+PCB/*/*backups/
+Production/PCB/*/*
+*.bak
+.vscode
+firmware/*.uf2
 build

@@ -55,6 +55,11 @@ static int savedata_page = -1;
 static bool requesting_save = false;
 static uint64_t requesting_time = 0;
 
+uint32_t get_savedata_offset()
+{
+    return SAVE_SECTOR_OFFSET;
+}
+
 static void do_write_flash(void *param)
 {
     bool clean = (uintptr_t)param != 0;

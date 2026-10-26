@@ -371,6 +371,9 @@ void rgb_init(bool alternative_gpio)
 {
     uint pio0_offset = pio_add_program(pio0, &ws2812_program);
 
+    pio_sm_claim(pio0, 0);
+    pio_sm_claim(pio0, 1);
+
     uint button_led_pin = BUTTON_RGB_PIN;
     gpio_set_drive_strength(button_led_pin, GPIO_DRIVE_STRENGTH_2MA);
     ws2812_program_init(pio0, 0, pio0_offset, button_led_pin, 800000, false);
