@@ -180,6 +180,7 @@
 * 要访问命令行，你可以使用这个 Web 串口终端连接到 IIDX Pico 的 USB 串口。（注意："?" 是帮助）  
   https://googlechromelabs.github.io/serial-terminal/
 * 刚装好的时候，需要设置一下转盘的 LED 灯数量，具体参考手册中的 SETUP 模式。
+* 开机时按住 E1+E2 可以在 Pico W 上启动蓝牙配对。
 * 你可以设置灯光亮度，转盘灯效主题，按键灯效主题。
 * [Nice Looking Manual Here]（doc/IIDX_Pico_Manual.pdf）  
   <img src="doc/manual.gif" width="80%">

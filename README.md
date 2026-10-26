@@ -179,6 +179,7 @@ For following prints, FDM, PLA, 0.4 nozzle, 0.2mm layer, 3 to 4 walls.
 * For the new build, hold the BOOTSEL button while connect the USB to a PC, there will be a disk named "RPI-RP2" showed up. Drag the UF2 firmware binary file into it and that's it. There's a small hole at the back side of the keyboard, it is facing right to the BOOTSEL button.
 * If it is already running my IIDX firmware, hold two small AUX buttons together will do the same as the BOOTSEL button.
 * You need to setup your turntable LED strip first, check the manual for the SETUP mode.
+* Hold E1+E2 while powering on to start Bluetooth pairing on Pico W.
 * You can set the brightness, turntable LED theme, button LED theme.
 * [Nice Looking Manual Here](doc/IIDX_Pico_Manual.pdf)  
   <img src="doc/manual.gif" width="80%">
