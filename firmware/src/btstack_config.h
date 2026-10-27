@@ -5,15 +5,15 @@
 #error Please link to pico_btstack_ble
 #endif
 
-// BLE peripheral only (HID over GATT), no classic, no central, no GATT client
+// BLE peripheral only, no classic, no central, no GATT client
 #define ENABLE_LE_PERIPHERAL
 #define ENABLE_LOG_ERROR
 // Required by the SDK's hci_dump_embedded_stdout.c, nothing is printed unless
 // WANT_HCI_DUMP is set.
 #define ENABLE_PRINTF_HEXDUMP
 // LE Secure Connections is left out on purpose, the P-256 math runs in
-// software on the RP2040 and would stall core 0 for a long time. Legacy
-// "Just Works" pairing with bonding is enough for HID on iOS.
+// software on the RP2040 and would stall core 0 for a long time. The Konami
+// protocol does not use pairing at all.
 
 // BTstack configuration. buffers, sizes, ...
 #define HCI_OUTGOING_PRE_BUFFER_SIZE 4

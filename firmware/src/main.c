@@ -35,7 +35,7 @@
 static struct __attribute__((packed)) {
     uint16_t buttons;
     uint8_t axis[2];
-} hid_joy, hid_joy_sent, hid_joy_bt;
+} hid_joy, hid_joy_sent;
 
 void report_usb_hid()
 {
@@ -97,23 +97,6 @@ static void factory_check()
     }
 }
 
-/* Hold E1+E2 (only these two) at power on to pair a new Bluetooth host */
-static bool pairing_check()
-{
-    uint16_t e_mask = (1 << E1_BIT) | (1 << E2_BIT) | (1 << E3_BIT) | (1 << E4_BIT);
-    uint16_t pairing = (1 << E1_BIT) | (1 << E2_BIT);
-    return (button_read() & e_mask) == pairing;
-}
-
-static void pairing_led()
-{
-    if (bt_pairing_active()) {
-        uint32_t color = ((time_us_32() / 250000) & 1) ? BLUE : 0;
-        rgb_force_light(E1_BIT, color);
-        rgb_force_light(E2_BIT, color);
-    }
-}
-
 static uint16_t latest_hybrid_buttons;
 
 static void hybrid_button_update()
@@ -158,19 +141,19 @@ static void gen_binary_tt(uint8_t angle)
     hid_joy.axis[1] = 0x80;
 }
 
-static uint16_t konami_buttons(uint16_t buttons)
-{
-    uint16_t aux_buttons = buttons & 0xff80;
-    return (buttons & 0x7f) | (aux_buttons << 1); // skips button 8
-}
-
 static void gen_hid_report()
 {
     uint16_t buttons = hybrid_button_read();
     uint8_t angle = turntable_read(8);
 
-    hid_joy_bt.buttons = konami_buttons(buttons);
-    hid_joy.buttons = iidx_cfg->hid.konami ? hid_joy_bt.buttons : buttons;
+    /* Bluetooth: keys 1-7, then E1 and E2 */
+    bt_input(angle, buttons & 0x7f, (buttons >> 7) & 0x03);
+
+    if (iidx_cfg->hid.konami) {
+        uint16_t aux_buttons = buttons & 0xff80;
+        buttons = (buttons & 0x7f) | (aux_buttons << 1); // skips button 8
+    }
+    hid_joy.buttons = buttons;
 
     if (iidx_cfg->sensor.binary) {
         gen_binary_tt(angle);
@@ -178,7 +161,6 @@ static void gen_hid_report()
         hid_joy.axis[0] = angle;
         hid_joy.axis[1] = 255 - hid_joy.axis[0];
     }
-    memcpy(hid_joy_bt.axis, hid_joy.axis, sizeof(hid_joy.axis));
 }
 
 /* Core 1 is launched at the very beginning of init(), so that flash writes
@@ -234,18 +216,17 @@ static void core0_loop()
             rgb_override_button(setup_led_button);
         } else {
             rgb_set_button_light(buttons);
-            pairing_led();
         }
 
         hid_joy.buttons = 0;
-        hid_joy_bt.buttons = 0;
         if (!ov_tt && !ov_btn) {
             gen_hid_report();
             savedata_loop();
+        } else {
+            bt_input(0, 0, 0);
         }
 
         report_usb_hid();
-        bt_hid_report(&hid_joy_bt);
         cli_fps_count(0);
 
         sleep_until(next_frame);
@@ -297,7 +278,7 @@ void init()
                             " https://github.com/whowechina\n\n");
     commands_init();
 
-    bt_init(pairing_check());
+    bt_init();
 
     core0_ready = true;
 }

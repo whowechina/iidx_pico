@@ -24,6 +24,7 @@
 特别感谢社区项目和开发者的帮助，还有如下项目：
 * RP_Silicon_KiCad: https://github.com/HeadBoffin/RP_Silicon_KiCad
 * Type-C: https://github.com/ai03-2725/Type-C.pretty
+* Bluetooth for UM: https://github.com/987123879113/Esp32EntryModel
 
 ## 其他项目
 你也可以查看我其他的酷炫项目。

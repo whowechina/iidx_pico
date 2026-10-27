@@ -51,8 +51,4 @@ enum {
 /* Enable Konami spoof mode */
 void switch_to_konami_mode();
 
-/* HID report descriptor, shared with Bluetooth (HID over GATT) */
-extern uint8_t const desc_hid_report_joy[];
-extern const uint16_t desc_hid_report_joy_size;
-
 #endif /* USB_DESCRIPTORS_H_ */
