@@ -10,8 +10,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#ifdef BT_SUPPORT
-
 #include "pico/cyw43_arch.h"
 #include "pico/multicore.h"
 #include "pico/btstack_flash_bank.h"
@@ -426,35 +424,3 @@ uint32_t bt_conn_interval()
 {
     return conn_interval * 125;
 }
-
-#else
-
-void bt_init()
-{
-}
-
-void bt_input(uint8_t tt, uint8_t keys1, uint8_t keys2)
-{
-}
-
-bool bt_hw_present()
-{
-    return false;
-}
-
-const char *bt_hw_name()
-{
-    return "Not built";
-}
-
-const char *bt_state_name()
-{
-    return "Not built";
-}
-
-uint32_t bt_conn_interval()
-{
-    return 0;
-}
-
-#endif

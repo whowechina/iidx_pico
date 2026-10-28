@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.12)
 
-# Pull in SDK (must set be before project)
+# IIDX Pico builds on PICO_W, but supports PICO as well
+set(PICO_BOARD pico_w)
+
 include(pico_sdk_import.cmake)
 
 project(iidx_pico C CXX ASM)
