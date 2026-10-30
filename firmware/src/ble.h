@@ -12,8 +12,8 @@
  * There is no pairing, no bonding and no encryption.
  */
 
-#ifndef BT_H
-#define BT_H
+#ifndef BLE_H
+#define BLE_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -23,23 +23,25 @@
  * flash lockout (BTstack's storage lives in flash). The chip firmware
  * download blocks for a while. Everything after that runs in the background,
  * there is nothing to poll. */
-void bt_init(void);
+void ble_init(void);
 
 /* Hand the latest input over. Cheap, never blocks, call it every loop.
  * tt: 8 bits turntable angle, keys1: bit 0-6 are keys 1-7, keys2: bit 0 is E1
  * and bit 1 is E2. */
-void bt_input(uint8_t tt, uint8_t keys1, uint8_t keys2);
+void ble_input(uint8_t tt, uint8_t keys1, uint8_t keys2);
 
-bool bt_hw_present();
+bool ble_hw_present();
+
+void ble_update();
 
 /* "CYW43439", "Not present" or "Not built" (firmware built without support) */
-const char *bt_hw_name();
+const char *ble_hw_name();
 
 /* "Off", "Failed", "Starting", "Advertising", "Connected", "Active" (the host
  * enabled notifications) or "Not built" */
-const char *bt_state_name();
+const char *ble_state_name();
 
 /* Connection interval in 0.01 ms, 0 if not connected */
-uint32_t bt_conn_interval();
+uint32_t ble_conn_interval();
 
 #endif

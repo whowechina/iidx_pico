@@ -1,5 +1,4 @@
 set(BTSTACK_ROOT ${PICO_SDK_PATH}/lib/btstack)
-set(LWIP_ROOT ${PICO_SDK_PATH}/lib/lwip)
 
 function(make_firmware board board_def)
     pico_sdk_init()
@@ -7,13 +6,14 @@ function(make_firmware board board_def)
                    main.c cli.c commands.c buttons.c hebtn.c rgb.c savedata.c
                    config.c setup.c turntable.c as5600.c mt6701.c tmag5273.c
                    tt_rainbow.c tt_blade.c tt_heatbar.c
-                   usb_descriptors.c bt.c)
+                   usb_descriptors.c ble.c)
 
 
-    target_compile_definitions(${board} PUBLIC ${board_def}
+    target_compile_definitions(${board} PUBLIC
+                               ${board_def}
+                               CYW43_LWIP=0
                                PICO_XOSC_STARTUP_DELAY_MULTIPLIER=20)
 
-    target_compile_definitions(${board} PUBLIC ${board_def})
     pico_enable_stdio_usb(${board} 1)
     pico_enable_stdio_uart(${board} 0)
 
@@ -29,11 +29,11 @@ function(make_firmware board board_def)
         pico_multicore pico_stdlib hardware_pio hardware_pwm hardware_flash
         hardware_adc hardware_i2c hardware_watchdog
         tinyusb_device tinyusb_board
-        pico_cyw43_arch_none pico_btstack_ble pico_btstack_cyw43
-        pico_btstack_flash_bank pico_btstack_run_loop_async_context)
+        pico_cyw43_arch_poll pico_btstack_ble pico_btstack_cyw43
+        pico_btstack_flash_bank)
 
     target_compile_definitions(${board} PRIVATE
-            pico_flash_bank_get_storage_offset_func=bt_flash_storage_offset)
+            pico_flash_bank_get_storage_offset_func=ble_flash_storage_offset)
 
     pico_btstack_make_gatt_header(${board} PRIVATE
             ${CMAKE_CURRENT_LIST_DIR}/bt_profile.gatt)

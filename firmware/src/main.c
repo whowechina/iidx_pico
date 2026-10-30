@@ -30,7 +30,7 @@
 #include "config.h"
 #include "cli.h"
 #include "commands.h"
-#include "bt.h"
+#include "ble.h"
 
 static struct __attribute__((packed)) {
     uint16_t buttons;
@@ -147,7 +147,7 @@ static void gen_hid_report()
     uint8_t angle = turntable_read(8);
 
     /* Bluetooth: keys 1-7, then E1 and E2 */
-    bt_input(angle, buttons & 0x7f, (buttons >> 7) & 0x03);
+    ble_input(angle, buttons & 0x7f, (buttons >> 7) & 0x03);
 
     if (iidx_cfg->hid.konami) {
         uint16_t aux_buttons = buttons & 0xff80;
@@ -223,10 +223,12 @@ static void core0_loop()
             gen_hid_report();
             savedata_loop();
         } else {
-            bt_input(0, 0, 0);
+            ble_input(0, 0, 0);
         }
 
         report_usb_hid();
+        ble_update();
+
         cli_fps_count(0);
 
         sleep_until(next_frame);
@@ -278,7 +280,7 @@ void init()
                             " https://github.com/whowechina\n\n");
     commands_init();
 
-    bt_init();
+    ble_init();
 
     core0_ready = true;
 }

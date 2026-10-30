@@ -3,7 +3,7 @@
  * WHowe <github.com/whowechina>
  */
 
-#include "bt.h"
+#include "ble.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -20,8 +20,8 @@
 
 #include "savedata.h"
 
-/* Games look for this name, it is also in bt_profile.gatt */
-#define BT_NAME "IIDX Entry model"
+/* Games look for this name, it is also in ble_profile.gatt */
+#define BLE_NAME "IIDX Entry model"
 
 /* Connection interval to ask for, units of 1.25ms: 7.5ms to 11.25ms. The host
  * usually picks the upper end (a 15..30ms request ended up at 30ms), so the
@@ -46,16 +46,16 @@
 #define FRAMES_PER_NOTIFY 2
 
 typedef enum {
-    BT_OFF,
-    BT_FAILED,
-    BT_STARTING,
-    BT_ADVERTISING,
-    BT_CONNECTED,
-    BT_ACTIVE,
-} bt_state_t;
+    BLE_OFF,
+    BLE_FAILED,
+    BLE_STARTING,
+    BLE_ADVERTISING,
+    BLE_CONNECTED,
+    BLE_ACTIVE,
+} ble_state_t;
 
 static bool present = false;
-static volatile bt_state_t state = BT_OFF;
+static volatile ble_state_t state = BLE_OFF;
 static volatile uint16_t conn_interval = 0; /* 1.25ms */
 
 static hci_con_handle_t con_handle = HCI_CON_HANDLE_INVALID;
@@ -77,7 +77,7 @@ static bool send_pending = false;
 
 /* BTstack storage (two sectors) sits right below the savedata sector. Called
  * by the SDK's flash bank code, see pico_flash_bank_get_storage_offset_func */
-uint32_t bt_flash_storage_offset(void)
+uint32_t ble_flash_storage_offset(void)
 {
     return get_savedata_offset() - PICO_FLASH_BANK_TOTAL_SIZE;
 }
@@ -86,7 +86,7 @@ uint32_t bt_flash_storage_offset(void)
 static bool flash_layout_ok()
 {
     extern char __flash_binary_end;
-    return (uintptr_t)&__flash_binary_end - XIP_BASE <= bt_flash_storage_offset();
+    return (uintptr_t)&__flash_binary_end - XIP_BASE <= ble_flash_storage_offset();
 }
 
 /* BTstack storage is written with flash_safe_execute(), it only works when
@@ -138,9 +138,9 @@ static const struct __attribute__((packed)) {
 
 static const struct __attribute__((packed)) {
     uint8_t len, type;
-    char name[sizeof(BT_NAME) - 1];
+    char name[sizeof(BLE_NAME) - 1];
 } scan_rsp_data = {
-    sizeof(BT_NAME), BLUETOOTH_DATA_TYPE_COMPLETE_LOCAL_NAME, BT_NAME,
+    sizeof(BLE_NAME), BLUETOOTH_DATA_TYPE_COMPLETE_LOCAL_NAME, BLE_NAME,
 };
 
 static void start_advertising()
@@ -152,7 +152,7 @@ static void start_advertising()
     gap_advertisements_set_data(sizeof(adv_data), (uint8_t *)&adv_data);
     gap_scan_response_set_data(sizeof(scan_rsp_data), (uint8_t *)&scan_rsp_data);
     gap_advertisements_enable(1);
-    state = BT_ADVERTISING;
+    state = BLE_ADVERTISING;
 }
 
 /* Two frames per notification, the counter runs per frame */
@@ -200,7 +200,7 @@ static void send_timer_handler(btstack_timer_source_t *timer)
 
 /* Runs in the BTstack context. Poll callbacks run on every pass of the run
  * loop, and arming a timer triggers another pass, so only act when
- * bt_input() asked for it, otherwise this spins in the IRQ and starves the
+ * ble_input() asked for it, otherwise this spins in the IRQ and starves the
  * main loop. */
 static void input_poll(btstack_data_source_t *source,
                        btstack_data_source_callback_type_t type)
@@ -261,7 +261,7 @@ static int att_write(hci_con_handle_t handle, uint16_t att_handle,
                           GATT_CLIENT_CHARACTERISTICS_CONFIGURATION_NOTIFICATION);
         if (notify_enabled) {
             con_handle = handle;
-            state = BT_ACTIVE;
+            state = BLE_ACTIVE;
             frame_counter = 0;
             sent_valid = false;
             gap_request_connection_parameter_update(handle, CONN_INTERVAL_MIN,
@@ -269,7 +269,7 @@ static int att_write(hci_con_handle_t handle, uint16_t att_handle,
             send_poll();
         } else {
             btstack_run_loop_remove_timer(&send_timer);
-            state = BT_CONNECTED;
+            state = BLE_CONNECTED;
         }
     }
     /* Writes to the value itself are accepted and ignored */
@@ -303,7 +303,7 @@ static void packet_handler(uint8_t packet_type, uint16_t channel,
                 GAP_SUBEVENT_LE_CONNECTION_COMPLETE) {
                 con_handle = gap_subevent_le_connection_complete_get_connection_handle(packet);
                 conn_interval = gap_subevent_le_connection_complete_get_conn_interval(packet);
-                state = BT_CONNECTED;
+                state = BLE_CONNECTED;
             }
             break;
         case HCI_EVENT_LE_META:
@@ -341,7 +341,7 @@ static void start_stack()
     btstack_run_loop_enable_data_source_callbacks(&input_source, DATA_SOURCE_CALLBACK_POLL);
     btstack_run_loop_add_data_source(&input_source);
 
-    state = BT_STARTING;
+    state = BLE_STARTING;
     /* Loads the BT firmware right here, the rest of the bring-up is event
      * driven and goes through packet_handler() */
     hci_power_control(HCI_POWER_ON);
@@ -349,19 +349,19 @@ static void start_stack()
     cyw43_arch_lwip_end();
 }
 
-void bt_init()
+void ble_init()
 {
     present = false;
-    state = BT_OFF;
+    state = BLE_OFF;
 
     if (!flash_layout_ok() || !core1_ready()) {
         printf("Bluetooth disabled, flash layout or core 1 not ready.\n");
-        state = BT_FAILED;
+        state = BLE_FAILED;
         return;
     }
 
     if (cyw43_arch_init() != 0) {
-        state = BT_FAILED;
+        state = BLE_FAILED;
         return;
     }
 
@@ -377,7 +377,7 @@ void bt_init()
     start_stack();
 }
 
-void bt_input(uint8_t tt, uint8_t keys1, uint8_t keys2)
+void ble_input(uint8_t tt, uint8_t keys1, uint8_t keys2)
 {
     uint32_t value = tt | (keys1 << 8) | (keys2 << 16);
 
@@ -392,35 +392,40 @@ void bt_input(uint8_t tt, uint8_t keys1, uint8_t keys2)
     }
 }
 
-bool bt_hw_present()
+bool ble_hw_present()
 {
     return present;
 }
 
-const char *bt_hw_name()
+void ble_update()
+{
+    cyw43_arch_poll();
+}
+
+const char *ble_hw_name()
 {
     return present ? "CYW43439" : "Not present";
 }
 
-const char *bt_state_name()
+const char *ble_state_name()
 {
     switch (state) {
-        case BT_FAILED:
+        case BLE_FAILED:
             return "Failed";
-        case BT_STARTING:
+        case BLE_STARTING:
             return "Starting";
-        case BT_ADVERTISING:
+        case BLE_ADVERTISING:
             return "Advertising";
-        case BT_CONNECTED:
+        case BLE_CONNECTED:
             return "Connected";
-        case BT_ACTIVE:
+        case BLE_ACTIVE:
             return "Active";
         default:
             return "Off";
     }
 }
 
-uint32_t bt_conn_interval()
+uint32_t ble_conn_interval()
 {
     return conn_interval * 125;
 }
